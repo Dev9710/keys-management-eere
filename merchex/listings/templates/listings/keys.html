@@ -1,0 +1,356 @@
+<!-- templates/key_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Key List</title>
+    <style>
+        table {     
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+  
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <!-- Affichage des Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Success message for deletion -->
+          {% if delete_success %}
+          <div class="alert alert-{{ message.tags }}  alert-dismissible fade show" role="alert">
+              Clé supprimée avec succès !
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+      {% endif %}
+    <h1 class="mb-4">Gerer les Clés</h1>
+    <!-- Bouton Ajouter une Nouvelle Clé -->
+    <div class="mb-3">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addKeyModal">
+            <i class="fas fa-plus"></i> Ajouter une Nouvelle Clé
+        </button>
+    </div>
+    <table  class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th  scope="col">Numéro de clé</th>
+                <th  scope="col">Nom de la clé</th>
+                <th  scope="col">Emplacement</th>
+                <th  scope="col">Nombre de clés(initial)</th>
+                <th  scope="col">Clés utilisées</th>
+                <th  scope="col">Clés disponibles</th>
+                <th  scope="col">Armoire à clés</th>
+                <th  scope="col">Clé au coffre</th>
+                <th  scope="col">Commentaires</th>
+                <th  scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for key in keys %}
+            <tr>
+                    <td>{{ key.number }}</td> <!-- Changed key.key_number to key.number -->
+                    <td>{{ key.name }}</td> <!-- Changed key.key_name to key.name -->
+                    <td>{{ key.place }}</td>
+                    <td>{{ key.initial_key_number }}</td>
+                    <td>{{ key.key_used }}</td>
+                    <td>{{ key.key_available }}</td>
+                    <td>{{ key.in_safe }}</td>
+                    <td>{{ key.in_cabinet}}</td>
+                    <td>{{ key.comments }}</td>
+                       <!-- Edit Button -->
+                    <td>
+                        <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-warning btn-sm edit-btn flex-fill action-btn" data-bs-toggle="modal" data-bs-target="#editKeyModal" 
+                            data-id="{{ key.id }}"
+                            data-number="{{ key.number }}"
+                            data-name="{{ key.name }}"
+                            data-place="{{ key.place }}"
+                            data-initial_key_number="{{ key.initial_key_number }}"
+                            data-keyused="{{ key.key_used }}"
+                            data-keyavailable="{{ key.key_available|default:0 }}"
+                            data-incabinet="{{ key.in_cabinet }}"
+                            data-insafe="{{ key.in_safe }}"
+                            data-comments="{{ key.comments }}"
+                            style="width: 80px;">
+                           <i class="fas fa-edit"></i> Edit
+                        </button>
+                         <!-- Add some space between buttons -->
+                       <!-- Delete button -->
+                    <form method="post" action="{% url 'key_delete' key.id %}" style="width: 80px;">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-danger btn-sm" 
+                            data-bs-toggle="modal" data-bs-target="#deleteKeyModal" 
+                            data-delete-url="{% url 'key_delete' key.id %}" 
+                            data-key-number="{{ key.number }}">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                    </form>
+                    </td>              
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- Modal for adding a new key -->
+<div class="modal fade" id="addKeyModal" tabindex="-1" aria-labelledby="addKeyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'key_create' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addKeyModalLabel">Ajouter une Nouvelle Clé</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Example of a more structured and styled form using Bootstrap -->
+                    <div class="mb-3">
+                        <label for="id_number" class="form-label fw-bold">Numéro de clé</label>
+                        <input type="number" name="number" id="id_number" class="form-control" placeholder="Entrez le numéro de la clé">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_name" class="form-label fw-bold">Nom de la clé</label>
+                        <input type="text" name="name" id="id_name" class="form-control" placeholder="Entrez le nom de la clé">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_place" class="form-label fw-bold">Emplacement</label>
+                        <input type="text" name="place" id="id_place" class="form-control" placeholder="Emplacement de la clé">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_initial_key_number" class="form-label fw-bold">Nombre de clés (initial)</label>
+                        <input type="text" name="initial_key_number" id="id_initial_key_number" class="form-control" placeholder="Nombre de clés initiales">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_key_used" class="form-label fw-bold">Clés utilisées</label>
+                        <input type="number" name="key_used" id="id_key_used" class="form-control" placeholder="Nombre de clés utilisées">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_key_available" class="form-label fw-bold">Clés disponibles</label>
+                        <input type="text" name="key_available" id="id_key_available" class="form-control" placeholder="Nombre de clés disponibles">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_in_cabinet" class="form-label fw-bold">Armoire à clés</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="in_cabinet" id="id_in_cabinet">
+                            <label class="form-check-label" for="id_in_cabinet">La clé est dans l'armoire</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_in_safe" class="form-label fw-bold">Clé au coffre</label>
+                        <input type="number" name="in_safe" id="id_in_safe" class="form-control" placeholder="Nombre de clés dans le coffre">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_comments" class="form-label fw-bold">Commentaires</label>
+                        <textarea name="comments" id="id_comments" class="form-control" rows="3" placeholder="Ajoutez des commentaires..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-primary">Ajouter la Clé</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+  <!-- Modal for Editing a Key -->
+  <div class="modal fade" id="editKeyModal" tabindex="-1" aria-labelledby="editKeyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'key_update' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="editKeyModalLabel">Modifier une Clé</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Hidden field to store key ID -->
+                    <input type="hidden" name="key_id" id="editKeyId">
+                    
+                    <!-- Styled Form Fields for Editing -->
+                    <div class="mb-3">
+                        <label for="edit_id_number" class="form-label fw-bold">Numéro de clé</label>
+                        <input type="number" name="number" id="edit_id_number" class="form-control" placeholder="Entrez le numéro de la clé">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_id_name" class="form-label fw-bold">Nom de la clé</label>
+                        <input type="text" name="name" id="edit_id_name" class="form-control" placeholder="Entrez le nom de la clé">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_id_place" class="form-label fw-bold">Emplacement</label>
+                        <input type="text" name="place" id="edit_id_place" class="form-control" placeholder="Emplacement de la clé">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_id_initial_key_number" class="form-label fw-bold">Nombre de clés (initial)</label>
+                        <input type="text" name="initial_key_number" id="edit_id_initial_key_number" class="form-control" placeholder="Nombre de clés initiales">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_id_key_used" class="form-label fw-bold">Clés utilisées</label>
+                        <input type="number" name="key_used" id="edit_id_key_used" class="form-control" placeholder="Nombre de clés utilisées">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_id_key_available" class="form-label fw-bold">Clés disponibles</label>
+                        <input type="text" name="key_available" id="edit_id_key_available" class="form-control" placeholder="Nombre de clés disponibles">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_id_in_cabinet" class="form-label fw-bold">Armoire à clés</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="in_cabinet" id="edit_id_in_cabinet">
+                            <label class="form-check-label" for="edit_id_in_cabinet">La clé est dans l'armoire</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_id_in_safe" class="form-label fw-bold">Clé au coffre</label>
+                        <input type="number" name="in_safe" id="edit_id_in_safe" class="form-control" placeholder="Nombre de clés dans le coffre">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_id_comments" class="form-label fw-bold">Commentaires</label>
+                        <textarea name="comments" id="edit_id_comments" class="form-control" rows="3" placeholder="Ajoutez des commentaires..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer les Modifications</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteKeyModal" tabindex="-1" aria-labelledby="deleteKeyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteKeyModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Dynamically show the key number -->
+                Are you sure you want to delete key number <strong id="keyNumberToDelete"></strong>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <!-- This form will submit the delete action -->
+                <form id="deleteKeyForm" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Add event listener to delete buttons
+    document.addEventListener('DOMContentLoaded', function () {
+        var deleteButtons = document.querySelectorAll('[data-bs-target="#deleteKeyModal"]');
+
+        deleteButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                // Get the key number and delete URL from the clicked button
+                var keyNumber = this.getAttribute('data-key-number');
+                var deleteUrl = this.getAttribute('data-delete-url');
+
+                // Update the modal content with the key number
+                document.getElementById('keyNumberToDelete').innerText = keyNumber;
+
+                // Set the action of the delete form to the delete URL
+                document.getElementById('deleteKeyForm').setAttribute('action', deleteUrl);
+            });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Obtenir le formulaire de modification
+        var editKeyForm = document.getElementById('editKeyForm');
+        if (editKeyForm) {
+            editKeyForm.addEventListener('submit', function (e) {
+                var confirmation = confirm("Êtes-vous sûr de vouloir modifier cette clé ?");
+                if (!confirmation) {
+                    e.preventDefault(); // Empêcher la soumission du formulaire
+                }
+            });
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+ <!-- JavaScript to Populate Edit Modal -->
+ <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get all edit buttons
+        var editButtons = document.querySelectorAll('.edit-btn');
+        
+        // Loop through buttons and add click event listener
+        editButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                // Get key data from the button's data attributes
+                var keyId = this.getAttribute('data-id');
+                var keyNumber = this.getAttribute('data-number');
+                var keyName = this.getAttribute('data-name');
+                var keyPlace = this.getAttribute('data-place');
+                var keyInitial = this.getAttribute('data-initial_key_number');
+                var keyUsed = this.getAttribute('data-keyused');
+                var keyAvailable = this.getAttribute('data-keyavailable');
+                var keyInCabinet = this.getAttribute('data-keyincabinet') === 'True' || this.getAttribute('data-key-in-cabinet') === 'true';
+                var keyInSafe = this.getAttribute('data-insafe');
+                var keyComments = this.getAttribute('data-comments');
+
+                // Populate the modal fields
+                document.getElementById('editKeyId').value = keyId;
+                document.getElementById('edit_id_number').value = keyNumber;
+                document.getElementById('edit_id_name').value = keyName;
+                document.getElementById('edit_id_place').value = keyPlace;
+                document.getElementById('edit_id_initial_key_number').value = keyInitial;
+                document.getElementById('edit_id_key_used').value = keyUsed;
+                document.getElementById('edit_id_key_available').value = keyAvailable;
+                document.getElementById('edit_id_in_cabinet').checked = keyInCabinet;
+                document.getElementById('edit_id_in_safe').value = keyInSafe;
+                document.getElementById('edit_id_comments').value = keyComments;
+            });
+        });
+    });
+</script>
+</body>
+</html>
