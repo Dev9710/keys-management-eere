@@ -268,12 +268,22 @@ def assign_keys_to_user(request):
 
 def get_modal_assigned_keys(request, user_id):
     user = get_object_or_404(User, id=user_id)
-    assigned_keys = Key.objects.filter(assigned_user=user)
 
-    # Ajouter assigned_keys_ids dans la réponse
-    assigned_keys_ids = list(assigned_keys.values_list('id', flat=True))
-    
+    # Récupérer les clés assignées à l'utilisateur
+    assigned_keys = Key.objects.filter(assigned_user=user)
+    assigned_keys_ids = list(assigned_keys.values_list('id', flat=True))  # Convertir en liste pour JSON
+
+
+    # Récupérer les clés non assignées
+    available_keys = Key.objects.filter(assigned_user=None)
+    print("Assigned keys:", list(assigned_keys))
+    print("Available keys:", list(available_keys))  # Vérifiez que cette liste n'est pas vide
     return JsonResponse({
-        'assigned_keys': [{'id': key.id, 'number': key.number, 'name': key.name, 'key_used': key.key_used, 'place': key.place} for key in assigned_keys],
-        'assigned_keys_ids': assigned_keys_ids
+        'assigned_keys': [
+            {'id': key.id, 'number': key.number, 'name': key.name, 'place': key.place} for key in assigned_keys
+        ],
+        'available_keys': [
+            {'id': key.id, 'number': key.number, 'name': key.name, 'place': key.place} for key in available_keys
+        ],
+         'assigned_keys_ids': assigned_keys_ids,
     })
