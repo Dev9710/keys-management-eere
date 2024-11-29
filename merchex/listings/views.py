@@ -107,16 +107,18 @@ def user_keys_view(request):
     # Initialiser les variables
     assigned_keys = []
     keys = []
+    user = None 
 
     # Filtrer par équipe si une équipe est sélectionnée
     if team_id:
         team = get_object_or_404(Team, id=team_id)
         
         # Filtrer les utilisateurs par équipe
-        users = User.objects.filter(team=team.name)
+        users = User.objects.filter(team=team)
         
         # Filtrer les clés non attribuées par équipe
-        keys = Key.objects.filter(team=team, is_assigned=False).distinct()
+        keys = Key.objects.filter(assigned_user__team=team, is_assigned=False).distinct()
+
     else:
         # Récupérer tous les utilisateurs si aucune équipe n'est sélectionnée
         users = User.objects.all()
@@ -125,12 +127,15 @@ def user_keys_view(request):
     # Filtrer les clés attribuées par utilisateur si un utilisateur est sélectionné
     if user_id:
         user = get_object_or_404(User, id=user_id)
-        assigned_keys = Key.objects.filter(users=user).distinct()
+        assigned_keys = Key.objects.filter(assigned_user=user).distinct()
 
         if team_id:
-            assigned_keys = Key.objects.filter(userkey__user=user, team=team).distinct()
+            assigned_keys = Key.objects.filter(assigned_user=user, assigned_user__team=team).distinct()
         else:
             assigned_keys = Key.objects.filter(userkey__user=user).distinct()
+            
+         # Filtrer les clés non attribuées et exclure celles déjà attribuées à cet utilisateur
+        keys = Key.objects.filter(is_assigned=False).exclude(id__in=[key.id for key in assigned_keys])
 
     # Récupérer toutes les équipes pour les filtres
     teams = Team.objects.all()
@@ -143,6 +148,7 @@ def user_keys_view(request):
         'assigned_keys': assigned_keys,  # Clés attribuées à l'utilisateur
         'user_id': user_id,
         'team_id': team_id,
+        'user': user,  # Ajout explicite de l'utilisateur
     }
     
     return render(request, 'listings/users.html', context)
@@ -287,3 +293,43 @@ def get_modal_assigned_keys(request, user_id):
         ],
          'assigned_keys_ids': assigned_keys_ids,
     })
+
+
+
+def assign_keys(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Méthode non autorisée'}, status=405)
+
+    try:
+        # Charger les données JSON du corps de la requête
+        data = json.loads(request.body)
+
+        # Extraire les informations nécessaires
+        user_id = data.get('user_id')
+        selected_keys = data.get('selected_keys')
+
+        # Vérifier que les données sont présentes
+        if not user_id or not selected_keys:
+            return JsonResponse({'success': False, 'message': 'Utilisateur ou clés non spécifiés.'}, status=400)
+
+        # Vérifier que l'utilisateur existe
+        user = get_object_or_404(User, id=user_id)
+
+        # Vérifier que les clés existent
+        keys_to_assign = Key.objects.filter(id__in=selected_keys)
+        if not keys_to_assign.exists():
+            return JsonResponse({'success': False, 'message': 'Une ou plusieurs clés n\'existent pas.'}, status=404)
+
+        # Assigner les clés à l'utilisateur
+        keys_to_assign.update(assigned_user=user)
+
+        # Récupérer les clés mises à jour pour l'affichage
+        updated_keys = list(Key.objects.filter(assigned_user=user).values('id', 'number', 'name', 'place'))
+
+        return JsonResponse({'success': True, 'updated_keys': updated_keys })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Erreur dans le format JSON.'}, status=400)
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)

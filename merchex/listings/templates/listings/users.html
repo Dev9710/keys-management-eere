@@ -34,7 +34,7 @@
 
 <body>
     <div class="container mt-5">
-        <h2 class="mb-4">Gestion des Clés par Utilisateur</h2>
+        <h2 class="mb-4">Gestion d'attribution des clées</h2>
 
         <!-- Affichage des Messages d'alerte -->
         {% if messages %}
@@ -79,7 +79,7 @@
                         Attribuer une Clé
                     </button>
                     <button type="button" class="btn btn-primary" id="show-assigned-keys-btn">
-                        Afficher les Clés
+                        Raffraichire les données
                     </button>
                 </div>
             </div>
@@ -92,7 +92,6 @@
                     <th scope="col"><input type="checkbox" id="select-all"></th>
                     <th scope="col">Numéro de Clé</th>
                     <th scope="col">Nom de la Clé</th>
-                    <th scope="col">Compteur</th>
                     <th scope="col">Localisation</th>
                     <th scope="col">Action</th>
                 </tr>
@@ -100,11 +99,10 @@
             <tbody>
                 {% for key in assigned_keys %}
                 <tr>
+                    <th scope="col"><input type="checkbox" id="select-all"></th>
                     <td>{{ key.number }}</td>
                     <td>{{ key.name }}</td>
-                    <td>{{ key.key_used }}</td>
                     <td>{{ key.place }}</td>
-                    <td>{{ key.assigned_user.firstname }} {{ key.assigned_user.lastname }}</td>
                     <td>
                         <button type="button" class="btn btn-danger delete-key-btn" data-key-id="{{ key.id }}">
                             <i class="fa fa-trash"></i> Supprimer
@@ -134,28 +132,49 @@
                     </div>
                     <div class="modal-body">
                         <div id="keys-list">
+                            {% for user in users %}
                             <!-- Liste des clés -->
                             {% if assigned_keys_ids %}
+                            <h5>Clés déjà assignées : {{ user.name }} </h5>
                             {% for key in keys %}
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" value="{{ key.id }}"
-                                    id="key-{{ key.id }}" name="selected_keys" {% if key.id in assigned_keys_ids %}checked{% endif %}>
+                                    id="key-{{ key.id }}" name="selected_keys" {% if key.id in assigned_keys_ids%}checked{% endif %}>
+                                <label class="form-check-label" for="key-{{ key.id }}">
+                                    {{ key.number }} - {{ key.name }} ({{ key.place }})
+                                </label>
+                            </div>
+
+                            {% endfor %}
+                            {% else %}
+                            <h5>Clés disponibles :</h5>
+                            {% for key in available_keys %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="{{ key.id }}"
+                                    id="key-{{ key.id }}" name="selected_keys">
                                 <label class="form-check-label" for="key-{{ key.id }}">
                                     {{ key.number }} - {{ key.name }} ({{ key.place }})
                                 </label>
                             </div>
                             {% endfor %}
                             {% endif %}
+
+                            <!-- Si aucune clé n'est assignée ni disponible -->
+                            {% if not assigned_keys_ids and not available_keys %}
+                            <p class="text-center">Aucune clé disponible ou assignée.</p>
+                            {% endif %}
+                            {% endfor %}
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" class="btn btn-primary">Attribuer</button>
+                        <button type="button" id="submit-assign-keys" class="btn btn-primary">Attribuer</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
 
 
 
@@ -326,79 +345,75 @@
             }
 
             keyModal.addEventListener('show.bs.modal', function () {
-    const userId = userDropdown.value;
+                const userId = userDropdown.value;
 
-    if (!userId) {
-        alert("Veuillez sélectionner un utilisateur.");
-        return;
-    }
+                if (!userId) {
+                    alert("Veuillez sélectionner un utilisateur.");
+                    return;
+                }
 
-    // Requête AJAX pour récupérer les clés
-    fetch(`/get_modal_assigned_keys/${userId}/`)
-        .then(response => response.json())
-        .then(data => {
-            console.log("Données reçues :", data);
+                // Requête AJAX pour récupérer les clés
+                fetch(`/get_modal_assigned_keys/${userId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Données reçues :", data);
 
-            const keysList = document.getElementById('keys-list');
-            keysList.innerHTML = ''; // Vider la liste avant de charger
+                        const keysList = document.getElementById('keys-list');
+                        keysList.innerHTML = ''; // Vider la liste avant de charger
 
-            const assignedKeysIds = data.assigned_keys_ids; // IDs des clés assignées
-            console.log("assigned key id list : " + assignedKeysIds)
+                        const assignedKeysIds = data.assigned_keys_ids; // IDs des clés assignées
+                        console.log("assigned key id list : " + assignedKeysIds)
 
-            // Ajouter les clés assignées
-            if (data.assigned_keys.length > 0) {
-                const assignedSection = document.createElement('div');
-                assignedSection.innerHTML = `<h5>Clés déjà assignées</h5>`;
-                data.assigned_keys.forEach(key => {
-                    const div = document.createElement('div');
-                    div.classList.add('form-check');
-                    div.innerHTML = `
+                        // Ajouter les clés assignées
+                        if (data.assigned_keys.length > 0) {
+                            const assignedSection = document.createElement('div');
+                            assignedSection.innerHTML = `<h5>Clés déjà assignées</h5>`;
+                            data.assigned_keys.forEach(key => {
+                                const div = document.createElement('div');
+                                div.classList.add('form-check');
+                                div.innerHTML = `
                         <input class="form-check-input" type="checkbox" value="${key.id}" id="key-${key.id}" name="selected_keys" ${assignedKeysIds.includes(key.id) ? 'checked' : ''}>
                         <label class="form-check-label" for="key-${key.id}">
                             ${key.number} - ${key.name} (${key.place})
                         </label>
                     `;
-                    assignedSection.appendChild(div);
-                });
-                keysList.appendChild(assignedSection);
-            }
+                                assignedSection.appendChild(div);
+                            });
+                            keysList.appendChild(assignedSection);
+                        }
 
-            const availableKeysList = data.available_keys
-            console.log("availableKeysList : " + availableKeysList)
-            // Ajouter les clés disponibles
-            if (Array.isArray(availableKeysList) && availableKeysList.length > 0) {
-        const availableSection = document.createElement('div');
-        availableSection.innerHTML = `<h5>Clés disponibles</h5>`;
-        data.available_keys.forEach(key => {
-            const div = document.createElement('div');
-            div.classList.add('form-check');
-            div.innerHTML = `
+                        const availableKeysList = data.available_keys
+                        console.log("availableKeysList : " + availableKeysList)
+                        // Ajouter les clés disponibles
+                        if (Array.isArray(availableKeysList) && availableKeysList.length > 0) {
+                            const availableSection = document.createElement('div');
+                            availableSection.innerHTML = `<h5>Clés disponibles</h5>`;
+                            data.available_keys.forEach(key => {
+                                const div = document.createElement('div');
+                                div.classList.add('form-check');
+                                div.innerHTML = `
                 <input class="form-check-input" type="checkbox" value="${key.id}" id="key-${key.id}" name="selected_keys">
                 <label class="form-check-label" for="key-${key.id}">
                     ${key.number} - ${key.name} (${key.place})
                 </label>
             `;
-            availableSection.appendChild(div);
-        });
-        keysList.appendChild(availableSection);
-    }
+                                availableSection.appendChild(div);
+                            });
+                            keysList.appendChild(availableSection);
+                        }
 
-            // Si aucune clé n'est disponible ni assignée
-           
-       // Si aucune clé n'est disponible ni assignée
-       if ((!data.assigned_keys || data.assigned_keys.length === 0) &&
-        (!data.available_keys || data.available_keys.length === 0)) {
-        keysList.innerHTML = `<p class="text-center">Aucune clé disponible ou assignée.</p>`;
-    }
-        })
-        .catch(error => {
-            console.error('Erreur lors de la récupération des clés pour la modal:', error);
-        });
-});
+                        // Si aucune clé n'est disponible ni assignée
 
-
-
-
+                        // Si aucune clé n'est disponible ni assignée
+                        if ((!data.assigned_keys || data.assigned_keys.length === 0) &&
+                            (!data.available_keys || data.available_keys.length === 0)) {
+                            keysList.innerHTML = `<p class="text-center">Aucune clé disponible ou assignée.</p>`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la récupération des clés pour la modal:', error);
+                    });
+            });
             // Écouteur pour le bouton de chargement des clés dans le tableau principal
             showAssignedKeysBtn.addEventListener('click', function () {
                 const userId = userDropdown.value;
@@ -414,6 +429,98 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const assignKeysButton = document.getElementById('submit-assign-keys');
+            const keyModal = document.getElementById('keyModal');
+
+            if (assignKeysButton && keyModal) {
+                assignKeysButton.addEventListener('click', function () {
+                    const userId = keyModal.getAttribute('data-user-id');
+                    const selectedKeys = Array.from(document.querySelectorAll('.modal-body input[type="checkbox"]:checked'))
+                        .map(checkbox => checkbox.value);
+
+                    if (!userId || selectedKeys.length === 0) {
+                        alert('Veuillez sélectionner un utilisateur et au moins une clé.');
+                        return;
+                    }
+
+                    // Vérification du format des clés sélectionnées (s'assurer qu'elles sont bien des entiers)
+                    selectedKeys.forEach((key, index) => {
+                        selectedKeys[index] = parseInt(key, 10);
+                        if (isNaN(selectedKeys[index])) {
+                            alert('Une ou plusieurs clés sélectionnées ne sont pas valides.');
+                            return;
+                        }
+                    });
+
+                    fetch(`/assign-keys/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        },
+                        body: JSON.stringify({
+                            user_id: userId,
+                            selected_keys: selectedKeys,
+                        }),
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Erreur lors de l\'attribution des clés');
+                            }
+                            return response.json(); // Parse the JSON response
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                // Mettre à jour la liste des clés dans le tableau principal
+                                updateAssignedKeysTable(data.updated_keys);
+
+                                console.log("Clés assignées:", data.updated_keys);
+                                console.log("Clés disponibles:", data.available_keys);
+
+                                alert('Clés attribuées avec succès !');
+                                const modalInstance = bootstrap.Modal.getInstance(keyModal);
+                                modalInstance.hide(); // Fermer la modal
+                            } else {
+                                alert('Erreur : ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erreur réseau :', error);
+                            alert('Une erreur est survenue lors de l\'attribution des clés.');
+                        });
+                });
+            }
+
+            function updateAssignedKeysTable(keys) {
+                const assignedKeysTableBody = document.querySelector('#assigned-keys-table tbody');
+                assignedKeysTableBody.innerHTML = ''; // Réinitialiser la table
+
+                if (keys.length === 0) {
+                    assignedKeysTableBody.innerHTML = '<tr><td colspan="6" class="text-center">Aucune clé attribuée.</td></tr>';
+                } else {
+                    keys.forEach(key => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td><input type="checkbox"></td>
+                            <td>${key.number}</td>
+                            <td>${key.name}</td>
+                            <td>${key.place}</td>
+                            <td>
+                                <button type="button" class="btn btn-danger delete-key-btn" data-key-id="${key.id}">
+                                    <i class="fa fa-trash"></i> Supprimer
+                                </button>
+                            </td>
+                        `;
+                        assignedKeysTableBody.appendChild(row);
+                    });
+                }
+            }
+        });
+
+    </script>
+
 
 </body>
 

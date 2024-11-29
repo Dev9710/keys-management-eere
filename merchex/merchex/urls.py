@@ -36,4 +36,5 @@ urlpatterns = [
     path('key_delete/<int:key_id>/', views.key_delete, name='key_delete'),
     path('keys/bulk-delete/', views.bulk_key_delete, name='bulk_key_delete'),
     path('get-users-by-team/<int:team_id>/', views.get_users_by_team, name='get_users_by_team'),    
+    path('assign-keys/', views.assign_keys, name='assign_keys'),
 ]
