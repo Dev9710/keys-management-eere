@@ -1,4 +1,6 @@
-from django.shortcuts import render, redirect, get_object_or_404 
+from .models import Key
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from .models import Key, User, Team
@@ -10,30 +12,35 @@ from django.views.decorators.csrf import csrf_exempt
 
 def hello(request):
     bands = Band.objects.all()
-    return render(request,'listings/hello.html',{'bands': bands})
+    return render(request, 'listings/hello.html', {'bands': bands})
+
 
 def about(request):
     return HttpResponse('<h1>A propos de</h1> <p> Nous aimons  merchex </p>')
 
+
 def listing(request):
-    listings = Listing.objects.all()        
-    return HttpResponse(f"""'<h1>Listing!</h1>  
+    listings = Listing.objects.all()
+    return HttpResponse(f"""'<h1>Listing!</h1>
                         <p>Mes listings :<p>
                 <ul>
                     <li>{listings[0].title}</li>
                     <li>{listings[1].title}</li>
                     <li>{listings[2].title}</li>
-                </ul>               
+                </ul>
                 """)
+
+
 def contact(request):
     return HttpResponse('<h1> contact us </h1> <p> </>')
 
+
 def key_list(request):
-    keys = Key.objects.all()  # Get all keys from the database
+    keys = Key.objects.all().order_by('number')  # Get all keys from the database
     form = KeyForm()  # Create an empty form for adding a new key
 
     # Filtrer les clés non attribuées pour l’attribution
-    available_keys = Key.objects.filter(is_assigned=False)
+    available_keys = Key.objects.filter(is_assigned=False).order_by('number')
 
     return render(request, 'listings/keys.html', {'keys': keys, 'form': form, 'available_keys': available_keys})
 
@@ -47,14 +54,18 @@ def key_delete(request, key_id):
         key.delete()
 
         # Add a success message if deletion is successful
-        messages.success(request, f'La clé numéro {key.number} a été supprimée avec succès !')
+        messages.success(request, f'La clé numéro {
+                         key.number} a été supprimée avec succès !')
 
     except Exception as e:
         # Add an error message if the deletion fails
-        messages.error(request, f'Échec de la suppression de la clé numéro {key.number}. Erreur: {str(e)}')
+        messages.error(request, f'Échec de la suppression de la clé numéro {
+                       key.number}. Erreur: {str(e)}')
 
     # Redirect to the key list view (or another view)
-    return redirect('key_list')  # Replace 'key_list' with your actual view name
+    # Replace 'key_list' with your actual view name
+    return redirect('key_list')
+
 
 def key_create(request):
     if request.method == 'POST':
@@ -67,6 +78,7 @@ def key_create(request):
             print(form.errors)
             messages.error(request, 'Erreur lors de l\'ajout de la clé.')
     return redirect('key_list')  # If not POST, redirect back to the key list
+
 
 def key_update(request):
     if request.method == 'POST':
@@ -82,8 +94,10 @@ def key_update(request):
         else:
             # Log des erreurs pour le débogage
             print(form.errors)
-            messages.error(request, 'Erreur lors de la modification de la clé.')
+            messages.error(
+                request, 'Erreur lors de la modification de la clé.')
     return redirect('key_list')
+
 
 def users(request):
     if request.method == "POST":
@@ -93,11 +107,13 @@ def users(request):
             # Handle success (e.g., redirect or display a message)
     else:
         form = User()
-    return render(request,'listings/users.html', {'users': users})
+    return render(request, 'listings/users.html', {'users': users})
+
 
 def teams(request):
     teams = Team.objects.all()
-    return render(request,'listings/teams.html', {'teams': teams})
+    return render(request, 'listings/teams.html', {'teams': teams})
+
 
 def user_keys_view(request):
     # Récupérer les paramètres depuis la requête
@@ -107,17 +123,18 @@ def user_keys_view(request):
     # Initialiser les variables
     assigned_keys = []
     keys = []
-    user = None 
+    user = None
 
     # Filtrer par équipe si une équipe est sélectionnée
     if team_id:
         team = get_object_or_404(Team, id=team_id)
-        
+
         # Filtrer les utilisateurs par équipe
         users = User.objects.filter(team=team)
-        
+
         # Filtrer les clés non attribuées par équipe
-        keys = Key.objects.filter(assigned_user__team=team, is_assigned=False).distinct()
+        keys = Key.objects.filter(
+            assigned_user__team=team, is_assigned=False).distinct()
 
     else:
         # Récupérer tous les utilisateurs si aucune équipe n'est sélectionnée
@@ -130,12 +147,14 @@ def user_keys_view(request):
         assigned_keys = Key.objects.filter(assigned_user=user).distinct()
 
         if team_id:
-            assigned_keys = Key.objects.filter(assigned_user=user, assigned_user__team=team).distinct()
+            assigned_keys = Key.objects.filter(
+                assigned_user=user, assigned_user__team=team).distinct()
         else:
             assigned_keys = Key.objects.filter(userkey__user=user).distinct()
-            
+
          # Filtrer les clés non attribuées et exclure celles déjà attribuées à cet utilisateur
-        keys = Key.objects.filter(is_assigned=False).exclude(id__in=[key.id for key in assigned_keys])
+        keys = Key.objects.filter(is_assigned=False).exclude(
+            id__in=[key.id for key in assigned_keys])
 
     # Récupérer toutes les équipes pour les filtres
     teams = Team.objects.all()
@@ -150,28 +169,28 @@ def user_keys_view(request):
         'team_id': team_id,
         'user': user,  # Ajout explicite de l'utilisateur
     }
-    
-    return render(request, 'listings/users.html', context)
 
+    return render(request, 'listings/users.html', context)
 
 
 def get_users_by_team(request, team_id):
     # Récupérer les membres de l'équipe avec les champs requis
-    team_members = User.objects.filter(team_id=team_id).values('id', 'firstname', 'name', 'comment')
-    
+    team_members = User.objects.filter(team_id=team_id).values(
+        'id', 'firstname', 'name', 'comment')
+
     # Utiliser une clé unique avec le prénom et nom
     unique_members = {}
     for member in team_members:
-        key = (member['firstname'], member['name'])  # Clé basée sur firstname et name
+        # Clé basée sur firstname et name
+        key = (member['firstname'], member['name'])
         if key not in unique_members:
             unique_members[key] = member
-    
+
     # Convertir en liste de membres uniques
     members_list = list(unique_members.values())
     print("Membres uniques envoyés :", members_list)
 
     return JsonResponse({'users': members_list})
-
 
 
 def get_keys_by_user(request, user_id):
@@ -180,6 +199,7 @@ def get_keys_by_user(request, user_id):
     keys_list = list(keys)
     return JsonResponse({'keys': keys_list})
 
+
 @require_POST
 def key_delete(request, key_id):
     key = get_object_or_404(Key, id=key_id)
@@ -187,12 +207,10 @@ def key_delete(request, key_id):
     users_with_key = key.users.all()
     for user in users_with_key:
         key.users.remove(user)
-    messages.success(request, f'La clé numéro {key.number} a été désattribuée avec succès !')
+    messages.success(request, f'La clé numéro {
+                     key.number} a été désattribuée avec succès !')
     return redirect('user_keys')
 
-
-from django.http import JsonResponse
-from .models import Key
 
 def get_assigned_keys(request, user_id):
     if request.method == 'GET':
@@ -211,12 +229,13 @@ def get_assigned_keys(request, user_id):
     else:
         return JsonResponse({"error": "Invalid request method"}, status=400)
 
+
 def modal_user_keys(request):
     teams = Team.objects.all()
     users = User.objects.all()
     selected_team_id = request.GET.get('team_id')
     selected_user_id = request.GET.get('user_id')
-    
+
     assigned_keys = []
     keys = Key.objects.all()
 
@@ -238,7 +257,8 @@ def bulk_key_delete(request):
     if request.method == "POST":
         try:
             # Récupérer les clés depuis le champ caché
-            keys_to_delete = json.loads(request.POST.get('keys_to_delete', '[]'))
+            keys_to_delete = json.loads(
+                request.POST.get('keys_to_delete', '[]'))
 
             if not keys_to_delete:
                 return JsonResponse({'error': 'Aucune clé sélectionnée.'}, status=400)
@@ -251,13 +271,15 @@ def bulk_key_delete(request):
             return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'error': 'Requête non valide.'}, status=400)
 
+
 def assign_keys_to_user(request):
     if request.method == 'POST':
         user_id = request.POST.get('user_id')
         selected_keys = request.POST.getlist('selected_keys')
 
         if not user_id or not selected_keys:
-            messages.error(request, "Veuillez sélectionner un utilisateur et des clés.")
+            messages.error(
+                request, "Veuillez sélectionner un utilisateur et des clés.")
             return redirect('user_keys')
 
         user = get_object_or_404(User, id=user_id)
@@ -272,18 +294,20 @@ def assign_keys_to_user(request):
         messages.success(request, "Les clés ont été attribuées avec succès.")
         return redirect('user_keys')
 
+
 def get_modal_assigned_keys(request, user_id):
     user = get_object_or_404(User, id=user_id)
 
     # Récupérer les clés assignées à l'utilisateur
     assigned_keys = Key.objects.filter(assigned_user=user)
-    assigned_keys_ids = list(assigned_keys.values_list('id', flat=True))  # Convertir en liste pour JSON
-
+    assigned_keys_ids = list(assigned_keys.values_list(
+        'id', flat=True))  # Convertir en liste pour JSON
 
     # Récupérer les clés non assignées
     available_keys = Key.objects.filter(assigned_user=None)
     print("Assigned keys:", list(assigned_keys))
-    print("Available keys:", list(available_keys))  # Vérifiez que cette liste n'est pas vide
+    # Vérifiez que cette liste n'est pas vide
+    print("Available keys:", list(available_keys))
     return JsonResponse({
         'assigned_keys': [
             {'id': key.id, 'number': key.number, 'name': key.name, 'place': key.place} for key in assigned_keys
@@ -291,9 +315,8 @@ def get_modal_assigned_keys(request, user_id):
         'available_keys': [
             {'id': key.id, 'number': key.number, 'name': key.name, 'place': key.place} for key in available_keys
         ],
-         'assigned_keys_ids': assigned_keys_ids,
+        'assigned_keys_ids': assigned_keys_ids,
     })
-
 
 
 def assign_keys(request):
@@ -324,9 +347,10 @@ def assign_keys(request):
         keys_to_assign.update(assigned_user=user)
 
         # Récupérer les clés mises à jour pour l'affichage
-        updated_keys = list(Key.objects.filter(assigned_user=user).values('id', 'number', 'name', 'place'))
+        updated_keys = list(Key.objects.filter(
+            assigned_user=user).values('id', 'number', 'name', 'place'))
 
-        return JsonResponse({'success': True, 'updated_keys': updated_keys })
+        return JsonResponse({'success': True, 'updated_keys': updated_keys})
 
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'message': 'Erreur dans le format JSON.'}, status=400)
