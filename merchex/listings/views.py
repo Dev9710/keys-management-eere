@@ -203,13 +203,16 @@ def get_keys_by_user(request, user_id):
 @require_POST
 def key_delete(request, key_id):
     key = get_object_or_404(Key, id=key_id)
-    # Désattribuer la clé de tous les utilisateurs qui la possèdent
-    users_with_key = key.users.all()
-    for user in users_with_key:
-        key.users.remove(user)
-    messages.success(request, f'La clé numéro {
-                     key.number} a été désattribuée avec succès !')
-    return redirect('user_keys')
+
+    # Supprimer la clé, qu'elle soit attribuée ou non
+    key.delete()
+
+    # Ajouter un message de confirmation
+    messages.success(request, f"La clé numéro {
+                     key.number} a été supprimée avec succès.")
+
+    # Rediriger vers la liste des clés ou une page appropriée.
+    return redirect('key_list')
 
 
 def get_assigned_keys(request, user_id):
