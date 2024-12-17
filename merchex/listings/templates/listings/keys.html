@@ -26,7 +26,13 @@
             align-items: center;
             justify-content: center;
         }
-  
+        .table-responsive thead th {
+            position: sticky; /* Rend les en-têtes "collants" */
+            top: 0; /* Fixe l'en-tête tout en haut */
+            background-color: #3a9f87; /* Couleur de fond pour le header */
+            z-index: 2; /* S'assure que le header passe au-dessus des lignes */
+        }
+        
     </style>
 </head>
 <body>
@@ -51,17 +57,27 @@
     <h1 class="mb-4">Gerer les Clés</h1>
     <!-- Bouton Ajouter une Nouvelle Clé -->
     <div class="d-flex flex-row bd-highlight mb-3 gap-3">
+        <!-- Bouton Ajouter une Nouvelle Clé -->
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addKeyModal">
             <i class="fas fa-plus"></i> Ajouter une Nouvelle Clé
         </button>
+        
+        <!-- Champ de Recherche -->
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Rechercher une clé..." class="form-control w-100">
         </div>
+        
+        <!-- Total des clés aligné à droite -->
+        <div class="mb-3 ms-auto text-end">
+            <span class="fw-bold">Total des clés :</span>
+            <span>{{ keys_count }}</span>
+        </div>
     </div>
-    <table  class="table table-striped table-hover"  id="keyTable">
+    
+    <table  class="table table-striped table-hover table-responsive"  id="keyTable">
         <thead class="table-dark">
             <tr>
-                <th  scope="col">Numéro de clé</th>
+                <th  scope="col">N°</th>
                 <th  scope="col">Nom de la clé</th>
                 <th  scope="col">Emplacement</th>
                 <th  scope="col">Nombre de clés(initial)</th>
@@ -76,8 +92,8 @@
         <tbody>
             {% for key in keys %}
             <tr>
-                    <td>{{ key.number }}</td> <!-- Changed key.key_number to key.number -->
-                    <td>{{ key.name }}</td> <!-- Changed key.key_name to key.name -->
+                    <td>{{ key.number }}</td>
+                    <td>{{ key.name }}</td>
                     <td>{{ key.place }}</td>
                     <td>{{ key.initial_key_number }}</td>
                     <td>{{ key.key_used }}</td>
@@ -100,7 +116,7 @@
                             data-insafe="{{ key.in_safe }}"
                             data-comments="{{ key.comments }}"
                             style="width: 80px;">
-                           <i class="fas fa-edit"></i> Edit
+                           <i class="fas fa-edit"></i> Modifier
                         </button>
                          <!-- Add some space between buttons -->
                        <!-- Delete button -->
@@ -110,7 +126,7 @@
                             data-bs-toggle="modal" data-bs-target="#deleteKeyModal" 
                             data-delete-url="{% url 'key_delete' key.id %}" 
                             data-key-number="{{ key.number }}">
-                            <i class="fas fa-trash"></i> Delete
+                            <i class="fas fa-trash"></i> Retirer
                         </button>
                     </div>
                     </form>
@@ -132,10 +148,17 @@
                 </div>
                 <div class="modal-body">
                     <!-- Example of a more structured and styled form using Bootstrap -->
-                    <div class="mb-3">
-                        <label for="id_number" class="form-label fw-bold">Numéro de clé</label>
-                        <input type="number" name="number" id="id_number" class="form-control" placeholder="Entrez le numéro de la clé">
-                    </div>
+                    <!-- Champ Numéro de clé (remplacé par un select) -->
+                <div class="mb-3">
+                <label for="id_number" class="form-label fw-bold">Numéro de clé</label>
+                <select name="number" id="id_number" class="form-select">
+                    <option value="" selected disabled>Choisissez un numéro disponible</option>
+                    {% for number in available_numbers %}
+                        <option value="{{ number }}">{{ number }}</option>
+                    {% endfor %}
+                </select>
+                </div>
+
 
                     <div class="mb-3">
                         <label for="id_name" class="form-label fw-bold">Nom de la clé</label>
@@ -203,10 +226,21 @@
                     <input type="hidden" name="key_id" id="editKeyId">
                     
                     <!-- Styled Form Fields for Editing -->
-                    <div class="mb-3">
-                        <label for="edit_id_number" class="form-label fw-bold">Numéro de clé</label>
-                        <input type="number" name="number" id="edit_id_number" class="form-control" placeholder="Entrez le numéro de la clé">
-                    </div>
+                    <div class="mb-3 d-flex align-items-center">
+
+                        <!-- Champ Numéro de la clé -->
+                        <div style="width: 100px;">
+                            <label for="edit_id_number" class="form-label fw-bold">N°</label>
+                            <input type="number" name="number" id="edit_id_number" class="form-control" placeholder="000" disabled>
+                        </div>
+                        <!-- Champ Nom de la clé -->
+                        <div class="flex-grow-1 me-3">
+                            <label for="edit_id_name" class="form-label fw-bold">Nom de la clé</label>
+                            <input type="text" name="name" id="edit_id_name" class="form-control" placeholder="Entrez le nom de la clé">
+                        </div>
+                    
+                        
+                    </div>                    
 
                     <div class="mb-3">
                         <label for="edit_id_name" class="form-label fw-bold">Nom de la clé</label>
@@ -264,19 +298,19 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteKeyModalLabel">Confirm Delete</h5>
+                <h5 class="modal-title" id="deleteKeyModalLabel">Dissocié et supprimer la clé</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <!-- Dynamically show the key number -->
-                Are you sure you want to delete key number <strong id="keyNumberToDelete"></strong>?
+                Voulez-vous vraiment dissocier et supprimer les informations de la clé numéro <strong id="keyNumberToDelete"></strong> ? Le numéro sera toujours disponible mais les informations de la clé seront perdu. 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                 <!-- This form will submit the delete action -->
                 <form id="deleteKeyForm" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="submit" class="btn btn-danger">Dissocié</button>
                 </form>
             </div>
         </div>
@@ -356,6 +390,7 @@
     });
 </script>
 <script>
+//Fonction de recherche dans le tableau
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('searchInput');
     const table = document.getElementById('keyTable');

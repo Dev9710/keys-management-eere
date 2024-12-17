@@ -24,17 +24,25 @@ urlpatterns = [
     path('about-us/', views.about),  # ajoutez cette ligne
     path('listing/', views.listing),
     path('contact/', views.contact),
+    path('users/', views.user_list, name='user_list'),
     path('attr/', views.user_keys_view, name='user_keys'),
     path('get_assigned_keys/', views.get_assigned_keys, name='get_assigned_keys'),
-    path('get-assigned-keys/<int:user_id>/', views.get_assigned_keys, name='get_assigned_keys'),
-    path('get_modal_assigned_keys/<int:user_id>/', views.get_modal_assigned_keys, name='get_modal_assigned_keys'), #affiche les clés assigné
-    path('keys/list/', views.key_list , name='key_list'), 
-    path('keys/add/', views.key_create, name='key_create'),  # Vue pour ajouter une clé
-    path('keys/update/', views.key_update, name='key_update'),  # URL for updating a key
-    path('get_users_by_team/<int:team_id>/', views.get_users_by_team, name='get_users_by_team'),
-    path('get_keys_by_user/<int:user_id>/', views.get_keys_by_user, name='get_keys_by_user'),
+    path('get-assigned-keys/<int:user_id>/',
+         views.get_assigned_keys, name='get_assigned_keys'),
+    path('get_modal_assigned_keys/<int:user_id>/', views.get_modal_assigned_keys,
+         name='get_modal_assigned_keys'),  # affiche les clés assigné
+    path('keys/list/', views.key_list, name='key_list'),
+    # Vue pour ajouter une clé
+    path('keys/add/', views.key_create, name='key_create'),
+    path('keys/update/', views.key_update,
+         name='key_update'),  # URL for updating a key
+    path('get_users_by_team/<int:team_id>/',
+         views.get_users_by_team, name='get_users_by_team'),
+    path('get_keys_by_user/<int:user_id>/',
+         views.get_keys_by_user, name='get_keys_by_user'),
     path('key_delete/<int:key_id>/', views.key_delete, name='key_delete'),
     path('keys/bulk-delete/', views.bulk_key_delete, name='bulk_key_delete'),
-    path('get-users-by-team/<int:team_id>/', views.get_users_by_team, name='get_users_by_team'),    
+    path('get-users-by-team/<int:team_id>/',
+         views.get_users_by_team, name='get_users_by_team'),
     path('assign-keys/', views.assign_keys, name='assign_keys'),
 ]
