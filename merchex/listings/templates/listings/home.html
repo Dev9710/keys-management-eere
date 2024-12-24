@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page d'accueil - Gestion des clés</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sections-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px;
+        }
+
+        section {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            width: calc(25% - 5px); /* 4(=100/25) sections côte à côte avec 15px d'ecartement*/
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <h1>Page d'accueil - Gestion des clés</h1>
+
+    <!-- Section Ajouter une personne -->
+    <div class="sections-container">
+        <section>
+            <h2>Comment ca marche</h2>
+            <form method="get" action="{% url 'key_create' %}">
+                <!--{% csrf_token %} -->
+                <!-- {{ form.as_p }} -->
+                <form method="get" action="{% url 'Doc_util' %}">
+                    <button type="submit">???</button>
+                </form>
+</section>
+        <section>
+            <h2>Ajouter une personne</h2>
+            <form method="get" action="{% url 'key_create' %}">
+                <!--{% csrf_token %} -->
+                <!-- {{ form.as_p }} -->
+                <button type="submit">Ajouter</button>
+            </form>
+        </section>
+        <!-- Section Trouver une clé -->
+        <section>
+            <h2>Trouver une clé</h2>
+            <form method="post">
+                <!--{% csrf_token %} -->
+                <!-- {{ form.as_p }} -->
+                <form method="get" action="{% url 'get_keys_by_user' %}">
+                    <button type="submit">Rechercher</button>
+                </form>
+        </section>
+        <!-- Section Modifier une clé -->
+        <section>
+            <h2>Modifier une clé</h2>
+            <form method="post">
+                <!--{% csrf_token %} -->
+                <!-- {{ form.as_p }} -->
+                <form method="get" action="{% url 'key_update' %}">
+                    <button type="submit">Modifier</button>
+                </form>
+        </section>
+
+        <!-- Section Qui a rendu les clés -->
+        <section>
+            <h2>Qui a les clés></h2>
+            <!--{% csrf_token %} -->
+            <!-- {{ form.as_p }} -->
+            <form method="get" action="{% url 'get_keys_by_user' %}">
+                <button type="submit">Vérifier</button>
+            </form>
+        </section>
+
+        <!-- Section Clés par équipe -->
+        <section>
+            <h2>Clés par équipe</h2>
+            <form method="post">
+                <!--{% csrf_token %} -->
+                <!-- {{ form.as_p }} -->
+                <button type="submit">Afficher</button>
+            </form>
+        </section>
+
+        <!-- Section Clés disponibles -->
+        <section>
+            <h2>Clés disponibles</h2>
+            </
+            <form method="post">
+                <!--{% csrf_token %} -->
+                <!-- {{ form.as_p }} -->
+                <form method="get" action="{% url 'key_list' %}">
+                    <button type="submit">Lister</button>
+                </form>
+        </section>
+    </div>
+</body>
+</html>
