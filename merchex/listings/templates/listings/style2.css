@@ -1,0 +1,42 @@
+/* Horizontale style style2.css */
+/* Style global pour le corps de la page */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 20px;
+}
+
+.sections-container {
+    display: flex;
+    flex-wrap: wrap; /* Permet de renvoyer les sections à la ligne */
+    gap: 20px; /* Espacement entre les sections */
+    justify-content: center;
+}
+
+section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: calc(33.33% - 20px); /* 33.33% pour trois sections par ligne, -20px pour le gap */
+    box-sizing: border-box; /* Assure que le padding ne dépasse pas la largeur */
+    min-width: 200px; /* Largeur minimum pour chaque section */
+}
+/* Style pour les titres */
+h2 {
+    color: #333;
+}
+
+/* Style pour les boutons */
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    button:hover {
+        background-color: #45a049;
+    }

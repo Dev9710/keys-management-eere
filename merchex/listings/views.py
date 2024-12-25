@@ -11,8 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 
 def hello(request):
-    bands = Band.objects.all()
-    return render(request, 'listings/hello.html', {'bands': bands})
+    #bands = Band.objects.all()
+    return render(request, 'listings/hello.html')
 
 
 def about(request):
@@ -54,13 +54,11 @@ def key_delete(request, key_id):
         key.delete()
 
         # Add a success message if deletion is successful
-        messages.success(request, f'La clé numéro {
-                         key.number} a été supprimée avec succès !')
+        messages.success(request, f'La clé numéro {key.number} a été supprimée avec succès !')
 
     except Exception as e:
         # Add an error message if the deletion fails
-        messages.error(request, f'Échec de la suppression de la clé numéro {
-                       key.number}. Erreur: {str(e)}')
+        messages.error(request, f'Échec de la suppression de la clé numéro {key.number}. Erreur: {str(e)}')
 
     # Redirect to the key list view (or another view)
     # Replace 'key_list' with your actual view name
@@ -208,8 +206,7 @@ def key_delete(request, key_id):
     key.delete()
 
     # Ajouter un message de confirmation
-    messages.success(request, f"La clé numéro {
-                     key.number} a été supprimée avec succès.")
+    messages.success(request, f"La clé numéro { key.number} a été supprimée avec succès.")
 
     # Rediriger vers la liste des clés ou une page appropriée.
     return redirect('key_list')
