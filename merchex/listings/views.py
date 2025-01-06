@@ -11,8 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 
 def hello(request):
-    bands = Band.objects.all()
-    return render(request, 'listings/hello.html', {'bands': bands})
+    # bands = Band.objects.all()
+    return render(request, 'listings/hello.html')
 
 
 def about(request):
@@ -73,7 +73,7 @@ def key_delete(request, key_id):
 
         # Add a success message if deletion is successful
         messages.success(request, f'La clé numéro {
-                         key.number} a été dissocié avec succès !')
+                         key.number} a été supprimée avec succès !')
 
     except Exception as e:
         # Add an error message if the deletion fails
