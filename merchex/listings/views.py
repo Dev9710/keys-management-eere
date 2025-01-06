@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from .models import Key, User, Team
-from .forms import KeyForm
+from .forms import KeyForm, UserForm
 from django.views.decorators.http import require_POST
 import json
 from django.views.decorators.csrf import csrf_exempt
@@ -36,13 +36,31 @@ def contact(request):
 
 
 def key_list(request):
-    keys = Key.objects.all().order_by('number')  # Get all keys from the database
-    form = KeyForm()  # Create an empty form for adding a new key
+    keys = Key.objects.all().order_by('number')  # Toutes les clés existantes
+    form = KeyForm()  # Formulaire vide pour ajouter une nouvelle clé
+    keys_count = keys.count()
 
-    # Filtrer les clés non attribuées pour l’attribution
+    # Récupérer les numéros déjà utilisés
+    used_numbers = Key.objects.values_list('number', flat=True)
+
+    # Trouver les 10 premiers numéros disponibles
+    # Exemple : numéros possibles de 1 à 999
+    all_possible_numbers = range(1, 1000)
+    available_numbers = [
+        num for num in all_possible_numbers if num not in used_numbers][:10]
+
+    # Filtrer les clés non attribuées
     available_keys = Key.objects.filter(is_assigned=False).order_by('number')
 
-    return render(request, 'listings/keys.html', {'keys': keys, 'form': form, 'available_keys': available_keys})
+    context = {
+        'keys': keys,
+        'keys_count': keys_count,
+        'form': form,
+        'available_keys': available_keys,
+        # Passer les numéros disponibles au template
+        'available_numbers': available_numbers,
+    }
+    return render(request, 'listings/keys.html', context)
 
 
 def key_delete(request, key_id):
@@ -55,7 +73,7 @@ def key_delete(request, key_id):
 
         # Add a success message if deletion is successful
         messages.success(request, f'La clé numéro {
-                         key.number} a été supprimée avec succès !')
+                         key.number} a été dissocié avec succès !')
 
     except Exception as e:
         # Add an error message if the deletion fails
@@ -107,7 +125,7 @@ def users(request):
             # Handle success (e.g., redirect or display a message)
     else:
         form = User()
-    return render(request, 'listings/users.html', {'users': users})
+    return render(request, 'listings/attribute.html', {'users': users})
 
 
 def teams(request):
@@ -170,7 +188,7 @@ def user_keys_view(request):
         'user': user,  # Ajout explicite de l'utilisateur
     }
 
-    return render(request, 'listings/users.html', context)
+    return render(request, 'listings/attribute.html', context)
 
 
 def get_users_by_team(request, team_id):
@@ -246,7 +264,7 @@ def modal_user_keys(request):
         user = User.objects.get(id=selected_user_id)
         assigned_keys = Key.objects.filter(assigned_user=user)
 
-    return render(request, 'listings/users.html', {
+    return render(request, 'listings/attribute.html', {
         'teams': teams,
         'users': users,
         'assigned_keys': assigned_keys,
@@ -360,3 +378,130 @@ def assign_keys(request):
 
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+def user_list(request):
+    # Récupérer tous les utilisateurs avec leurs équipes
+    users = User.objects.select_related('team').all()
+    teams = Team.objects.all()
+    users_count = users.count()
+
+    # Récupérer les paramètres GET
+    user_id = request.GET.get('user_id', None)
+    team_id = request.GET.get('team_id', None)
+
+    # Filtrer les utilisateurs si une équipe est sélectionnée
+    if team_id:
+        team = get_object_or_404(Team, id=team_id)
+        users = users.filter(team=team)
+
+    # Récupérer un utilisateur spécifique si `user_id` est passé
+    selected_user = None
+    if user_id:
+        selected_user = get_object_or_404(User, id=user_id)
+    # Passer les données au template
+    context = {
+        'users_count': users_count,
+        'teams': teams,
+        'users': users,
+        'user_id': user_id,
+        'team_id': team_id,
+        'selected_user': selected_user,
+        'selected_team_id': team_id,
+    }
+
+    return render(request, 'listings/users.html', context)
+
+
+@require_POST
+def user_delete(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+
+    # Supprimer le user
+    user.delete()
+
+    # Ajouter un message de confirmation
+    messages.success(request, f"L'utiisateur {
+                     user.firstname} a été supprimée avec succès.")
+
+    # Rediriger vers la liste de user
+    return redirect('user_list')
+
+
+def user_team(request):
+    team_id = request.GET.get('team_id', None)
+
+    if team_id:
+        team = get_object_or_404(Team, id=team_id)
+        users = User.objects.filter(team=team)
+    else:
+        users = User.objects.all()
+
+    # Créer une liste d'utilisateurs sous forme de dictionnaire
+    user_list = [
+        {
+            'id': user.id,
+            'name': user.name,
+            'firstname': user.firstname,
+            'team': user.team.name if user.team else 'Aucune équipe',
+            'team_id': user.team.id if user.team else None,  # Ajout de l'ID de l'équipe
+            'comment': user.comment,
+        }
+        for user in users
+    ]
+
+    # Retourner une réponse JSON
+    return JsonResponse({'users': user_list})
+
+
+def user_update(request):
+    if request.method == 'POST':
+        print("Données POST reçues:", request.POST)  # Debug log
+        user_id = request.POST.get('user_id')
+        if not user_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'Utilisateur non spécifié.'
+            }, status=400)
+
+        user = get_object_or_404(User, id=user_id)
+        form = UserForm(request.POST, instance=user)
+
+        print("Form data:", form.data)  # Debug log
+        print("Form is valid:", form.is_valid())  # Debug log
+
+        if not form.is_valid():
+            print("Form errors:", form.errors)  # Debug log
+
+        if form.is_valid():
+            user = form.save()
+            print("User après sauvegarde:", user.team)  # Debug log
+            return JsonResponse({
+                'success': True,
+                'message': 'Utilisateur mis à jour avec succès.'
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'Erreur lors de la modification.',
+                'errors': form.errors
+            }, status=400)
+
+    return JsonResponse({
+        'success': False,
+        'message': 'Méthode non autorisée'
+    }, status=405)
+
+
+def user_create(request):
+    if request.method == 'POST':
+        form = UserForm(request.POST)  # Get the data from the form
+        if form.is_valid():  # Validate the form
+            form.save()  # Save the new key
+            messages.success(request, 'Utilisateur ajoutée avec succès.')
+            return redirect('user_list')  # Redirect to the key list page
+        else:
+            print(form.errors)
+            messages.error(
+                request, "Erreur lors de l\'ajout de l'utilisateur.")
+    return redirect('user_list')  # If not POST, redirect back to the key list
