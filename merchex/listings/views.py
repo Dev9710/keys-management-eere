@@ -132,6 +132,8 @@ def teams(request):
     teams = Team.objects.all()
     return render(request, 'listings/teams.html', {'teams': teams})
 
+  # Vue Django (views.py)
+
 
 def user_keys_view(request):
     # Récupérer les paramètres depuis la requête
@@ -142,73 +144,57 @@ def user_keys_view(request):
     assigned_keys = []
     keys = []
     user = None
-
-    # Filtrer par équipe si une équipe est sélectionnée
-    if team_id:
-        team = get_object_or_404(Team, id=team_id)
-
-        # Filtrer les utilisateurs par équipe
-        users = User.objects.filter(team=team)
-
-        # Filtrer les clés non attribuées par équipe
-        keys = Key.objects.filter(
-            assigned_user__team=team, is_assigned=False).distinct()
-
-    else:
-        # Récupérer tous les utilisateurs si aucune équipe n'est sélectionnée
-        users = User.objects.all()
-        keys = Key.objects.filter(is_assigned=False).distinct()
-
-    # Filtrer les clés attribuées par utilisateur si un utilisateur est sélectionné
-    if user_id:
-        user = get_object_or_404(User, id=user_id)
-        assigned_keys = Key.objects.filter(assigned_user=user).distinct()
-
-        if team_id:
-            assigned_keys = Key.objects.filter(
-                assigned_user=user, assigned_user__team=team).distinct()
-        else:
-            assigned_keys = Key.objects.filter(userkey__user=user).distinct()
-
-         # Filtrer les clés non attribuées et exclure celles déjà attribuées à cet utilisateur
-        keys = Key.objects.filter(is_assigned=False).exclude(
-            id__in=[key.id for key in assigned_keys])
+    users = []  # Initialiser une liste vide pour les utilisateurs
 
     # Récupérer toutes les équipes pour les filtres
     teams = Team.objects.all()
 
-    # Passer les données au template
+    # Filtrer par équipe si une équipe est sélectionnée
+    if team_id:
+        team = get_object_or_404(Team, id=team_id)
+        # Filtrer les utilisateurs par équipe
+        users = User.objects.filter(team=team)
+    else:
+        # Si aucune équipe n'est sélectionnée, ne pas montrer d'utilisateurs
+        users = []
+
+    # Filtrer les clés attribuées par utilisateur si un utilisateur est sélectionné
+    if user_id:
+        user = get_object_or_404(User, id=user_id)
+        assigned_keys = Key.objects.filter(assigned_user=user)
+
+        # Filtrer les clés non attribuées et exclure celles déjà attribuées à cet utilisateur
+        keys = Key.objects.filter(is_assigned=False).exclude(
+            id__in=[key.id for key in assigned_keys])
+
     context = {
         'teams': teams,
         'users': users,
-        'keys': keys,  # Clés non attribuées
-        'assigned_keys': assigned_keys,  # Clés attribuées à l'utilisateur
+        'keys': keys,
+        'assigned_keys': assigned_keys,
         'user_id': user_id,
         'team_id': team_id,
-        'user': user,  # Ajout explicite de l'utilisateur
+        'user': user,
     }
 
     return render(request, 'listings/attribute.html', context)
 
 
 def get_users_by_team(request, team_id):
-    # Récupérer les membres de l'équipe avec les champs requis
-    team_members = User.objects.filter(team_id=team_id).values(
-        'id', 'firstname', 'name', 'comment')
+    try:
+        # Récupérer les membres de l'équipe avec les champs requis
+        team_members = User.objects.filter(team_id=team_id).values(
+            'id', 'firstname', 'name')
 
-    # Utiliser une clé unique avec le prénom et nom
-    unique_members = {}
-    for member in team_members:
-        # Clé basée sur firstname et name
-        key = (member['firstname'], member['name'])
-        if key not in unique_members:
-            unique_members[key] = member
+        # Formatter les données pour l'API
+        users_list = [{
+            'id': member['id'],
+            'name': f"{member['firstname']} {member['name']}"
+        } for member in team_members]
 
-    # Convertir en liste de membres uniques
-    members_list = list(unique_members.values())
-    print("Membres uniques envoyés :", members_list)
-
-    return JsonResponse({'users': members_list})
+        return JsonResponse({'users': users_list})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
 
 def get_keys_by_user(request, user_id):
@@ -234,21 +220,21 @@ def key_delete(request, key_id):
 
 
 def get_assigned_keys(request, user_id):
-    if request.method == 'GET':
+    if not user_id:
+        return JsonResponse({"error": "User ID is required"}, status=400)
+
+    try:
         keys = Key.objects.filter(assigned_user_id=user_id)
-        keys_data = [
-            {
-                "id": key.id,
-                "number": key.number,
-                "name": key.name,
-                "key_used": key.key_used,
-                "place": key.place
-            }
-            for key in keys
-        ]
+        keys_data = [{
+            "id": key.id,
+            "number": key.number,
+            "name": key.name,
+            "key_used": key.key_used,
+            "place": key.place
+        } for key in keys]
         return JsonResponse({"assigned_keys": keys_data})
-    else:
-        return JsonResponse({"error": "Invalid request method"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
 
 
 def modal_user_keys(request):

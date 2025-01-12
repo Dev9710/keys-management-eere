@@ -30,10 +30,9 @@ urlpatterns = [
     path('user_create/', views.user_create, name='user_create'),
     path('users/delete/<int:user_id>/', views.user_delete, name="user_delete"),
     path('attr/', views.user_keys_view, name='user_keys'),
-    path('get_assigned_keys/', views.get_assigned_keys, name='get_assigned_keys'),
     path('get-assigned-keys/<int:user_id>/',
          views.get_assigned_keys, name='get_assigned_keys'),
-    path('get_modal_assigned_keys/<int:user_id>/', views.get_modal_assigned_keys,
+    path('get-modal-assigned-keys/<int:user_id>/', views.get_modal_assigned_keys,
          name='get_modal_assigned_keys'),  # affiche les clés assigné
     path('keys/list/', views.key_list, name='key_list'),
     # Vue pour ajouter une clé
