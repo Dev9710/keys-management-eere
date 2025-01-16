@@ -232,8 +232,8 @@
         }
     </script>
     <!-- Modal pour attribuer des clés -->
-    <div class="modal fade" id="keyModal" tabindex="-1" aria-labelledby="assignKeyModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal fade bd-example-modal-lg" id="keyModal"  role="dialog" tabindex="-1" aria-labelledby="assignKeyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <form method="post" action="{% url 'assign_keys' %}">
                     {% csrf_token %}
@@ -309,76 +309,132 @@
         document.getElementById('team-dropdown').addEventListener('change', resetUserDropdown);
     </script>
     <script>
-        // Remplacer tous les scripts existants liés à la modal par celui-ci
 document.addEventListener('DOMContentLoaded', function () {
     const keyModal = document.getElementById('keyModal');
     const userDropdown = document.getElementById('user-dropdown');
     const assignKeyBtn = document.getElementById('assign-key-btn');
     
-    // Fonction pour charger les clés dans la modal
     function loadModalKeys(userId) {
-        // Récupérer les clés via l'API
         fetch(`/get-modal-assigned-keys/${userId}/`)
             .then(response => response.json())
             .then(data => {
                 const modalBody = keyModal.querySelector('.modal-body');
-                modalBody.innerHTML = ''; // Nettoyer le contenu existant
-                
-                // Ajouter un champ caché pour l'ID utilisateur
+                modalBody.innerHTML = '';
+
+                // Input utilisateur caché
                 const userIdInput = document.createElement('input');
                 userIdInput.type = 'hidden';
                 userIdInput.name = 'user_id';
                 userIdInput.value = userId;
                 modalBody.appendChild(userIdInput);
 
-                // Section des clés attribuées
-                if (data.assigned_keys.length > 0) {
-                    const assignedSection = document.createElement('div');
-                    assignedSection.innerHTML = `
-                        <h6 class="mb-3 text-primary">Clés actuellement attribuées :</h6>
-                        <div class="assigned-keys mb-4">
-                            ${data.assigned_keys.map(key => `
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" 
-                                           value="${key.id}" name="selected_keys" 
-                                           id="key-${key.id}" checked>
-                                    <label class="form-check-label" for="key-${key.id}">
-                                        ${key.number} - ${key.name} 
-                                        <span class="text-muted">(${key.place})</span>
-                                        <span class="badge bg-primary ms-2">Attribuée</span>
-                                    </label>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                    modalBody.appendChild(assignedSection);
-                }
+                // Conteneur principal avec barre de recherche
+                const searchContainer = document.createElement('div');
+                searchContainer.className = 'mb-3';
+                searchContainer.innerHTML = `
+                    <input type="text" class="form-control" id="keySearchInput" 
+                           placeholder="Rechercher une clé par numéro, nom ou localisation...">
+                `;
+                modalBody.appendChild(searchContainer);
 
-                // Section des clés disponibles
-                if (data.available_keys.length > 0) {
-                    const availableSection = document.createElement('div');
-                    availableSection.innerHTML = `
-                        <h6 class="mb-3 text-success">Clés disponibles :</h6>
-                        <div class="available-keys">
+                // Conteneur deux colonnes
+                const columnsContainer = document.createElement('div');
+                columnsContainer.className = 'row mt-3';
+                columnsContainer.style.height = '400px'; // Hauteur fixe pour le scroll
+
+                // Colonne des clés disponibles
+                columnsContainer.innerHTML = `
+                    <div class="col-6 border-end">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-primary mb-0">Clés disponibles</h6>
+                            <span class="badge bg-primary">${data.available_keys.length}</span>
+                        </div>
+                        <div class="key-list" style="height: 350px; overflow-y: auto;">
                             ${data.available_keys.map(key => `
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" 
-                                           value="${key.id}" name="selected_keys" 
-                                           id="key-${key.id}">
-                                    <label class="form-check-label" for="key-${key.id}">
-                                        ${key.number} - ${key.name} 
-                                        <span class="text-muted">(${key.place})</span>
-                                    </label>
+                                <div class="key-item mb-2" 
+                                     data-search="${key.number} ${key.name} ${key.place}">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               value="${key.id}" name="selected_keys" 
+                                               id="key-${key.id}">
+                                        <label class="form-check-label w-100" for="key-${key.id}">
+                                            <div class="border rounded p-2 hover-highlight">
+                                                <div class="fw-bold">${key.number}</div>
+                                                <div class="small text-muted">
+                                                    ${key.name} - ${key.place}
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
-                    `;
-                    modalBody.appendChild(availableSection);
-                }
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-success mb-0">Clés attribuées</h6>
+                            <span class="badge bg-success">${data.assigned_keys.length}</span>
+                        </div>
+                        <div class="key-list" style="height: 350px; overflow-y: auto;">
+                            ${data.assigned_keys.map(key => `
+                                <div class="key-item mb-2" 
+                                     data-search="${key.number} ${key.name} ${key.place}">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               value="${key.id}" name="selected_keys" 
+                                               id="key-${key.id}" checked>
+                                        <label class="form-check-label w-100" for="key-${key.id}">
+                                            <div class="border rounded p-2 hover-highlight">
+                                                <div class="fw-bold">${key.number}</div>
+                                                <div class="small text-muted">
+                                                    ${key.name} - ${key.place}
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
 
-                if (data.assigned_keys.length === 0 && data.available_keys.length === 0) {
-                    modalBody.innerHTML = '<p class="text-center">Aucune clé disponible</p>';
-                }
+                // Ajouter le style
+                const style = document.createElement('style');
+                style.textContent = `
+                    .key-list::-webkit-scrollbar {
+                        width: 5px;
+                    }
+                    .key-list::-webkit-scrollbar-track {
+                        background: #f1f1f1;
+                    }
+                    .key-list::-webkit-scrollbar-thumb {
+                        background: #888;
+                        border-radius: 10px;
+                    }
+                    .hover-highlight:hover {
+                        background-color: #f8f9fa;
+                        cursor: pointer;
+                    }
+                    .key-item.hidden {
+                        display: none;
+                    }
+                `;
+                modalBody.appendChild(style);
+                modalBody.appendChild(columnsContainer);
+
+                // Fonction de recherche
+                const searchInput = document.getElementById('keySearchInput');
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    document.querySelectorAll('.key-item').forEach(item => {
+                        const searchText = item.getAttribute('data-search').toLowerCase();
+                        if (searchText.includes(searchTerm)) {
+                            item.classList.remove('hidden');
+                        } else {
+                            item.classList.add('hidden');
+                        }
+                    });
+                });
             })
             .catch(error => {
                 console.error('Erreur lors du chargement des clés:', error);
@@ -386,6 +442,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     '<div class="alert alert-danger">Erreur lors du chargement des clés</div>';
             });
     }
+
+    // Event listener pour la modal
+    keyModal.addEventListener('show.bs.modal', function () {
+        const userId = userDropdown.value;
+        if (userId) {
+            loadModalKeys(userId);
+        } else {
+            this.querySelector('.modal-body').innerHTML = 
+                '<div class="alert alert-warning">Veuillez sélectionner un utilisateur</div>';
+        }
+    });
+
 
     // Gérer l'ouverture de la modal
     keyModal.addEventListener('show.bs.modal', function () {
@@ -400,48 +468,55 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Gérer la soumission du formulaire
     const modalForm = keyModal.querySelector('form');
+    // Dans votre script de soumission du formulaire
     modalForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const selectedKeys = Array.from(this.querySelectorAll('input[name="selected_keys"]:checked'))
-            .map(cb => cb.value);
+    e.preventDefault();
+    
+    // Récupérer TOUTES les cases à cocher (cochées et décochées)
+    const allCheckboxes = this.querySelectorAll('input[name="selected_keys"]');
+    
+    // Ne garder que les IDs des clés cochées
+    const selectedKeys = Array.from(allCheckboxes)
+        .filter(cb => cb.checked)
+        .map(cb => parseInt(cb.value));
 
-        if (selectedKeys.length === 0) {
-            alert("Veuillez sélectionner au moins une clé.");
-            return;
+    const userId = parseInt(userDropdown.value);
+    const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch('{% url "assign_keys" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            user_id: userId,
+            selected_keys: selectedKeys
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Fermer la modal
+            bootstrap.Modal.getInstance(keyModal).hide();
+            // Recharger les clés attribuées
+            loadAssignedKeys(userId);
+            // Afficher le message de succès
+            const messageElement = document.getElementById('assignment-message');
+            messageElement.textContent = data.message;
+            messageElement.classList.remove('d-none');
+            setTimeout(() => {
+                messageElement.classList.add('d-none');
+            }, 3000);
+        } else {
+            alert(data.message || 'Une erreur est survenue');
         }
-
-        const userId = userDropdown.value;
-        const formData = new FormData();
-        formData.append('user_id', userId);
-        formData.append('selected_keys', selectedKeys.join(','));
-        formData.append('csrfmiddlewaretoken', this.querySelector('[name=csrfmiddlewaretoken]').value);
-
-        // Soumettre le formulaire
-        fetch('{% url "assign_keys" %}', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Fermer la modal
-                bootstrap.Modal.getInstance(keyModal).hide();
-                // Recharger les clés attribuées
-                loadAssignedKeys(userId);
-                // Afficher le message de succès
-                document.getElementById('assignment-message').classList.remove('d-none');
-                setTimeout(() => {
-                    document.getElementById('assignment-message').classList.add('d-none');
-                }, 3000);
-            } else {
-                alert(data.error || 'Une erreur est survenue');
-            }
-        })
-        .catch(error => {
-            console.error('Erreur lors de l\'attribution des clés:', error);
-            alert('Une erreur est survenue lors de l\'attribution des clés');
-        });
+    })
+    .catch(error => {
+        console.error('Erreur lors de la mise à jour des clés:', error);
+        alert('Une erreur est survenue lors de la mise à jour des clés');
     });
+});
 });
     </script>
     <script>

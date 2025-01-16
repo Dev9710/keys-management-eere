@@ -8,6 +8,7 @@ from .forms import KeyForm, UserForm
 from django.views.decorators.http import require_POST
 import json
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 
 def hello(request):
@@ -331,39 +332,53 @@ def assign_keys(request):
         return JsonResponse({'success': False, 'message': 'Méthode non autorisée'}, status=405)
 
     try:
-        # Charger les données JSON du corps de la requête
         data = json.loads(request.body)
-
-        # Extraire les informations nécessaires
         user_id = data.get('user_id')
-        selected_keys = data.get('selected_keys')
+        selected_keys = data.get('selected_keys', [])
 
-        # Vérifier que les données sont présentes
-        if not user_id or not selected_keys:
-            return JsonResponse({'success': False, 'message': 'Utilisateur ou clés non spécifiés.'}, status=400)
+        if not user_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'Utilisateur non spécifié'
+            }, status=400)
 
-        # Vérifier que l'utilisateur existe
-        user = get_object_or_404(User, id=user_id)
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Utilisateur non trouvé'
+            }, status=404)
 
-        # Vérifier que les clés existent
-        keys_to_assign = Key.objects.filter(id__in=selected_keys)
-        if not keys_to_assign.exists():
-            return JsonResponse({'success': False, 'message': 'Une ou plusieurs clés n\'existent pas.'}, status=404)
+        # Récupérer toutes les clés actuellement attribuées à l'utilisateur
+        current_keys = Key.objects.filter(assigned_user=user)
 
-        # Assigner les clés à l'utilisateur
-        keys_to_assign.update(assigned_user=user)
+        # Désattribuer les clés qui ne sont plus sélectionnées
+        current_keys.exclude(id__in=selected_keys).update(assigned_user=None)
 
-        # Récupérer les clés mises à jour pour l'affichage
+        # Attribuer les nouvelles clés sélectionnées
+        Key.objects.filter(id__in=selected_keys).update(assigned_user=user)
+
+        # Récupérer la liste mise à jour des clés
         updated_keys = list(Key.objects.filter(
             assigned_user=user).values('id', 'number', 'name', 'place'))
 
-        return JsonResponse({'success': True, 'updated_keys': updated_keys})
+        return JsonResponse({
+            'success': True,
+            'message': 'Clés mises à jour avec succès',
+            'updated_keys': updated_keys
+        })
 
     except json.JSONDecodeError:
-        return JsonResponse({'success': False, 'message': 'Erreur dans le format JSON.'}, status=400)
-
+        return JsonResponse({
+            'success': False,
+            'message': 'Format JSON invalide'
+        }, status=400)
     except Exception as e:
-        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+        return JsonResponse({
+            'success': False,
+            'message': f'Erreur serveur: {str(e)}'
+        }, status=500)
 
 
 def user_list(request):
