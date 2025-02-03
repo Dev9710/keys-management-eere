@@ -1,6 +1,7 @@
 from .models import Key
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Case, When, Value, CharField, F
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from .models import Key, User, Team
@@ -9,6 +10,7 @@ from django.views.decorators.http import require_POST
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils import timezone
 
 
 def hello(request):
@@ -133,8 +135,6 @@ def teams(request):
     teams = Team.objects.all()
     return render(request, 'listings/teams.html', {'teams': teams})
 
-  # Vue Django (views.py)
-
 
 def user_keys_view(request):
     # Récupérer les paramètres depuis la requête
@@ -214,12 +214,13 @@ def key_delete(request, key_id):
 
     # Ajouter un message de confirmation
     messages.success(request, f"La clé numéro {
-                     key.number} a été supprimée avec succès.")
+                     key.number} a été supprimée avec succès")
 
     # Rediriger vers la liste des clés ou une page appropriée.
     return redirect('key_list')
 
 
+# used
 def get_assigned_keys(request, user_id):
     if not user_id:
         return JsonResponse({"error": "User ID is required"}, status=400)
@@ -231,34 +232,13 @@ def get_assigned_keys(request, user_id):
             "number": key.number,
             "name": key.name,
             "key_used": key.key_used,
-            "place": key.place
+            "place": key.place,
+            "assigned_date": key.assigned_date.strftime('%d-%m-%Y') if key.assigned_date else None,
         } for key in keys]
+
         return JsonResponse({"assigned_keys": keys_data})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
-
-
-def modal_user_keys(request):
-    teams = Team.objects.all()
-    users = User.objects.all()
-    selected_team_id = request.GET.get('team_id')
-    selected_user_id = request.GET.get('user_id')
-
-    assigned_keys = []
-    keys = Key.objects.all()
-
-    if selected_user_id:
-        user = User.objects.get(id=selected_user_id)
-        assigned_keys = Key.objects.filter(assigned_user=user)
-
-    return render(request, 'listings/attribute.html', {
-        'teams': teams,
-        'users': users,
-        'assigned_keys': assigned_keys,
-        'keys': keys,
-        'selected_team_id': selected_team_id,
-        'selected_user_id': selected_user_id,
-    })
 
 
 def bulk_key_delete(request):
@@ -280,51 +260,38 @@ def bulk_key_delete(request):
     return JsonResponse({'error': 'Requête non valide.'}, status=400)
 
 
-def assign_keys_to_user(request):
-    if request.method == 'POST':
-        user_id = request.POST.get('user_id')
-        selected_keys = request.POST.getlist('selected_keys')
-
-        if not user_id or not selected_keys:
-            messages.error(
-                request, "Veuillez sélectionner un utilisateur et des clés.")
-            return redirect('user_keys')
-
-        user = get_object_or_404(User, id=user_id)
-
-        for key_id in selected_keys:
-            if key_id:
-                key = get_object_or_404(Key, id=key_id)
-                key.assigned_user = user  # Assigner la clé à l'utilisateur
-                key.is_assigned = True
-                key.save()
-
-        messages.success(request, "Les clés ont été attribuées avec succès.")
-        return redirect('user_keys')
-
-
+# used
 def get_modal_assigned_keys(request, user_id):
     user = get_object_or_404(User, id=user_id)
 
+    # Obtenir la date courante
+    current_date = timezone.now().date().isoformat()
+
     # Récupérer les clés assignées à l'utilisateur
     assigned_keys = Key.objects.filter(assigned_user=user)
-    assigned_keys_ids = list(assigned_keys.values_list(
-        'id', flat=True))  # Convertir en liste pour JSON
+    assigned_keys_ids = list(assigned_keys.values_list('id', flat=True))
 
     # Récupérer les clés non assignées
     available_keys = Key.objects.filter(assigned_user=None)
-    print("Assigned keys:", list(assigned_keys))
-    # Vérifiez que cette liste n'est pas vide
-    print("Available keys:", list(available_keys))
+
     return JsonResponse({
         'assigned_keys': [
-            {'id': key.id, 'number': key.number, 'name': key.name, 'place': key.place} for key in assigned_keys
+            {
+                'id': key.id,
+                'number': key.number,
+                'name': key.name,
+                'place': key.place,
+                'assigned_date': key.assigned_date.isoformat() if key.assigned_date else "Aucune date"
+            } for key in assigned_keys
         ],
         'available_keys': [
             {'id': key.id, 'number': key.number, 'name': key.name, 'place': key.place} for key in available_keys
         ],
         'assigned_keys_ids': assigned_keys_ids,
+        'current_date': current_date
     })
+
+# used
 
 
 def assign_keys(request):
@@ -335,6 +302,7 @@ def assign_keys(request):
         data = json.loads(request.body)
         user_id = data.get('user_id')
         selected_keys = data.get('selected_keys', [])
+        assignment_date = data.get('assignment_date', timezone.now().date())
 
         if not user_id:
             return JsonResponse({
@@ -354,14 +322,27 @@ def assign_keys(request):
         current_keys = Key.objects.filter(assigned_user=user)
 
         # Désattribuer les clés qui ne sont plus sélectionnées
-        current_keys.exclude(id__in=selected_keys).update(assigned_user=None)
+        current_keys.exclude(id__in=selected_keys).update(
+            assigned_user=None,
+            assigned_date=None
+        )
 
         # Attribuer les nouvelles clés sélectionnées
-        Key.objects.filter(id__in=selected_keys).update(assigned_user=user)
+        Key.objects.filter(id__in=selected_keys).update(
+            assigned_user=user,
+            assigned_date=assignment_date
+        )
 
         # Récupérer la liste mise à jour des clés
-        updated_keys = list(Key.objects.filter(
-            assigned_user=user).values('id', 'number', 'name', 'place'))
+        updated_keys = []
+        for key in Key.objects.filter(assigned_user=user):
+            updated_keys.append({
+                'id': key.id,
+                'number': key.number,
+                'name': key.name,
+                'place': key.place,
+                'formatted_date': key.assigned_date.strftime('%d/%m/%Y') if key.assigned_date else None
+            })
 
         return JsonResponse({
             'success': True,

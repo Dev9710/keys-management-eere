@@ -44,6 +44,36 @@
         #delete-selected-btn {
             margin-left: 115px;
         }
+         /* Style pour le container du date picker */
+         .date-picker-container {
+        min-width: 200px;
+    }
+
+    .date-picker-container input[type="date"] {
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .date-picker-container input[type="date"]:hover {
+        border-color: #86b7fe;
+    }
+
+    .date-picker-container input[type="date"]:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        outline: 0;
+    }
+
+    /* Ajustement pour l'espacement dans le footer */
+    .modal-footer {
+        padding: 1rem;
+    }
+    .form-control{
+        width: 415px;
+        margin-left: 180px;
+    }
+    
     </style>
 </head>
 
@@ -114,7 +144,9 @@
             <th scope="col">Nom de la Clé</th>
             <th scope="col">Compteur</th>
             <th scope="col">Localisation</th>
+            <th scope="col">Date de d'attribution</th>
             <th scope="col">Action</th>
+            
         </tr>
     </thead>
     <tbody>
@@ -149,6 +181,7 @@
                 <td>{{ key.name }}</td>
                 <td>{{ key.key_used }}</td>
                 <td>{{ key.place }}</td>
+                <td></td>
                 <td>
                     <button type="button" class="btn btn-danger action-btn" data-key-id="{{ key.id }}">
                         <i class="fa fa-trash"></i> Supprimer
@@ -181,8 +214,9 @@
                             <td><input type="checkbox" class="key-checkbox" data-key-id="${key.id}"></td>
                             <td>${key.number}</td>
                             <td>${key.name}</td>
+                            <td>${key.key_used}</td>
                             <td>${key.place}</td>
-                            <td></td>
+                            <td>${key.assigned_date}</td>
                             <td>
                                 <button type="button" class="btn btn-danger delete-key-btn" data-key-id="${key.id}">
                                     <i class="fa fa-trash"></i> Supprimer
@@ -195,7 +229,7 @@
                     // Si aucune clé n'est attribuée, afficher un message
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="6" class="text-center">
+                            <td colspan="7" class="text-center">
                                 <strong>Aucune clé attribuée à cet utilisateur.</strong><br>
                                 Cliquez sur le bouton "Attribuer une Clé" ci-dessus pour attribuer des clés.
                             </td>
@@ -211,7 +245,7 @@
         const tbody = document.querySelector('#assigned-keys-table tbody');
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" class="text-center">
+                <td colspan="7" class="text-center">
                     Veuillez sélectionner un utilisateur pour voir ses clés attribuées.
                 </td>
             </tr>
@@ -243,6 +277,15 @@
                     </div>
                     <div class="modal-body">
                         <!-- Le contenu sera chargé dynamiquement -->
+                    </div>
+                    <div class="date-picker-container">
+                        <input 
+                            type="date" 
+                            id="assignment-date" 
+                            name="assignment_date" 
+                            class="form-control" 
+                            required
+                        >
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
@@ -296,7 +339,7 @@
                         data.users.forEach(user => {
                             const option = document.createElement('option');
                             option.value = user.id;
-                            option.textContent = `${user.firstname} ${user.name}`;
+                            option.textContent = `${user.name}`;
                             userDropdown.appendChild(option);
                         });
                     })
@@ -319,6 +362,8 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 const modalBody = keyModal.querySelector('.modal-body');
+                const assignmentdateinput =  document.getElementById('assignment-date').value 
+                assignmentdateinput.value = data.current_date;
                 modalBody.innerHTML = '';
 
                 // Input utilisateur caché
@@ -361,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                             <div class="border rounded p-2 hover-highlight">
                                                 <div class="fw-bold">${key.number}</div>
                                                 <div class="small text-muted">
-                                                    ${key.name} - ${key.place}
+                                                    ${key.name}
                                                 </div>
                                             </div>
                                         </label>
@@ -387,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                             <div class="border rounded p-2 hover-highlight">
                                                 <div class="fw-bold">${key.number}</div>
                                                 <div class="small text-muted">
-                                                    ${key.name} - ${key.place}
+                                                    ${key.name}
                                                 </div>
                                             </div>
                                         </label>
@@ -481,6 +526,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .map(cb => parseInt(cb.value));
 
     const userId = parseInt(userDropdown.value);
+    const assignmentDate = document.getElementById('assignment-date').value; // Récupérer la date
     const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
 
     fetch('{% url "assign_keys" %}', {
@@ -491,7 +537,8 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         body: JSON.stringify({
             user_id: userId,
-            selected_keys: selectedKeys
+            selected_keys: selectedKeys,
+            assignment_date: assignmentDate // Ajouter la date à la requête
         })
     })
     .then(response => response.json())

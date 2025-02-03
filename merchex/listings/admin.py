@@ -1,8 +1,10 @@
 from django.contrib import admin
 from .models import User, Team, Key
 
+
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('firstname', 'name', 'team', 'comment', 'get_keys_non_assigned','get_keys_assigned')
+    list_display = ('firstname', 'name', 'team', 'comment',
+                    'get_keys_non_assigned', 'get_keys_assigned')
     list_filter = ('team',)
     search_fields = ('firstname', 'name')
 
@@ -11,7 +13,7 @@ class UserAdmin(admin.ModelAdmin):
         non_assigned_keys = Key.objects.filter(assigned_user__isnull=True)
         return ", ".join([str(key) for key in non_assigned_keys])
     get_keys_non_assigned.short_description = 'Clés non assignées'
-    
+
     def get_keys_assigned(self, obj):
         """Affiche les clés assignées à cet utilisateur."""
         assigned_keys = Key.objects.filter(assigned_user=obj)
@@ -20,7 +22,8 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class KeyAdmin(admin.ModelAdmin):
-    list_display = ('number', 'name', 'place', 'key_used', 'get_user')
+    list_display = ('number', 'name', 'place', 'key_used',
+                    'get_user', 'assigned_date')
     search_fields = ('name', 'number')
 
     def get_user(self, obj):

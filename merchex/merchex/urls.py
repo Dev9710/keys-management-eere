@@ -31,9 +31,9 @@ urlpatterns = [
     path('users/delete/<int:user_id>/', views.user_delete, name="user_delete"),
     path('attr/', views.user_keys_view, name='user_keys'),
     path('get-assigned-keys/<int:user_id>/',
-         views.get_assigned_keys, name='get_assigned_keys'),
+         views.get_assigned_keys, name='get_assigned_keys'),  # ok
     path('get-modal-assigned-keys/<int:user_id>/', views.get_modal_assigned_keys,
-         name='get_modal_assigned_keys'),  # affiche les clés assigné
+         name='get_modal_assigned_keys'),  # affiche les clés assigné ok
     path('keys/list/', views.key_list, name='key_list'),
     # Vue pour ajouter une clé
     path('keys/add/', views.key_create, name='key_create'),
@@ -46,6 +46,6 @@ urlpatterns = [
     path('key_delete/<int:key_id>/', views.key_delete, name='key_delete'),
     path('keys/bulk-delete/', views.bulk_key_delete, name='bulk_key_delete'),
     path('get-users-by-team/<int:team_id>/',
-         views.get_users_by_team, name='get_users_by_team'),
-    path('assign-keys/', views.assign_keys, name='assign_keys'),
+         views.get_users_by_team, name='get_users_by_team'),  # ok
+    path('assign-keys/', views.assign_keys, name='assign_keys'),  # ok
 ]
