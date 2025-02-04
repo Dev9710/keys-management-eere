@@ -139,14 +139,10 @@
 <table class="table table-striped table-hover"  id="assigned-keys-table">
     <thead class="table-dark">
         <tr>
-            <th scope="col"><input type="checkbox" id="select-all"></th>
-            <th scope="col">Numéro de Clé</th>
             <th scope="col">Nom de la Clé</th>
-            <th scope="col">Compteur</th>
             <th scope="col">Localisation</th>
-            <th scope="col">Date de d'attribution</th>
-            <th scope="col">Action</th>
-            
+            <th scope="col">Date d'attribution</th>
+            <th scope="col">Commentaires</th>
         </tr>
     </thead>
     <tbody>
@@ -154,16 +150,10 @@
         {% if assigned_keys %}
             {% for key in assigned_keys %}
             <tr>
-                <td><input type="checkbox" class="key-checkbox" data-key-id="{{ key.id }}"></td>
-                <td>{{ key.number }}</td>
                 <td>{{ key.name }}</td>
-                <td>{{ key.key_used }}</td>
                 <td>{{ key.place }}</td>
-                <td>
-                    <button type="button" class="btn btn-danger action-btn" data-key-id="{{ key.id }}">
-                        <i class="fa fa-trash"></i> Supprimer
-                    </button>
-                </td>
+                <td>{{ key.assigned_date}}</td>
+                <td>{{ key.comments}}</td>
             </tr>
             {% endfor %}
         {% else %}
@@ -176,17 +166,10 @@
         {% if not assigned_keys %}
             {% for key in keys %}
             <tr>
-                <td><input type="checkbox" class="key-checkbox" data-key-id="{{ key.id }}"></td>
-                <td>{{ key.number }}</td>
                 <td>{{ key.name }}</td>
-                <td>{{ key.key_used }}</td>
                 <td>{{ key.place }}</td>
-                <td></td>
-                <td>
-                    <button type="button" class="btn btn-danger action-btn" data-key-id="{{ key.id }}">
-                        <i class="fa fa-trash"></i> Supprimer
-                    </button>
-                </td>
+                <td>{{ key.assigned_date}}</td>
+                <td>{{ key.comments}}</td>
             </tr>
             {% endfor %}
         {% endif %}
@@ -211,17 +194,10 @@
                     data.assigned_keys.forEach(key => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
-                            <td><input type="checkbox" class="key-checkbox" data-key-id="${key.id}"></td>
-                            <td>${key.number}</td>
                             <td>${key.name}</td>
-                            <td>${key.key_used}</td>
                             <td>${key.place}</td>
                             <td>${key.assigned_date}</td>
-                            <td>
-                                <button type="button" class="btn btn-danger delete-key-btn" data-key-id="${key.id}">
-                                    <i class="fa fa-trash"></i> Supprimer
-                                </button>
-                            </td>
+                            <td>${key.comments}</td>
                         `;
                         tbody.appendChild(row);
                     });
@@ -277,6 +253,9 @@
                     </div>
                     <div class="modal-body">
                         <!-- Le contenu sera chargé dynamiquement -->
+                    </div>
+                    <div class="text-datepicker">
+                        <span> Date d'attribution:</span>
                     </div>
                     <div class="date-picker-container">
                         <input 

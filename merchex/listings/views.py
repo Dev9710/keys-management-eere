@@ -234,6 +234,7 @@ def get_assigned_keys(request, user_id):
             "key_used": key.key_used,
             "place": key.place,
             "assigned_date": key.assigned_date.strftime('%d-%m-%Y') if key.assigned_date else None,
+            'comments': key.comments
         } for key in keys]
 
         return JsonResponse({"assigned_keys": keys_data})
@@ -281,7 +282,8 @@ def get_modal_assigned_keys(request, user_id):
                 'number': key.number,
                 'name': key.name,
                 'place': key.place,
-                'assigned_date': key.assigned_date.isoformat() if key.assigned_date else "Aucune date"
+                'assigned_date': key.assigned_date.isoformat() if key.assigned_date else "Aucune date",
+                'comments': key.comments,
             } for key in assigned_keys
         ],
         'available_keys': [
@@ -341,7 +343,8 @@ def assign_keys(request):
                 'number': key.number,
                 'name': key.name,
                 'place': key.place,
-                'formatted_date': key.assigned_date.strftime('%d/%m/%Y') if key.assigned_date else None
+                'formatted_date': key.assigned_date.strftime('%d/%m/%Y') if key.assigned_date else None,
+                'comments': key.comments,
             })
 
         return JsonResponse({
