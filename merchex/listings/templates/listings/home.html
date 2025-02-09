@@ -1,111 +1,313 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page d'accueil - Gestion des clÈs</title>
+    <title>Modern Web App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #f5f5f5;
         }
 
-        h1 {
+        .top-header {
+            background: white;
+            color: #3a9f87;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 50px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-menu a {
+            color: #3a9f87;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-menu a:hover {
+            color: #2a7562;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #3a9f87, #2a7562);
+            padding: 80px 20px;
             text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .hero-description {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out 0.4s forwards;
+        }
+
+        .section-separator {
+            height: 100px;
+            background-color: #f5f5f5;
+            position: relative;
+            overflow: hidden;
+            margin: -1px 0;
+        }
+
+        .separator-wave {
+            position: absolute;
+            width: 100%;
+            height: 100px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' d='M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+            background-size: cover;
+        }
+
+        .features-section {
+            background-color: white;
+            padding: 80px 20px;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .features-section h2 {
+            text-align: center;
+            color: #2c786c; /* Teinte plus adapt√©e au style g√©n√©ral */
+            font-size: 2rem; /* Augmente la taille pour plus de visibilit√© */
+            font-weight: bold;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        .feature:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature i {
+            font-size: 40px;
+            color: #3a9f87;
             margin-bottom: 20px;
         }
 
-        .sections-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            margin: 20px;
+        .feature h3 {
+            color: #333;
+            margin-bottom: 15px;
         }
 
-        section {
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 20px;
-            width: calc(25% - 5px); /* 4(=100/25) sections cÙte ‡ cÙte avec 15px d'ecartement*/
-            box-sizing: border-box;
+        .feature p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .get-started-section {
+            background-color: #ffffff;
+            padding: 100px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .get-started-section::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(to bottom right, transparent 49%, #f8f9fa 50%);
+        }
+
+        .cta-button {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background: #3a9f87;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: bounceIn 1s ease 0.8s both;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            background: #2a7562;
+        }
+
+        .footer {
+            background: #3a9f87;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+            background-size: cover;
+        }
+
+        @keyframes waveAnimation {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5em;
+            }
+            .hero-description {
+                font-size: 1.2em;
+            }
+            .feature {
+                width: 100%;
+                max-width: 350px;
+            }
+            .nav-menu {
+                gap: 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Page d'accueil - Gestion des clÈs</h1>
-
-    <!-- Section Ajouter une personne -->
-    <div class="sections-container">
-        <section>
-            <h2>Comment ca marche</h2>
-            <form method="get" action="{% url 'key_create' %}">
-                <!--{% csrf_token %} -->
-                <!-- {{ form.as_p }} -->
-                <form method="get" action="{% url 'Doc_util' %}">
-                    <button type="submit">???</button>
-                </form>
-</section>
-        <section>
-            <h2>Ajouter une personne</h2>
-            <form method="get" action="{% url 'key_create' %}">
-                <!--{% csrf_token %} -->
-                <!-- {{ form.as_p }} -->
-                <button type="submit">Ajouter</button>
-            </form>
-        </section>
-        <!-- Section Trouver une clÈ -->
-        <section>
-            <h2>Trouver une clÈ</h2>
-            <form method="post">
-                <!--{% csrf_token %} -->
-                <!-- {{ form.as_p }} -->
-                <form method="get" action="{% url 'get_keys_by_user' %}">
-                    <button type="submit">Rechercher</button>
-                </form>
-        </section>
-        <!-- Section Modifier une clÈ -->
-        <section>
-            <h2>Modifier une clÈ</h2>
-            <form method="post">
-                <!--{% csrf_token %} -->
-                <!-- {{ form.as_p }} -->
-                <form method="get" action="{% url 'key_update' %}">
-                    <button type="submit">Modifier</button>
-                </form>
-        </section>
-
-        <!-- Section Qui a rendu les clÈs -->
-        <section>
-            <h2>Qui a les clÈs></h2>
-            <!--{% csrf_token %} -->
-            <!-- {{ form.as_p }} -->
-            <form method="get" action="{% url 'get_keys_by_user' %}">
-                <button type="submit">VÈrifier</button>
-            </form>
-        </section>
-
-        <!-- Section ClÈs par Èquipe -->
-        <section>
-            <h2>ClÈs par Èquipe</h2>
-            <form method="post">
-                <!--{% csrf_token %} -->
-                <!-- {{ form.as_p }} -->
-                <button type="submit">Afficher</button>
-            </form>
-        </section>
-
-        <!-- Section ClÈs disponibles -->
-        <section>
-            <h2>ClÈs disponibles</h2>
-            </
-            <form method="post">
-                <!--{% csrf_token %} -->
-                <!-- {{ form.as_p }} -->
-                <form method="get" action="{% url 'key_list' %}">
-                    <button type="submit">Lister</button>
-                </form>
-        </section>
+    <div class="top-header">
+        <div class="logo" onclick="window.location.href='/home/'">Modern Web App</div>
+        <nav class="nav-menu">
+            <a href="#home">Home</a>
+            <a href="#features">Features</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+        </nav>
     </div>
+
+    <section class="hero-section" id="home">
+        <div class="wave"></div>
+        <div class="hero-content">
+            <h2 class="hero-title">Welcome to Our App</h2>
+            <p class="hero-description">Experience a modern, user-friendly, and efficient application.</p>
+            <button class="cta-button">Get Started</button>
+        </div>
+    </section>
+
+    <div class="section-separator">
+        <div class="separator-wave"></div>
+    </div>
+
+   <!-- Features Section -->
+   <section class="features-section" id="features">
+    <h2>Fonctionnalit√©s</h2>
+    <div class="features">
+        <div class="feature" onclick="window.location.href='/keys/list/'">
+            <i class="fas fa-key"></i>
+            <h3>Gestion des cl√©s</h3>
+            <p>Ajouter,modifier et consulter la liste des cl√©s de l'√©glise.</p>
+        </div>
+        <div class="feature" onclick="window.location.href='/teams'">
+            <i class="fas fa-users"></i>
+            <h3>Gestion des √©quipes</h3>
+            <p>Ajouter, supprimer ou modifier le nom d'une √©quipe.</p>
+        </div>
+        <div class="feature" onclick="window.location.href='/users'">
+            <i class="fas fa-user"></i>
+            <h3>Gestion des fid√®les</h3>
+            <p>Administrer les fid√®les par √©quipe.</p>
+        </div>
+        <div class="feature" onclick="window.location.href='/attr'">
+            <i class="fas fa-id-badge"></i>
+            <h3>Attribution des cl√©s</h3>
+            <p>Attribuer une ou plusieurs cl√© aux fid√®les</p>
+        </div>
+    </div>
+</section>
+
+    <div class="section-separator">
+        <div class="separator-wave"></div>
+    </div>
+
+    <section class="get-started-section" id="about">
+        <h2>Get Started Today</h2>
+        <p>Sign up now to explore all the features and transform your workflow.</p>
+        <button class="cta-button">Start Free Trial</button>
+    </section>
+
+    <footer class="footer" id="contact">
+        <p>&copy; 2025 Modern Web Application. All rights reserved.</p>
+    </footer>
 </body>
 </html>

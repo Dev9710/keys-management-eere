@@ -15,6 +15,8 @@
     <!-- Lien vers Font Awesome pour inclure des icônes dans les boutons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Style CSS personnalisé pour ajuster les boutons et la mise en page -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         /* Styles pour aligner le contenu des boutons */
         .action-btn {
@@ -73,11 +75,56 @@
         width: 415px;
         margin-left: 180px;
     }
+    .fa-file-pdf{
+        margin-right: auto;
+    }
+    .top-header {
+            background: white;
+            color: #3a9f87;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 50px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-menu a {
+            color: #3a9f87;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-menu a:hover {
+            color: #2a7562;
+        }
     
     </style>
 </head>
 
 <body>
+    <div class="top-header">
+        <div class="logo" onclick="window.location.href='/home/'">Modern Web App</div>
+        <nav class="nav-menu">
+            <a href="#home">Home</a>
+            <a href="#features">Features</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </div>
     <div class="container mt-5">
         <!-- Titre de la section principale -->
         <h2 class="mb-4">Gestion des Clés par Utilisateur</h2>
@@ -175,6 +222,11 @@
         {% endif %}
     </tbody>
 </table>
+<div class="container mt-3 text-end">
+    <button id="generate-pdf-btn" class="btn btn-success" disabled>
+        <i class="fas fa-file-pdf"></i> Générer un PDF
+    </button>
+</div>
     </div>
     <script>
        function loadAssignedKeys(user_id) {
@@ -576,5 +628,135 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generatePdfBtn = document.getElementById('generate-pdf-btn');
+            const userDropdown = document.getElementById('user-dropdown');
+            const teamDropdown = document.getElementById('team-dropdown');
+            const assignedKeysTable = document.getElementById('assigned-keys-table');
+        
+            function loadAssignedKeys(user_id) {
+                if (user_id) {
+                    fetch(`/get-assigned-keys/${user_id}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const tbody = document.querySelector('#assigned-keys-table tbody');
+                            tbody.innerHTML = '';
+                            if (data.assigned_keys.length > 0) {
+                                data.assigned_keys.forEach(key => {
+                                    const row = document.createElement('tr');
+                                    row.innerHTML = `
+                                        <td>${key.name}</td>
+                                        <td>${key.place}</td>
+                                        <td>${key.assigned_date}</td>
+                                        <td>${key.comments}</td>
+                                    `;
+                                    tbody.appendChild(row);
+                                });
+                            } else {
+                                tbody.innerHTML = `
+                                    <tr>
+                                        <td colspan="7" class="text-center">
+                                            <strong>Aucune clé attribuée à cet utilisateur.</strong><br>
+                                            Cliquez sur le bouton "Attribuer une Clé" ci-dessus pour attribuer des clés.
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+                            updatePdfButtonState();
+                        })
+                        .catch(error => {
+                            console.error('Error fetching assigned keys:', error);
+                        });
+                } else {
+                    const tbody = document.querySelector('#assigned-keys-table tbody');
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                Veuillez sélectionner un utilisateur pour voir ses clés attribuées.
+                            </td>
+                        </tr>
+                    `;
+                    updatePdfButtonState();
+                }
+            }
+        
+            function updatePdfButtonState() {
+                const userId = userDropdown.value;
+                const hasKeys = assignedKeysTable.querySelectorAll('tbody tr').length > 0 && 
+                                assignedKeysTable.querySelectorAll('tbody tr')[0].textContent.trim() !== 'Aucune clé attribuée à cet utilisateur.';
+                
+                if (userId && hasKeys) {
+                    generatePdfBtn.removeAttribute('disabled');
+                } else {
+                    generatePdfBtn.setAttribute('disabled', 'disabled');
+                }
+            }
+        
+            generatePdfBtn.addEventListener('click', function() {
+                const { jsPDF } = window.jspdf;
+                
+                // Récupérer les noms de l'utilisateur et de l'équipe
+                const userName = userDropdown.options[userDropdown.selectedIndex].text;
+                const teamName = teamDropdown.options[teamDropdown.selectedIndex].text || 'Toutes les Équipes';
+                const today = new Date().toLocaleDateString('fr-FR');
+                
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                html2canvas(assignedKeysTable, {
+                    scale: 2,
+                    useCORS: true
+                }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    
+                    const pageWidth = 210;
+                    const pageHeight = 297;
+                    
+                    // En-tête avec équipe, utilisateur et date
+                    doc.setFontSize(12);
+                    doc.text(`Équipe: ${teamName}`, 10, 15);
+                    doc.text(`Nom: ${userName}`, 10, 22);
+                    doc.text(`Date: ${today}`, 10, 29);
+                    
+                    // Titre principal
+                    doc.setFontSize(16);
+                    doc.text('Récapitulatifs des clés', pageWidth / 2, 40, { align: 'center' });
+                    
+                    const imgWidth = pageWidth - 20;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    
+                    doc.addImage(imgData, 'PNG', 10, 50, imgWidth, imgHeight);
+                    
+                    // Encadré commentaires
+                    const commentBoxY = 50 + imgHeight + 10;
+                    doc.setDrawColor(0);
+                    doc.setLineWidth(0.1);
+                    doc.rect(10, commentBoxY, imgWidth, 50);
+                    
+                    doc.setFontSize(10);
+                    doc.text('Commentaires :', 15, commentBoxY + 10);
+                    
+                    // Signature
+                    doc.setFontSize(10);
+                    doc.text('Signature :', 140, commentBoxY + 80);
+                    doc.line(160, commentBoxY + 80, 190, commentBoxY + 80);
+                    
+                    doc.save(`Cles_${userName}_${today.replace(/\//g, '-')}.pdf`);
+                });
+            });
+        
+            userDropdown.addEventListener('change', function() {
+                const user_id = this.value;
+                loadAssignedKeys(user_id);
+            });
+        
+            // Écouteur pour la mise à jour du bouton PDF
+            userDropdown.addEventListener('change', updatePdfButtonState);
+            teamDropdown.addEventListener('change', updatePdfButtonState);
+        
+            // Mise à jour initiale de l'état du bouton
+            updatePdfButtonState();
+        });
+        </script>
 </body>
 </html>

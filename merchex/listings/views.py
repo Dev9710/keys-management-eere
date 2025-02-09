@@ -22,6 +22,10 @@ def about(request):
     return HttpResponse('<h1>A propos de</h1> <p> Nous aimons  merchex </p>')
 
 
+def home(request):
+    return render(request, 'listings/home.html')
+
+
 def listing(request):
     listings = Listing.objects.all()
     return HttpResponse(f"""'<h1>Listing!</h1>
@@ -62,6 +66,7 @@ def key_list(request):
         'available_keys': available_keys,
         # Passer les numéros disponibles au template
         'available_numbers': available_numbers,
+
     }
     return render(request, 'listings/keys.html', context)
 
