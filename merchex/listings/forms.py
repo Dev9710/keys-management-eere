@@ -44,3 +44,13 @@ class UserForm(forms.ModelForm):
             # Filter keys by the user's assigned keys
             self.fields['keys'].queryset = Key.objects.filter(
                 keys=user_instance)
+
+
+class TeamForm(forms.ModelForm):
+    class Meta:
+        model = Team  # Point to the correct model
+        fields = [
+            'name',
+        ]
+        widgets = {
+        }

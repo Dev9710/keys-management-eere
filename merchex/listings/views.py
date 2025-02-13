@@ -5,7 +5,7 @@ from django.db.models import Case, When, Value, CharField, F
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from .models import Key, User, Team
-from .forms import KeyForm, UserForm
+from .forms import KeyForm, UserForm, TeamForm
 from django.views.decorators.http import require_POST
 import json
 from django.views.decorators.csrf import csrf_exempt
@@ -301,6 +301,18 @@ def get_modal_assigned_keys(request, user_id):
 # used
 
 
+def remove_all_keys(request, user_id):
+    try:
+        # Supprimer toutes les clés attribuées à cet utilisateur
+        Key.objects.filter(user_id=user_id).delete()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+
+# used
+
+
+@csrf_exempt
 def assign_keys(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'message': 'Méthode non autorisée'}, status=405)
@@ -308,8 +320,7 @@ def assign_keys(request):
     try:
         data = json.loads(request.body)
         user_id = data.get('user_id')
-        selected_keys = data.get('selected_keys', [])
-        assignment_date = data.get('assignment_date', timezone.now().date())
+        remove_all = data.get('remove_all', False)
 
         if not user_id:
             return JsonResponse({
@@ -325,7 +336,22 @@ def assign_keys(request):
                 'message': 'Utilisateur non trouvé'
             }, status=404)
 
-        # Récupérer toutes les clés actuellement attribuées à l'utilisateur
+        if remove_all:
+            Key.objects.filter(assigned_user=user).update(
+                assigned_user=None,
+                assigned_date=None
+            )
+            return JsonResponse({
+                'success': True,
+                'message': 'Toutes les clés ont été retirées',
+                'updated_keys': []
+            })
+
+        # Récupérer les clés sélectionnées et la date d'attribution
+        selected_keys = data.get('selected_keys', [])
+        assignment_date = data.get('assignment_date')
+
+        # Récupérer les clés actuellement attribuées à l'utilisateur
         current_keys = Key.objects.filter(assigned_user=user)
 
         # Désattribuer les clés qui ne sont plus sélectionnées
@@ -334,11 +360,15 @@ def assign_keys(request):
             assigned_date=None
         )
 
-        # Attribuer les nouvelles clés sélectionnées
-        Key.objects.filter(id__in=selected_keys).update(
-            assigned_user=user,
-            assigned_date=assignment_date
-        )
+        # Pour chaque clé sélectionnée
+        for key_id in selected_keys:
+            key = Key.objects.get(id=key_id)
+            # Si la clé n'était pas déjà attribuée à cet utilisateur, utiliser la nouvelle date
+            if not current_keys.filter(id=key_id).exists():
+                key.assigned_date = assignment_date
+            # Sinon, garder la date existante
+            key.assigned_user = user
+            key.save()
 
         # Récupérer la liste mise à jour des clés
         updated_keys = []
@@ -495,3 +525,84 @@ def user_create(request):
             messages.error(
                 request, "Erreur lors de l\'ajout de l'utilisateur.")
     return redirect('user_list')  # If not POST, redirect back to the key list
+
+
+def team_list(request):
+    # Récupérer tous les utilisateurs avec leurs équipes
+    users = User.objects.select_related('team').all()
+    teams = Team.objects.all()
+    teams_count = teams.count()
+
+    # Récupérer les paramètres GET
+    user_id = request.GET.get('user_id', None)
+    team_id = request.GET.get('team_id', None)
+
+    context = {
+        'teams_count': teams_count,
+        'teams': teams,
+        'users': users,
+        'user_id': user_id,
+        'team_id': team_id,
+        'selected_team_id': team_id,
+    }
+
+    return render(request, 'listings/teams.html', context)
+
+
+@require_POST
+def team_delete(request, team_id):
+    # Correction : get_object_or_404(Team, id=team_id) au lieu de User
+    team = get_object_or_404(Team, id=team_id)
+    team.delete()
+    messages.success(
+        request, f"L'équipe {team.name} a été supprimée avec succès.")
+    return redirect('team_list')
+
+
+def team_update(request):
+    if request.method == 'POST':
+        id = request.POST.get('id')
+        if not id:
+            return JsonResponse({
+                'success': False,
+                'message': 'Équipe non spécifiée.'
+            }, status=400)
+
+        try:
+            team = Team.objects.get(id=id)
+            team.name = request.POST.get('name')
+            team.save()
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Équipe mise à jour avec succès.'
+            })
+        except Team.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Équipe non trouvée.'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': str(e)
+            }, status=400)
+
+    return JsonResponse({
+        'success': False,
+        'message': 'Méthode non autorisée'
+    }, status=405)
+
+
+def team_create(request):
+    if request.method == 'POST':
+        form = TeamForm(request.POST)  # Get the data from the form
+        if form.is_valid():  # Validate the form
+            form.save()  # Save the new key
+            messages.success(request, 'Equipe ajoutée avec succès.')
+            return redirect('team_list')  # Redirect to the key list page
+        else:
+            print(form.errors)
+            messages.error(
+                request, "Erreur lors de l\'ajout de l'équipe.")
+    return redirect('taem_list')  # If not POST, redirect back to the key list

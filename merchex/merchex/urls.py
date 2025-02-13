@@ -21,22 +21,26 @@ from listings import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('hello/', views.hello),
-    path('teams/', views.teams),
     path('about-us/', views.about),  # ajoutez cette ligne
     path('home/', views.home),
     path('listing/', views.listing),
     path('contact/', views.contact),
     path('users/', views.user_list, name='user_list'),
+    path('teams/', views.team_list, name='team_list'),
     path('user_team/', views.user_team, name='user_team'),
     path('user_update/', views.user_update, name='user_update'),
+    path('team_update/', views.team_update, name='team_update'),
     path('user_create/', views.user_create, name='user_create'),
+    path('team_create/', views.team_create, name='team_create'),
     path('users/delete/<int:user_id>/', views.user_delete, name="user_delete"),
+    path('teams/delete/<int:teams_id>/', views.team_delete, name="team_delete"),
     path('attr/', views.user_keys_view, name='user_keys'),
     path('get-assigned-keys/<int:user_id>/',
          views.get_assigned_keys, name='get_assigned_keys'),  # ok
     path('get-modal-assigned-keys/<int:user_id>/', views.get_modal_assigned_keys,
          name='get_modal_assigned_keys'),  # affiche les clés assigné ok
     path('keys/list/', views.key_list, name='key_list'),
+
     # Vue pour ajouter une clé
     path('keys/add/', views.key_create, name='key_create'),
     path('keys/update/', views.key_update,
@@ -50,4 +54,6 @@ urlpatterns = [
     path('get-users-by-team/<int:team_id>/',
          views.get_users_by_team, name='get_users_by_team'),  # ok
     path('assign-keys/', views.assign_keys, name='assign_keys'),  # ok
+    path('remove-all-keys/<int:user_id>/',
+         views.remove_all_keys, name='remove_all_keys'),  # ok
 ]
