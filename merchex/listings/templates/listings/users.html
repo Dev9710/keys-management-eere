@@ -49,17 +49,23 @@
         .nav-menu a:hover {
             color: #2a7562;
         }
+        .footer {
+            background: #3a9f87;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+        }
     </style>
 </head>
 
 <body>
     <div class="top-header">
-        <div class="logo" onclick="window.location.href='/home/'">Modern Web App</div>
+        <div class="logo" onclick="window.location.href='/home/'">EERE</div>
         <nav class="nav-menu">
-            <a href="#home">Home</a>
-            <a href="#features">Features</a>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
+            <a href="/keys/list/">Gestion des clés</a>
+            <a href="/teams">Gestion des équipes</a>
+            <a href="/users">Gestion des fidèles</a>
+            <a href="/attr">Attribuer des clés</a>
         </nav>
     </div>
     <div class="container mt-5">
@@ -84,8 +90,8 @@
         </div>
         <form method="get" action="{% url 'user_list' %}">
             <div class="row mb-4">
-                <div class="d-flex align-items-end">
-                    <div class="me-3 flex-grow-1">
+                <div class="d-flex align-items-end gap-3">
+                    <div class="me-3" style="width: 250px;">
                         <label for="team-dropdown" class="form-label fw-bold">Sélectionner une équipe :</label>
                         <select id="team-dropdown" name="team_id" class="form-select" data-url="{% url 'user_team' %}">
                             <option value="">-- Toutes les Équipes --</option>
@@ -96,6 +102,12 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <div class="form-check d-flex align-items-center">
+                        <input class="form-check-input me-2" type="checkbox" id="hasKeysFilter">
+                        <label class="form-check-label" for="hasKeysFilter">
+                            Afficher les détenteurs de clé
+                        </label>
+                    </div>
                 </div>
             </div>
         </form>
@@ -103,7 +115,6 @@
         <table class="table table-striped table-hover" id="user_tab">
             <thead class="table-dark">
                 <tr>
-
                     <th scope="col">Nom</th>
                     <th scope="col">Prénom</th>
                     <th scope="col">Equipe</th>
@@ -288,106 +299,86 @@
             </script>
             <script>
                 const teamDropdown = document.getElementById('team-dropdown'); // Liste déroulante des équipes
-                const userTableBody = document.querySelector('#user_tab tbody'); // Corps du tableau des utilisateurs
-                function loadUserbyTeam(teamId) {
-                        const baseUrl = teamDropdown.getAttribute('data-url'); // URL de base
-                        const url = `${baseUrl}?team_id=${teamId}`; // Construire l'URL complète
-                        
+const userTableBody = document.querySelector('#user_tab tbody'); // Corps du tableau des utilisateurs
+const hasKeysFilter = document.getElementById('hasKeysFilter'); // Checkbox pour filtrer les détenteurs de clés
 
-                        fetch(url)
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error(`HTTP error! status: ${response.status}`);
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                                userTableBody.innerHTML = ''; // Vider le tableau
+function loadUserbyTeam(teamId) {
+    const baseUrl = teamDropdown.getAttribute('data-url'); // URL de base
+    // Ajout du paramètre has_keys à l'URL si la checkbox est cochée
+    const hasKeys = hasKeysFilter.checked;
+    const url = `${baseUrl}?team_id=${teamId}${hasKeys ? '&has_keys=true' : ''}`; // Construire l'URL complète
 
-                                if (data.users.length > 0) {
-                                    data.users.forEach(user => {
-                                        const row = document.createElement('tr');
-                                        row.innerHTML = `
-                        <td>${user.name}</td>
-                        <td>${user.firstname}</td>
-                        <td>${user.team}</td>
-                        <td>${user.comment}</td>
-                           <td>
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-warning btn-sm edit-btn" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#editUserModal" 
-                                    data-id="${user.id}" 
-                                    data-name="${user.name}" 
-                                    data-firstname="${user.firstname}" 
-                                    data-team="${user.team_id}"  // Assurez-vous que team_id est disponible dans votre objet user
-                                    data-comment="${user.comment}">
-                                    <i class="fas fa-edit"></i> Modifier
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            userTableBody.innerHTML = ''; // Vider le tableau
+
+            if (data.users.length > 0) {
+                data.users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                    <td>${user.name}</td>
+                    <td>${user.firstname}</td>
+                    <td>${user.team}</td>
+                    <td>${user.comment}</td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-warning btn-sm edit-btn" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#editUserModal" 
+                                data-id="${user.id}" 
+                                data-name="${user.name}" 
+                                data-firstname="${user.firstname}" 
+                                data-team="${user.team_id}"
+                                data-comment="${user.comment}">
+                                <i class="fas fa-edit"></i> Modifier
+                            </button>
+                            <form method="post" action="/user_delete/${user.id}/">
+                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteUserModal" data-user-id="${user.id}">
+                                    <i class="fas fa-trash"></i> supprimer
                                 </button>
-                                <form method="post" action="/user_delete/${user.id}/">
-                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteUserModal" data-user-id="${user.id}">
-                                        <i class="fas fa-trash"></i> supprimer
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    `;
-                                        userTableBody.appendChild(row);
-                                    });
-                                } else {
-                                    // Si aucun utilisateur n'est trouvé
-                                    const row = document.createElement('tr');
-                                    row.innerHTML = `<td colspan="6" class="text-center">Aucun utilisateur trouvé.</td>`;
-                                    userTableBody.appendChild(row);
-                                }
-
-                                // Réattacher les événements aux boutons dynamiques
-                                attachEditButtonEvents();
-                            })
-                            .catch(error => {
-                                console.error('Erreur lors du chargement des utilisateurs :', error);
-                            });
-                    }
-                document.addEventListener('DOMContentLoaded', function () {
-                    
-
-                    
-                    // Écouter les changements dans la liste déroulante
-                    teamDropdown.addEventListener('change', function () {
-                        const selectedTeamId = teamDropdown.value; // Récupérer l'ID de l'équipe sélectionnée
-                        loadUserbyTeam(selectedTeamId); // Charger les utilisateurs pour l'équipe sélectionnée
-                    });
+                            </form>
+                        </div>
+                    </td>
+                `;
+                    userTableBody.appendChild(row);
                 });
-            </script>
-            <script>
-                //Fonction de recherche dans le tableau
-                document.addEventListener('DOMContentLoaded', function () {
-                    const searchInput = document.getElementById('searchInput');
-                    const table = document.getElementById('user_tab');
-                    const rows = table.getElementsByTagName('tr');
+            } else {
+                // Si aucun utilisateur n'est trouvé
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="6" class="text-center">Aucun utilisateur trouvé.</td>`;
+                userTableBody.appendChild(row);
+            }
 
-                    searchInput.addEventListener('keyup', function () {
-                        const filter = searchInput.value.toLowerCase();
+            // Réattacher les événements aux boutons dynamiques
+            attachEditButtonEvents();
+        })
+        .catch(error => {
+            console.error('Erreur lors du chargement des utilisateurs :', error);
+        });
+}
 
-                        for (let i = 1; i < rows.length; i++) { // Commence à 1 pour ignorer l'en-tête
-                            const cells = rows[i].getElementsByTagName('td');
-                            let match = false;
+document.addEventListener('DOMContentLoaded', function () {
+    // Écouter les changements dans la liste déroulante
+    teamDropdown.addEventListener('change', function () {
+        const selectedTeamId = teamDropdown.value; // Récupérer l'ID de l'équipe sélectionnée
+        loadUserbyTeam(selectedTeamId); // Charger les utilisateurs pour l'équipe sélectionnée
+    });
 
-                            for (let cell of cells) {
-                                if (cell.textContent.toLowerCase().includes(filter)) {
-                                    match = true;
-                                    break;
-                                }
-                            }
+    // Écouter les changements de la checkbox
+    hasKeysFilter.addEventListener('change', function () {
+        const selectedTeamId = teamDropdown.value; // Récupérer l'ID de l'équipe sélectionnée
+        loadUserbyTeam(selectedTeamId); // Recharger les utilisateurs avec le nouveau filtre
+    });
 
-                            rows[i].style.display = match ? '' : 'none'; // Affiche ou cache la ligne
-                        }
-                    });
-                });
-                document.addEventListener('DOMContentLoaded', function () {
-                    attachEditButtonEvents(); // Attacher les événements aux boutons existants
-                });
-
+    // Charger la liste initiale
+    loadUserbyTeam(teamDropdown.value);
+});
             </script>
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
@@ -510,6 +501,33 @@
                 }
 
             </script>
+            <script>
+                //Fonction de recherche dans le tableau
+                document.addEventListener('DOMContentLoaded', function () {
+                    const searchInput = document.getElementById('searchInput');
+                    const table = document.getElementById('user_tab');
+                    const rows = table.getElementsByTagName('tr');
+                
+                    searchInput.addEventListener('keyup', function () {
+                        const filter = searchInput.value.toLowerCase();
+                
+                        for (let i = 1; i < rows.length; i++) { // Commence à 1 pour ignorer l'en-tête
+                            const cells = rows[i].getElementsByTagName('td');
+                            let match = false;
+                
+                            for (let cell of cells) {
+                                if (cell.textContent.toLowerCase().includes(filter)) {
+                                    match = true;
+                                    break;
+                                }
+                            }
+                
+                            rows[i].style.display = match ? '' : 'none'; // Affiche ou cache la ligne
+                        }
+                    });
+                });
+                
+                </script>
 
             <script>
                 //script pour la validation du formation d'ajout utilisateur

@@ -450,12 +450,19 @@ def user_delete(request, user_id):
 
 def user_team(request):
     team_id = request.GET.get('team_id', None)
+    has_keys = request.GET.get('has_keys') == 'true'
 
+    # Commencer avec tous les utilisateurs
+    users = User.objects.all()
+
+    # Filtrer par équipe si une équipe est sélectionnée
     if team_id:
         team = get_object_or_404(Team, id=team_id)
-        users = User.objects.filter(team=team)
-    else:
-        users = User.objects.all()
+        users = users.filter(team=team)
+
+    # Filtrer les utilisateurs qui ont des clés si le filtre est activé
+    if has_keys:
+        users = users.filter(keys__isnull=False).distinct()
 
     # Créer une liste d'utilisateurs sous forme de dictionnaire
     user_list = [
@@ -464,7 +471,7 @@ def user_team(request):
             'name': user.name,
             'firstname': user.firstname,
             'team': user.team.name if user.team else 'Aucune équipe',
-            'team_id': user.team.id if user.team else None,  # Ajout de l'ID de l'équipe
+            'team_id': user.team.id if user.team else None,
             'comment': user.comment,
         }
         for user in users
