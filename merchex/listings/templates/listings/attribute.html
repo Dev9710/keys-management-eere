@@ -47,25 +47,22 @@
             margin-left: 115px;
         }
          /* Style pour le container du date picker */
-         .date-picker-container {
-        min-width: 200px;
-    }
-
-    .date-picker-container input[type="date"] {
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-        padding: 0.375rem 0.75rem;
-    }
-
-    .date-picker-container input[type="date"]:hover {
-        border-color: #86b7fe;
-    }
-
-    .date-picker-container input[type="date"]:focus {
-        border-color: #86b7fe;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        outline: 0;
-    }
+         
+.flatpickr-calendar {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+.flatpickr-day {
+    transition: all 0.2s ease;
+}
+.flatpickr-day:hover {
+    background-color: #e9ecef;
+    border-radius: 50%;
+}
+.flatpickr-day.selected {
+    background-color: #007bff !important;
+    color: white !important;
+}
 
     /* Ajustement pour l'espacement dans le footer */
     .modal-footer {
@@ -111,18 +108,24 @@
         .nav-menu a:hover {
             color: #2a7562;
         }
+        .footer {
+            background: #3a9f87;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+        }
     
     </style>
 </head>
 
 <body>
     <div class="top-header">
-        <div class="logo" onclick="window.location.href='/home/'">Modern Web App</div>
+        <div class="logo" onclick="window.location.href='/home/'">EERE</div>
         <nav class="nav-menu">
-            <a href="#home">Home</a>
-            <a href="#features">Features</a>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
+            <a href="/keys/list/">Gestion des clés</a>
+            <a href="/teams">Gestion des équipes</a>
+            <a href="/users">Gestion des fidèles</a>
+            <a href="/attr">Attribuer des clés</a>
         </nav>
     </div>
     <div class="container mt-5">
@@ -174,7 +177,7 @@
                     <!-- Bouton pour Attribuer une Clé -->
                     <button type="button" class="btn btn-primary" id="assign-key-btn" data-bs-toggle="modal"
     data-bs-target="#keyModal" disabled>
-    Attribuer une Clé
+    Mise à jour des clés
 </button>
                 </div>
             </div>
@@ -306,16 +309,12 @@
                     <div class="modal-body">
                         <!-- Le contenu sera chargé dynamiquement -->
                     </div>
-                    <div class="text-datepicker">
-                        <span> Date d'attribution:</span>
-                    </div>
                     <div class="date-picker-container">
                         <input 
                             type="date" 
                             id="assignment-date" 
                             name="assignment_date" 
                             class="form-control" 
-                            required
                         >
                     </div>
                     <div class="modal-footer">
@@ -548,16 +547,16 @@ document.addEventListener('DOMContentLoaded', function () {
     modalForm.addEventListener('submit', function(e) {
     e.preventDefault();
     
-    // Récupérer TOUTES les cases à cocher (cochées et décochées)
+    // Récupérer toutes les cases à cocher
     const allCheckboxes = this.querySelectorAll('input[name="selected_keys"]');
     
-    // Ne garder que les IDs des clés cochées
+    // Simplifier la structure - ne prendre que les IDs des clés sélectionnées
     const selectedKeys = Array.from(allCheckboxes)
         .filter(cb => cb.checked)
         .map(cb => parseInt(cb.value));
 
     const userId = parseInt(userDropdown.value);
-    const assignmentDate = document.getElementById('assignment-date').value; // Récupérer la date
+    const assignmentDate = document.getElementById('assignment-date').value;
     const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
 
     fetch('{% url "assign_keys" %}', {
@@ -568,18 +567,15 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         body: JSON.stringify({
             user_id: userId,
-            selected_keys: selectedKeys,
-            assignment_date: assignmentDate // Ajouter la date à la requête
+            selected_keys: selectedKeys,  // Maintenant c'est juste un tableau d'IDs
+            assignment_date: assignmentDate
         })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Fermer la modal
             bootstrap.Modal.getInstance(keyModal).hide();
-            // Recharger les clés attribuées
             loadAssignedKeys(userId);
-            // Afficher le message de succès
             const messageElement = document.getElementById('assignment-message');
             messageElement.textContent = data.message;
             messageElement.classList.remove('d-none');
@@ -758,5 +754,6 @@ document.addEventListener('DOMContentLoaded', function () {
             updatePdfButtonState();
         });
         </script>
+    
 </body>
 </html>

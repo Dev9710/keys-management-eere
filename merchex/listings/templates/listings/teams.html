@@ -1,4 +1,4 @@
-<!-- templates/listings/users.html -->
+<!-- templates/listings/Team.html -->
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -103,9 +103,12 @@
                     <td>{{ team.name }}</td>
                     <td>
                         <div class="d-flex gap-2">
-                            <button onclick="editTeam('{{ team.id }}', '{{ team.name }}')" class="btn btn-warning btn-sm edit-btn flex-fill action-btn" style="width: 10Opx;">
+                            <!-- Bouton Modifier -->
+                            <button type = 'button' class="btn btn-warning btn-sm edit-btn flex-fill action-btn" style="width: 10Opx;"
+                                 data-bs-toggle="modal" data-bs-target="#editTeamModal" data-id="{{ team.id }}">
                                 <i class="fas fa-edit"></i> Modifier
                             </button>
+                             <!-- Bouton Supprimer -->
                             <button type="button" class="btn btn-danger btn-sm" style="width: 100px;"
                                 data-bs-toggle="modal"
                                 data-bs-target="#deleteTeamModal"
@@ -152,7 +155,7 @@
                     </div>
                 </div>
             </div>
-            <!-- Add User Modal -->
+            <!-- Add team Modal -->
             <div class="modal fade" id="addTeamModal" tabindex="-1" aria-labelledby="addTeamModalLabel"
                 aria-hidden="true">
                 <div class="modal-dialog">
@@ -181,29 +184,28 @@
                 </div>
             </div>
             <!-- Delete Confirmation Modal -->
-            <div class="modal fade" id="deleteTeamModal" tabindex="-1" aria-labelledby="deleteTeamModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="deleteTeamModalLabel">Supprimer l'équipe</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <!-- Dynamically show the user name -->
-                            Voulez-vous vraiment supprimer l'équipe <strong id="TeamNameToDelete"></strong>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                            <!-- This form will submit the delete action -->
-                            <form id="deleteUserForm" method="post">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-danger">Supprimer</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+           <!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteTeamModal" tabindex="-1" aria-labelledby="deleteTeamModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteTeamModalLabel">Supprimer l'équipe</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <div class="modal-body">
+                <!-- Dynamically show the team name -->
+                Voulez-vous vraiment supprimer l'équipe <strong id="TeamNameToDelete"></strong> ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <form id="deleteTeamForm" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
             <script>
                 //evenement pour la suppression d'une équipe
                 document.addEventListener('DOMContentLoaded', function () {
@@ -211,11 +213,11 @@
 
                     deleteButtons.forEach(function (button) {
                         button.addEventListener('click', function () {
-                            // Get the user name and delete URL from the clicked button
+                            // Get the team name and delete URL from the clicked button
                             var teamName = this.getAttribute('data-team-name');
                             var deleteUrl = this.getAttribute('data-delete-url');
 
-                            // Update the modal content with the user name
+                            // Update the modal content with the team name
                             document.getElementById('TeamNameToDelete').innerText = teamName;
 
                             // Set the action of the delete form to the delete URL
@@ -256,10 +258,13 @@
                                     <i class="fas fa-edit"></i> Modifier
                                 </button>
                                 <form method="post" action="/team_delete/${team.id}/">
-                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteTeamModal" data-team-id="${team.id}">
-                                        <i class="fas fa-trash"></i> supprimer
-                                    </button>
-                                </form>
+                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" 
+        data-bs-target="#deleteTeamModal" 
+        data-delete-url="/team_delete/${team.id}/" 
+        data-user-name="${team.name}">
+        <i class="fas fa-trash"></i> Supprimer
+    </button>
+                            </form>
                             </div>
                         </td>
                     `;

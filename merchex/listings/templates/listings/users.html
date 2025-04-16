@@ -133,24 +133,24 @@
                     <!-- Edit Button -->
                     <td>
                         <div class="d-flex gap-2">
+                            <!-- Bouton Modifier -->
                             <button type="button" class="btn btn-warning btn-sm edit-btn flex-fill action-btn"
                                 data-bs-toggle="modal" data-bs-target="#editUserModal" data-id="{{ user.id }}"
                                 data-name="{{ user.name }}" data-firstname="{{ user.firstname }}"
                                 data-team="{{ user.team.id }}" data-comment="{{ user.comment }}">
                                 <i class="fas fa-edit"></i> Modifier
                             </button>
-
-                            <!-- Add some space between buttons -->
-                            <!-- Delete button -->
-                            <form method="post" action="{% url 'user_delete' user.id %}" style="width: 80px;">
-                                {% csrf_token %}
-                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#deleteUserModal" data-delete-url="{% url 'user_delete' user.id %}"
-                                    data-user-name="{{ user.name }}">
-                                    <i class="fas fa-trash"></i> Supprimer
-                                </button>
+                            
+                            <!-- Bouton Supprimer -->
+                            <button type="button" class="btn btn-danger btn-sm" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#deleteUserModal" 
+                                data-delete-url="{% url 'user_delete' user.id %}" 
+                                data-user-name="{{ user.name }}">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
                         </div>
-                        </form>
+                    </td> 
                 </tr>
                 {% empty %}
                 <tr>
@@ -253,8 +253,8 @@
                     </div>
                 </div>
             </div>
-            <!-- Delete Confirmation Modal -->
-            <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel"
+            <!-- Section du modal de suppression -->
+                <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel"
                 aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -264,7 +264,7 @@
                         </div>
                         <div class="modal-body">
                             <!-- Dynamically show the user name -->
-                            Voulez-vous vraiment supprimer l'utilisateur <strong id="UserNameToDelete"></strong>
+                            Voulez-vous vraiment supprimer l'utilisateur <strong id="UserNameToDelete"></strong> ?
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
@@ -276,31 +276,49 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <script>
-                //evenement pour la suppression d'un utilisateur
-                document.addEventListener('DOMContentLoaded', function () {
-                    var deleteButtons = document.querySelectorAll('[data-bs-target="#deleteUserModal"]');
-
-                    deleteButtons.forEach(function (button) {
-                        button.addEventListener('click', function () {
-                            // Get the user name and delete URL from the clicked button
-                            var userName = this.getAttribute('data-user-name');
-                            var deleteUrl = this.getAttribute('data-delete-url');
-
-                            // Update the modal content with the user name
-                            document.getElementById('UserNameToDelete').innerText = userName;
-
-                            // Set the action of the delete form to the delete URL
-                            document.getElementById('deleteUserForm').setAttribute('action', deleteUrl);
+                </div>
+                <script>
+                    console.log("Script de suppression chargé");
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var deleteButtons = document.querySelectorAll('[data-bs-target="#deleteUserModal"]');
+                        
+                        deleteButtons.forEach(function (button) {
+                            button.addEventListener('click', function () {
+                                // Récupérer le nom d'utilisateur et l'URL de suppression depuis le bouton cliqué
+                                var userName = this.getAttribute('data-user-name');
+                                var deleteUrl = this.getAttribute('data-delete-url');
+                                
+                                console.log("Suppression utilisateur :", userName, "URL :", deleteUrl);
+                                
+                                // Mettre à jour le contenu du modal avec le nom d'utilisateur
+                                document.getElementById('UserNameToDelete').innerText = userName;
+                                
+                                // Définir l'action du formulaire de suppression vers l'URL de suppression
+                                document.getElementById('deleteUserForm').setAttribute('action', deleteUrl);
+                            });
                         });
                     });
-                });
-            </script>
+                </script>
             <script>
                 const teamDropdown = document.getElementById('team-dropdown'); // Liste déroulante des équipes
 const userTableBody = document.querySelector('#user_tab tbody'); // Corps du tableau des utilisateurs
 const hasKeysFilter = document.getElementById('hasKeysFilter'); // Checkbox pour filtrer les détenteurs de clés
+
+function attachDeleteButtonEvents() {
+    var deleteButtons = document.querySelectorAll('[data-bs-target="#deleteUserModal"]');
+    
+    deleteButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+            var userName = this.getAttribute('data-user-name');
+            var deleteUrl = this.getAttribute('data-delete-url');
+            
+            console.log("Bouton de suppression cliqué pour :", userName, "URL :", deleteUrl);
+            
+            document.getElementById('UserNameToDelete').innerText = userName;
+            document.getElementById('deleteUserForm').setAttribute('action', deleteUrl);
+        });
+    });
+}
 
 function loadUserbyTeam(teamId) {
     const baseUrl = teamDropdown.getAttribute('data-url'); // URL de base
@@ -339,9 +357,12 @@ function loadUserbyTeam(teamId) {
                                 <i class="fas fa-edit"></i> Modifier
                             </button>
                             <form method="post" action="/user_delete/${user.id}/">
-                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteUserModal" data-user-id="${user.id}">
-                                    <i class="fas fa-trash"></i> supprimer
-                                </button>
+                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" 
+        data-bs-target="#deleteUserModal" 
+        data-delete-url="/user_delete/${user.id}/" 
+        data-user-name="${user.name}">
+        <i class="fas fa-trash"></i> Supprimer
+    </button>
                             </form>
                         </div>
                     </td>
@@ -357,6 +378,7 @@ function loadUserbyTeam(teamId) {
 
             // Réattacher les événements aux boutons dynamiques
             attachEditButtonEvents();
+            attachDeleteButtonEvents();
         })
         .catch(error => {
             console.error('Erreur lors du chargement des utilisateurs :', error);
@@ -564,5 +586,4 @@ document.addEventListener('DOMContentLoaded', function () {
             </script>
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

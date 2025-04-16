@@ -20,10 +20,8 @@ class Key(models.Model):
     place = models.CharField(max_length=100, default='')
     initial_key_number = models.CharField(
         max_length=100, default='', null=True, blank=True)
-    key_used = models.IntegerField(default=0, blank=True, null=True)
-    key_available = models.CharField(
+    in_cabinet = models.CharField(
         max_length=100, default='', null=True, blank=True)
-    in_cabinet = models.BooleanField(default=False)
     in_safe = models.CharField(
         max_length=100, default='', null=True, blank=True)
     comments = models.CharField(max_length=200, default='', blank=True)

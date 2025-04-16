@@ -29,10 +29,12 @@ urlpatterns = [
     path('teams/', views.team_list, name='team_list'),
     path('user_team/', views.user_team, name='user_team'),
     path('user_update/', views.user_update, name='user_update'),
+
     path('team_update/', views.team_update, name='team_update'),
     path('user_create/', views.user_create, name='user_create'),
     path('team_create/', views.team_create, name='team_create'),
     path('users/delete/<int:user_id>/', views.user_delete, name="user_delete"),
+    path('user_delete/<int:user_id>/', views.user_delete, name="user_delete"),
     path('teams/delete/<int:teams_id>/', views.team_delete, name="team_delete"),
     path('attr/', views.user_keys_view, name='user_keys'),
     path('get-assigned-keys/<int:user_id>/',

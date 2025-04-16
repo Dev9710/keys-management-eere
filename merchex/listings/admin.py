@@ -22,7 +22,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class KeyAdmin(admin.ModelAdmin):
-    list_display = ('number', 'name', 'place', 'key_used',
+    list_display = ('number', 'name', 'place',
                     'get_user', 'assigned_date')
     search_fields = ('name', 'number')
 

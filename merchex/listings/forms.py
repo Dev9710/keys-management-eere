@@ -11,14 +11,11 @@ class KeyForm(forms.ModelForm):
             'name',
             'place',
             'initial_key_number',
-            'key_used',
-            'key_available',
             'in_cabinet',
             'in_safe',
             'comments'
         ]
         widgets = {
-            'in_cabinet': forms.CheckboxInput(),
             'comments': forms.Textarea(attrs={'rows': 3}),
         }
 
