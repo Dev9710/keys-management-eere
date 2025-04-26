@@ -1,5 +1,4 @@
-<!-- templates/listings/users.html -->
-<!-- 1ere version not used-->
+<!-- templates/listings/attribute.html -->
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -9,12 +8,12 @@
     <!-- Configuration pour rendre le site responsive sur différents appareils -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Titre de la page affiché dans l'onglet du navigateur -->
-    <title>Gestion des Clés par Utilisateur</title>
+    <title>Gestion d'attribution des clées</title>
     <!-- Lien vers la librairie Bootstrap pour styliser la page -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Lien vers Font Awesome pour inclure des icônes dans les boutons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Style CSS personnalisé pour ajuster les boutons et la mise en page -->
+    <!-- Bibliothèques pour générer des PDF -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
@@ -48,34 +47,34 @@
         }
          /* Style pour le container du date picker */
          
-.flatpickr-calendar {
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    border-radius: 8px;
-}
-.flatpickr-day {
-    transition: all 0.2s ease;
-}
-.flatpickr-day:hover {
-    background-color: #e9ecef;
-    border-radius: 50%;
-}
-.flatpickr-day.selected {
-    background-color: #007bff !important;
-    color: white !important;
-}
+        .flatpickr-calendar {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        .flatpickr-day {
+            transition: all 0.2s ease;
+        }
+        .flatpickr-day:hover {
+            background-color: #e9ecef;
+            border-radius: 50%;
+        }
+        .flatpickr-day.selected {
+            background-color: #007bff !important;
+            color: white !important;
+        }
 
-    /* Ajustement pour l'espacement dans le footer */
-    .modal-footer {
-        padding: 1rem;
-    }
-    .form-control{
-        width: 415px;
-        margin-left: 180px;
-    }
-    .fa-file-pdf{
-        margin-right: auto;
-    }
-    .top-header {
+        /* Ajustement pour l'espacement dans le footer */
+        .modal-footer {
+            padding: 1rem;
+        }
+        .form-control{
+            width: 415px;
+            margin-left: 180px;
+        }
+        .fa-file-pdf{
+            margin-right: auto;
+        }
+        .top-header {
             background: white;
             color: #3a9f87;
             display: flex;
@@ -114,7 +113,92 @@
             text-align: center;
             padding: 30px 20px;
         }
+        
+        /* Styles pour le modal d'attribution */
+        .key-item .key-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .key-item .location-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 0.7rem;
+        }
+        
+        .hover-highlight {
+            position: relative;
+            transition: transform 0.2s;
+        }
+        
+        .hover-highlight:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+         /* Amélioration pour le modal d'attribution de clés */
+    .modal-xl {
+        max-width: 90%; /* Augmenter encore plus la largeur sur grands écrans */
+    }
     
+    /* Amélioration des éléments clés dans le modal */
+    .key-item .form-check-label {
+        padding: 0;
+    }
+    
+    .key-item .hover-highlight {
+        padding: 12px;
+        border-radius: 6px;
+        border-width: 2px !important;
+    }
+    
+    .key-item .hover-highlight:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .key-list {
+        padding-right: 10px;
+    }
+    
+    /* Style pour le datepicker */
+    #assignment-date {
+        padding: 8px;
+        border-radius: 4px;
+    }
+    
+    /* Style pour le champ de recherche */
+    #keySearchInput {
+        padding: 10px;
+        border-radius: 20px;
+        border: 1px solid #ced4da;
+        padding-left: 40px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23adb5bd' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: 12px center;
+    }
+    html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+}
+
+.footer {
+    margin-top: auto;
+    background: #3a9f87;
+    color: white;
+    text-align: center;
+    padding: 30px 20px;
+}
     </style>
 </head>
 
@@ -130,7 +214,7 @@
     </div>
     <div class="container mt-5">
         <!-- Titre de la section principale -->
-        <h2 class="mb-4">Gestion des Clés par Utilisateur</h2>
+        <h2 class="mb-4">Gestion d'attribution des clés</h2>
 
         <!-- Affichage des Messages d'alerte -->
         {% if messages %}
@@ -169,16 +253,16 @@
                             <option value="">-- Tous les Utilisateurs --</option>
                             {% for user in users %}
                             <option value="{{ user.id }}" {% if user.id|stringformat:"s" == request.GET.user_id %}selected{% endif %}>
-                                {{ user.firstname }} {{ user.lastname }}
+                                {{ user.firstname }} {{ user.name }}
                             </option>
                             {% endfor %}
                         </select>
                     </div>
                     <!-- Bouton pour Attribuer une Clé -->
                     <button type="button" class="btn btn-primary" id="assign-key-btn" data-bs-toggle="modal"
-    data-bs-target="#keyModal" disabled>
-    Mise à jour des clés
-</button>
+                        data-bs-target="#keyModal" disabled>
+                        Mise à jour des clés
+                    </button>
                 </div>
             </div>
         </form>
@@ -186,175 +270,487 @@
         <div id="assignment-message" class="alert alert-success d-none" role="alert"></div>
 
         <!-- Table pour afficher les clés attribuées à l'utilisateur sélectionné -->
-<table class="table table-striped table-hover"  id="assigned-keys-table">
-    <thead class="table-dark">
-        <tr>
-            <th scope="col">Nom de la Clé</th>
-            <th scope="col">Localisation</th>
-            <th scope="col">Date d'attribution</th>
-            <th scope="col">Commentaires</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Si un utilisateur est sélectionné, afficher ses clés attribuées -->
-        {% if assigned_keys %}
-            {% for key in assigned_keys %}
-            <tr>
-                <td>{{ key.name }}</td>
-                <td>{{ key.place }}</td>
-                <td>{{ key.assigned_date}}</td>
-                <td>{{ key.comments}}</td>
-            </tr>
-            {% endfor %}
-        {% else %}
-            <tr>
-                <td colspan="6">Aucune clé attribuée à cet utilisateur.</td>
-            </tr>
-        {% endif %}
-        
-        <!-- Sinon, afficher les clés non attribuées -->
-        {% if not assigned_keys %}
-            {% for key in keys %}
-            <tr>
-                <td>{{ key.name }}</td>
-                <td>{{ key.place }}</td>
-                <td>{{ key.assigned_date}}</td>
-                <td>{{ key.comments}}</td>
-            </tr>
-            {% endfor %}
-        {% endif %}
-    </tbody>
-</table>
-<div class="container mt-3 text-end">
-    <button id="generate-pdf-btn" class="btn btn-success" disabled>
-        <i class="fas fa-file-pdf"></i> Générer un PDF
-    </button>
-</div>
+        <table class="table table-striped table-hover" id="assigned-keys-table">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">N°</th>
+                    <th scope="col">Nom de la Clé</th>
+                    <th scope="col">Emplacement</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">Date d'attribution</th>
+                    <th scope="col">Commentaires</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Si un utilisateur est sélectionné, afficher ses clés attribuées -->
+                {% if assigned_keys %}
+                    {% for key in assigned_keys %}
+                    <tr>
+                        <td>{{ key.key_type.number }}</td>
+                        <td>{{ key.key_type.name }}</td>
+                        <td>{{ key.key_type.place }}</td>
+                        <td>{{ key.location }}</td>
+                        <td>{{ key.assignment.assigned_date|date:"d-m-Y" }}</td>
+                        <td>{{ key.assignment.comments }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            Veuillez sélectionner un utilisateur pour voir ses clés attribuées
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        <div class="container mt-3 text-end">
+            <button id="generate-pdf-btn" class="btn btn-success" disabled>
+                <i class="fas fa-file-pdf"></i> Générer un PDF
+            </button>
+        </div>
     </div>
-    <script>
-       function loadAssignedKeys(user_id) {
-    // Si un utilisateur est sélectionné
-    if (user_id) {
-        // Effectuer la requête AJAX pour récupérer les clés attribuées
-        fetch(`/get-assigned-keys/${user_id}/`)
-            .then(response => response.json())
-            .then(data => {
-                // Récupérer le corps de la table
-                const tbody = document.querySelector('#assigned-keys-table tbody');
-                tbody.innerHTML = '';  // Réinitialiser le contenu
 
-                // Vérifier si l'utilisateur a des clés attribuées
-                if (data.assigned_keys.length > 0) {
-                    // Ajouter les clés dans la table
-                    data.assigned_keys.forEach(key => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${key.name}</td>
-                            <td>${key.place}</td>
-                            <td>${key.assigned_date}</td>
-                            <td>${key.comments}</td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                } else {
-                    // Si aucune clé n'est attribuée, afficher un message
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="7" class="text-center">
-                                <strong>Aucune clé attribuée à cet utilisateur.</strong><br>
-                                Cliquez sur le bouton "Attribuer une Clé" ci-dessus pour attribuer des clés.
-                            </td>
-                        </tr>
-                    `;
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching assigned keys:', error);
-            });
-    } else {
-        // Si aucun utilisateur n'est sélectionné
-        const tbody = document.querySelector('#assigned-keys-table tbody');
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center">
-                    Veuillez sélectionner un utilisateur pour voir ses clés attribuées.
-                </td>
-            </tr>
-        `;
-    }
-}
-    
-        // Ajouter un événement pour détecter le changement de l'utilisateur dans la dropdown
-        document.getElementById('user-dropdown').addEventListener('change', function() {
-            const user_id = this.value;
-            loadAssignedKeys(user_id);
-        });
-    
-        // Charger les clés si un utilisateur est déjà sélectionné lors du chargement de la page
-        const userId = "{{ user_id }}";
-        if (userId) {
-            loadAssignedKeys(userId);
-        }
-    </script>
     <!-- Modal pour attribuer des clés -->
-    <div class="modal fade bd-example-modal-lg" id="keyModal"  role="dialog" tabindex="-1" aria-labelledby="assignKeyModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+    <div class="modal fade bd-example-modal-lg" id="keyModal" role="dialog" tabindex="-1" aria-labelledby="assignKeyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl"> <!-- Changé de modal-lg à modal-xl pour plus de largeur -->
             <div class="modal-content">
                 <form method="post" action="{% url 'assign_keys' %}">
                     {% csrf_token %}
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="assignKeyModalLabel">Sélectionner les Clés à Attribuer</h5>
+                    <div class="modal-header bg-light">
+                        <h5 class="modal-title fw-bold" id="assignKeyModalLabel">
+                            <i class="fas fa-key me-2"></i>Sélectionner les Clés à Attribuer
+                        </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                     </div>
                     <div class="modal-body">
                         <!-- Le contenu sera chargé dynamiquement -->
                     </div>
-                    <div class="date-picker-container">
-                        <input 
-                            type="date" 
-                            id="assignment-date" 
-                            name="assignment_date" 
-                            class="form-control" 
-                        >
+                    <div class="form-group mb-3 px-3 text-center">
+                        <label for="assignment-date" class="form-label fw-bold mb-2">Date d'attribution:</label>
+                        <div class="d-flex justify-content-center">
+                            <input 
+                                type="date" 
+                                id="assignment-date" 
+                                name="assignment_date" 
+                                class="form-control" 
+                                style="width: 300px; margin: 0 auto;"
+                            >
+                        </div>
                     </div>
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-danger me-auto" id="remove-all-keys-btn">
+                            <i class="fas fa-trash"></i> Retirer toutes les clés
+                        </button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" class="btn btn-primary">Attribuer les Clés</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Enregistrer les attributions
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Affichage des messages de succès -->
-    <div id="assignment-message" class="alert alert-success d-none mt-3" role="alert">
-        Les clés ont été attribuées avec succès !
-    </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Quand le bouton pour attribuer une clé est cliqué
-            const assignKeyBtn = document.getElementById('assign-key-btn');
-            const keyModal = document.getElementById('keyModal');
-    
-            if (assignKeyBtn && keyModal) {
-                assignKeyBtn.addEventListener('click', function (event) {
-                    const userId = assignKeyBtn.getAttribute('data-user-id'); // Récupérer l'ID utilisateur du bouton
-                    console.log('ID utilisateur passé à la modal:', userId);
-    
-                    // Passer l'ID utilisateur à la modal quand elle s'ouvre
-                    keyModal.addEventListener('show.bs.modal', function () {
-                        // Afficher l'ID utilisateur dans la console (vérification)
-                        console.log('L\'ID utilisateur dans la modal est:', userId);
+       function loadAssignedKeys(user_id) {
+            // Si un utilisateur est sélectionné
+            if (user_id && user_id !== "None" && user_id !== "")  {
+                // Effectuer la requête AJAX pour récupérer les clés attribuées
+                fetch(`/get-assigned-keys/${user_id}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Récupérer le corps de la table
+                        const tbody = document.querySelector('#assigned-keys-table tbody');
+                        tbody.innerHTML = '';  // Réinitialiser le contenu
+
+                        // Vérifier si l'utilisateur a des clés attribuées
+                        if (data.assigned_keys && data.assigned_keys.length > 0) {
+                            // Ajouter les clés dans la table
+                            data.assigned_keys.forEach(key => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${key.number}</td>
+                                    <td>${key.name}</td>
+                                    <td>${key.place}</td>
+                                    <td>${key.location || 'Utilisateur'}</td>
+                                    <td>${key.assigned_date || ''}</td>
+                                    <td>${key.comments || ''}</td>
+                                `;
+                                tbody.appendChild(row);
+                            });
+                        } else {
+                            // Si aucune clé n'est attribuée, afficher un message
+                            tbody.innerHTML = `
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        <strong>Aucune clé attribuée à cet utilisateur.</strong><br>
+                                        Cliquez sur le bouton "Mise à jour des clés" ci-dessus pour attribuer des clés.
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                        
+                        // Mettre à jour l'état du bouton PDF
+                        updatePdfButtonState();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching assigned keys:', error);
                     });
+            } else {
+                // Si aucun utilisateur n'est sélectionné
+                const tbody = document.querySelector('#assigned-keys-table tbody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            Veuillez sélectionner un utilisateur pour voir ses clés attribuées.
+                        </td>
+                    </tr>
+                `;
+                
+                // Désactiver le bouton PDF
+                updatePdfButtonState();
+            }
+        }
+    
+        // Ajouter un événement pour détecter le changement de l'utilisateur dans la dropdown
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('user-dropdown').addEventListener('change', function() {
+                const user_id = this.value;
+                loadAssignedKeys(user_id);
+                updateButtonState();
+            });
+        
+            // Charger les clés si un utilisateur est déjà sélectionné lors du chargement de la page
+            const userId = "{{ user_id }}";
+            if (userId) {
+                loadAssignedKeys(userId);
+            }
+            
+            // Initialiser l'état des boutons
+            updateButtonState();
+            updatePdfButtonState();
+        });
+    </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const keyModal = document.getElementById('keyModal');
+        const userDropdown = document.getElementById('user-dropdown');
+        const assignKeyBtn = document.getElementById('assign-key-btn');
+        const removeAllKeysBtn = document.getElementById('remove-all-keys-btn');
+        
+        function loadModalKeys(userId) {
+            if (!userId || userId === "None" || userId === "") {
+                keyModal.querySelector('.modal-body').innerHTML = 
+                    '<div class="alert alert-warning">Veuillez sélectionner un utilisateur valide</div>';
+                return;
+            }
+            
+            fetch(`/get-modal-assigned-keys/${userId}/`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erreur HTTP: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const modalBody = keyModal.querySelector('.modal-body');
+                    const assignmentDateInput = document.getElementById('assignment-date');
+                    assignmentDateInput.value = data.current_date;
+                    modalBody.innerHTML = '';
+
+                    // Input utilisateur caché
+                    const userIdInput = document.createElement('input');
+                    userIdInput.type = 'hidden';
+                    userIdInput.name = 'user_id';
+                    userIdInput.value = userId;
+                    modalBody.appendChild(userIdInput);
+
+                    // Conteneur principal avec barre de recherche
+                    const searchContainer = document.createElement('div');
+                    searchContainer.className = 'mb-4 px-3';
+                    searchContainer.innerHTML = `
+                        <input type="text" class="form-control" id="keySearchInput" 
+                            style="width: 100%; margin-left: 0;"
+                            placeholder="Rechercher une clé par numéro, nom ou emplacement...">
+                    `;
+                    modalBody.appendChild(searchContainer);
+
+                    // Informations sur l'utilisateur et statistiques
+                    const statsContainer = document.createElement('div');
+                    statsContainer.className = 'mb-3 px-3 d-flex justify-content-between align-items-center';
+                    const userName = document.getElementById('user-dropdown').options[document.getElementById('user-dropdown').selectedIndex].text;
+                    statsContainer.innerHTML = `
+                        <div>
+                            <span class="fw-bold">Utilisateur:</span> ${userName}
+                        </div>
+                        <div>
+                            <span class="badge bg-primary rounded-pill me-2">Disponibles: ${data.available_keys.length}</span>
+                            <span class="badge bg-success rounded-pill">Attribuées: ${data.assigned_keys.length}</span>
+                        </div>
+                    `;
+                    modalBody.appendChild(statsContainer);
+
+                    // Conteneur deux colonnes
+                    const columnsContainer = document.createElement('div');
+                    columnsContainer.className = 'row mt-3 px-2';
+                    columnsContainer.style.height = '450px'; // Hauteur augmentée
+
+                    // Colonne des clés disponibles
+                    columnsContainer.innerHTML = `
+                        <div class="col-6 border-end">
+                            <div class="d-flex justify-content-between align-items-center mb-2 px-2">
+                                <h6 class="text-primary mb-0 fw-bold">
+                                    <i class="fas fa-key me-1"></i> Exemplaires disponibles
+                                </h6>
+                                <button type="button" class="btn btn-sm btn-outline-primary select-all-available">Tout sélectionner</button>
+                            </div>
+                            <div class="key-list" style="height: 420px; overflow-y: auto;">
+                                ${data.available_keys.map(key => `
+                                    <div class="key-item mb-2 px-2" 
+                                        data-search="${key.number} ${key.name} ${key.place}">
+                                        <div class="form-check">
+                                            <input class="form-check-input available-key" type="checkbox" 
+                                                value="${key.id}" name="selected_keys" 
+                                                id="key-${key.id}">
+                                            <label class="form-check-label w-100" for="key-${key.id}">
+                                                <div class="border rounded p-2 hover-highlight">
+                                                    <div class="fw-bold">#${key.number} - ${key.name}</div>
+                                                    <div class="small text-muted">
+                                                        ${key.place}
+                                                    </div>
+                                                    <span class="badge ${key.location === 'Cabinet' ? 'bg-info' : 'bg-warning text-dark'} location-badge">
+                                                        ${key.location}
+                                                    </span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between align-items-center mb-2 px-2">
+                                <h6 class="text-success mb-0 fw-bold">
+                                    <i class="fas fa-check-circle me-1"></i> Exemplaires attribués
+                                </h6>
+                                <button type="button" class="btn btn-sm btn-outline-success select-all-assigned">Tout sélectionner</button>
+                            </div>
+                            <div class="key-list" style="height: 420px; overflow-y: auto;">
+                                ${data.assigned_keys.map(key => `
+                                    <div class="key-item mb-2 px-2" 
+                                        data-search="${key.number} ${key.name} ${key.place}">
+                                        <div class="form-check">
+                                            <input class="form-check-input assigned-key" type="checkbox" 
+                                                value="${key.id}" name="selected_keys" 
+                                                id="key-${key.id}" checked>
+                                            <label class="form-check-label w-100" for="key-${key.id}">
+                                                <div class="border rounded p-2 hover-highlight">
+                                                    <div class="fw-bold">#${key.number} - ${key.name}</div>
+                                                    <div class="small text-muted">
+                                                        ${key.place}
+                                                    </div>
+                                                    <div class="small text-success">
+                                                        <i class="fas fa-calendar-alt me-1"></i> Attribuée le: ${key.assigned_date}
+                                                    </div>
+                                                    <span class="badge bg-success location-badge">
+                                                        ${key.location || 'Utilisateur'}
+                                                    </span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                    // Ajouter le style
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        .key-list::-webkit-scrollbar {
+                            width: 8px;
+                        }
+                        .key-list::-webkit-scrollbar-track {
+                            background: #f1f1f1;
+                            border-radius: 10px;
+                        }
+                        .key-list::-webkit-scrollbar-thumb {
+                            background: #ccc;
+                            border-radius: 10px;
+                        }
+                        .key-list::-webkit-scrollbar-thumb:hover {
+                            background: #999;
+                        }
+                        .hover-highlight:hover {
+                            background-color: #f8f9fa;
+                            cursor: pointer;
+                        }
+                        .key-item.hidden {
+                            display: none;
+                        }
+                    `;
+                    modalBody.appendChild(style);
+                    modalBody.appendChild(columnsContainer);
+
+                    // Fonction de recherche
+                    const searchInput = document.getElementById('keySearchInput');
+                    searchInput.addEventListener('input', function(e) {
+                        const searchTerm = e.target.value.toLowerCase();
+                        document.querySelectorAll('.key-item').forEach(item => {
+                            const searchText = item.getAttribute('data-search').toLowerCase();
+                            if (searchText.includes(searchTerm)) {
+                                item.classList.remove('hidden');
+                            } else {
+                                item.classList.add('hidden');
+                            }
+                        });
+                    });
+                    
+                    // Boutons "Tout sélectionner"
+                    document.querySelector('.select-all-available').addEventListener('click', function() {
+                        const availableCheckboxes = document.querySelectorAll('.available-key');
+                        const allChecked = Array.from(availableCheckboxes).every(cb => cb.checked);
+                        
+                        availableCheckboxes.forEach(checkbox => {
+                            checkbox.checked = !allChecked;
+                        });
+                        
+                        this.textContent = allChecked ? 'Tout sélectionner' : 'Tout désélectionner';
+                    });
+                    
+                    document.querySelector('.select-all-assigned').addEventListener('click', function() {
+                        const assignedCheckboxes = document.querySelectorAll('.assigned-key');
+                        const allChecked = Array.from(assignedCheckboxes).every(cb => cb.checked);
+                        
+                        assignedCheckboxes.forEach(checkbox => {
+                            checkbox.checked = !allChecked;
+                        });
+                        
+                        this.textContent = allChecked ? 'Tout sélectionner' : 'Tout désélectionner';
+                    });
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement des clés:', error);
+                    keyModal.querySelector('.modal-body').innerHTML = 
+                        '<div class="alert alert-danger">Erreur lors du chargement des clés: ' + error.message + '</div>';
+                });
+        }
+
+        // Event listener pour la modal
+        keyModal.addEventListener('show.bs.modal', function () {
+            const userId = userDropdown.value;
+            if (userId && userId !== "None" && userId !== "") {
+                loadModalKeys(userId);
+            } else {
+                this.querySelector('.modal-body').innerHTML = 
+                    '<div class="alert alert-warning">Veuillez sélectionner un utilisateur</div>';
+            }
+        });
+
+        // Gérer la soumission du formulaire d'attribution
+        const modalForm = keyModal.querySelector('form');
+        modalForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Récupérer toutes les cases à cocher
+            const allCheckboxes = this.querySelectorAll('input[name="selected_keys"]');
+            
+            // Simplifier la structure - ne prendre que les IDs des clés sélectionnées
+            const selectedKeys = Array.from(allCheckboxes)
+                .filter(cb => cb.checked)
+                .map(cb => parseInt(cb.value));
+        
+            const userId = parseInt(userDropdown.value);
+            const assignmentDate = document.getElementById('assignment-date').value;
+            const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+            fetch('{% url "assign_keys" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    selected_keys: selectedKeys,
+                    assignment_date: assignmentDate
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erreur de requête: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(keyModal).hide();
+                    loadAssignedKeys(userId);
+                    const messageElement = document.getElementById('assignment-message');
+                    messageElement.textContent = data.message;
+                    messageElement.classList.remove('d-none');
+                    setTimeout(() => {
+                        messageElement.classList.add('d-none');
+                    }, 3000);
+                } else {
+                    alert(data.message || 'Une erreur est survenue');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la mise à jour des clés:', error);
+                alert('Une erreur est survenue lors de la mise à jour des clés: ' + error.message);
+            });
+        });
+        
+        // Gérer le bouton "Retirer toutes les clés"
+        removeAllKeysBtn.addEventListener('click', function() {
+            const userId = parseInt(userDropdown.value);
+            if (!userId) return;
+            
+            if (confirm('Êtes-vous sûr de vouloir retirer toutes les clés attribuées à cet utilisateur?')) {
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                
+                fetch(`/remove-all-keys/${userId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur de requête: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        bootstrap.Modal.getInstance(keyModal).hide();
+                        loadAssignedKeys(userId);
+                        const messageElement = document.getElementById('assignment-message');
+                        messageElement.textContent = "Toutes les clés ont été retirées avec succès";
+                        messageElement.classList.remove('d-none');
+                        setTimeout(() => {
+                            messageElement.classList.add('d-none');
+                        }, 3000);
+                    } else {
+                        alert(data.message || 'Une erreur est survenue');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors du retrait des clés:', error);
+                    alert('Une erreur est survenue lors du retrait des clés: ' + error.message);
                 });
             }
         });
-    </script>
-    <!-- Script JavaScript pour soumettre automatiquement le formulaire lors du changement de filtre -->
+    });
+</script>
+    
     <script>
         function resetUserDropdown() {
-            console.log("resetUserDropdown called"); // Vérification du nombre d'appel
             const teamId = document.getElementById('team-dropdown').value;
             const userDropdown = document.getElementById('user-dropdown');
 
@@ -363,341 +759,75 @@
 
             // Si une équipe est sélectionnée, récupérer les utilisateurs correspondants
             if (teamId) {
-                fetch(`/get-users-by-team/${teamId}/`)
+                fetch(`/get_users_by_team/${teamId}/`)
                     .then(response => response.json())
                     .then(data => {
                         data.users.forEach(user => {
                             const option = document.createElement('option');
                             option.value = user.id;
-                            option.textContent = `${user.name}`;
+                            option.textContent = user.name;
                             userDropdown.appendChild(option);
                         });
                     })
                     .catch(error => console.error('Erreur lors de la récupération des utilisateurs :', error));
             }
+            
+            // Mettre à jour l'état des boutons après le chargement des utilisateurs
+            updateButtonState();
         }
 
         // Exécuter cette fonction au changement d'équipe
-        document.getElementById('team-dropdown').removeEventListener('change', resetUserDropdown);
-        document.getElementById('team-dropdown').addEventListener('change', resetUserDropdown);
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('team-dropdown').addEventListener('change', resetUserDropdown);
+        });
     </script>
-    <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const keyModal = document.getElementById('keyModal');
-    const userDropdown = document.getElementById('user-dropdown');
-    const assignKeyBtn = document.getElementById('assign-key-btn');
     
-    function loadModalKeys(userId) {
-        fetch(`/get-modal-assigned-keys/${userId}/`)
-            .then(response => response.json())
-            .then(data => {
-                const modalBody = keyModal.querySelector('.modal-body');
-                const assignmentdateinput =  document.getElementById('assignment-date').value 
-                assignmentdateinput.value = data.current_date;
-                modalBody.innerHTML = '';
-
-                // Input utilisateur caché
-                const userIdInput = document.createElement('input');
-                userIdInput.type = 'hidden';
-                userIdInput.name = 'user_id';
-                userIdInput.value = userId;
-                modalBody.appendChild(userIdInput);
-
-                // Conteneur principal avec barre de recherche
-                const searchContainer = document.createElement('div');
-                searchContainer.className = 'mb-3';
-                searchContainer.innerHTML = `
-                    <input type="text" class="form-control" id="keySearchInput" 
-                           placeholder="Rechercher une clé par numéro, nom ou localisation...">
-                `;
-                modalBody.appendChild(searchContainer);
-
-                // Conteneur deux colonnes
-                const columnsContainer = document.createElement('div');
-                columnsContainer.className = 'row mt-3';
-                columnsContainer.style.height = '400px'; // Hauteur fixe pour le scroll
-
-                // Colonne des clés disponibles
-                columnsContainer.innerHTML = `
-                    <div class="col-6 border-end">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="text-primary mb-0">Clés disponibles</h6>
-                            <span class="badge bg-primary">${data.available_keys.length}</span>
-                        </div>
-                        <div class="key-list" style="height: 350px; overflow-y: auto;">
-                            ${data.available_keys.map(key => `
-                                <div class="key-item mb-2" 
-                                     data-search="${key.number} ${key.name} ${key.place}">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" 
-                                               value="${key.id}" name="selected_keys" 
-                                               id="key-${key.id}">
-                                        <label class="form-check-label w-100" for="key-${key.id}">
-                                            <div class="border rounded p-2 hover-highlight">
-                                                <div class="fw-bold">${key.number}</div>
-                                                <div class="small text-muted">
-                                                    ${key.name}
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="text-success mb-0">Clés attribuées</h6>
-                            <span class="badge bg-success">${data.assigned_keys.length}</span>
-                        </div>
-                        <div class="key-list" style="height: 350px; overflow-y: auto;">
-                            ${data.assigned_keys.map(key => `
-                                <div class="key-item mb-2" 
-                                     data-search="${key.number} ${key.name} ${key.place}">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" 
-                                               value="${key.id}" name="selected_keys" 
-                                               id="key-${key.id}" checked>
-                                        <label class="form-check-label w-100" for="key-${key.id}">
-                                            <div class="border rounded p-2 hover-highlight">
-                                                <div class="fw-bold">${key.number}</div>
-                                                <div class="small text-muted">
-                                                    ${key.name}
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-
-                // Ajouter le style
-                const style = document.createElement('style');
-                style.textContent = `
-                    .key-list::-webkit-scrollbar {
-                        width: 5px;
-                    }
-                    .key-list::-webkit-scrollbar-track {
-                        background: #f1f1f1;
-                    }
-                    .key-list::-webkit-scrollbar-thumb {
-                        background: #888;
-                        border-radius: 10px;
-                    }
-                    .hover-highlight:hover {
-                        background-color: #f8f9fa;
-                        cursor: pointer;
-                    }
-                    .key-item.hidden {
-                        display: none;
-                    }
-                `;
-                modalBody.appendChild(style);
-                modalBody.appendChild(columnsContainer);
-
-                // Fonction de recherche
-                const searchInput = document.getElementById('keySearchInput');
-                searchInput.addEventListener('input', function(e) {
-                    const searchTerm = e.target.value.toLowerCase();
-                    document.querySelectorAll('.key-item').forEach(item => {
-                        const searchText = item.getAttribute('data-search').toLowerCase();
-                        if (searchText.includes(searchTerm)) {
-                            item.classList.remove('hidden');
-                        } else {
-                            item.classList.add('hidden');
-                        }
-                    });
-                });
-            })
-            .catch(error => {
-                console.error('Erreur lors du chargement des clés:', error);
-                keyModal.querySelector('.modal-body').innerHTML = 
-                    '<div class="alert alert-danger">Erreur lors du chargement des clés</div>';
-            });
-    }
-
-    // Event listener pour la modal
-    keyModal.addEventListener('show.bs.modal', function () {
-        const userId = userDropdown.value;
-        if (userId) {
-            loadModalKeys(userId);
-        } else {
-            this.querySelector('.modal-body').innerHTML = 
-                '<div class="alert alert-warning">Veuillez sélectionner un utilisateur</div>';
-        }
-    });
-
-
-    // Gérer l'ouverture de la modal
-    keyModal.addEventListener('show.bs.modal', function () {
-        const userId = userDropdown.value;
-        if (userId) {
-            loadModalKeys(userId);
-        } else {
-            this.querySelector('.modal-body').innerHTML = 
-                '<div class="alert alert-warning">Veuillez sélectionner un utilisateur</div>';
-        }
-    });
-
-    // Gérer la soumission du formulaire
-    const modalForm = keyModal.querySelector('form');
-    // Dans votre script de soumission du formulaire
-    modalForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Récupérer toutes les cases à cocher
-    const allCheckboxes = this.querySelectorAll('input[name="selected_keys"]');
-    
-    // Simplifier la structure - ne prendre que les IDs des clés sélectionnées
-    const selectedKeys = Array.from(allCheckboxes)
-        .filter(cb => cb.checked)
-        .map(cb => parseInt(cb.value));
-
-    const userId = parseInt(userDropdown.value);
-    const assignmentDate = document.getElementById('assignment-date').value;
-    const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
-
-    fetch('{% url "assign_keys" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-        },
-        body: JSON.stringify({
-            user_id: userId,
-            selected_keys: selectedKeys,  // Maintenant c'est juste un tableau d'IDs
-            assignment_date: assignmentDate
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            bootstrap.Modal.getInstance(keyModal).hide();
-            loadAssignedKeys(userId);
-            const messageElement = document.getElementById('assignment-message');
-            messageElement.textContent = data.message;
-            messageElement.classList.remove('d-none');
-            setTimeout(() => {
-                messageElement.classList.add('d-none');
-            }, 3000);
-        } else {
-            alert(data.message || 'Une erreur est survenue');
-        }
-    })
-    .catch(error => {
-        console.error('Erreur lors de la mise à jour des clés:', error);
-        alert('Une erreur est survenue lors de la mise à jour des clés');
-    });
-});
-});
-    </script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-    const userDropdown = document.getElementById('user-dropdown');
-    const assignKeyBtn = document.getElementById('assign-key-btn');
-
-    // Fonction pour mettre à jour l'état du bouton
-    function updateButtonState() {
-        const userId = userDropdown.value;
-        if (userId && userId !== '') {
-            assignKeyBtn.removeAttribute('disabled');
-            console.log('Bouton activé pour utilisateur:', userId);
-        } else {
-            assignKeyBtn.setAttribute('disabled', 'disabled');
-            console.log('Bouton désactivé - pas d\'utilisateur sélectionné');
+        function updateButtonState() {
+            const userDropdown = document.getElementById('user-dropdown');
+            const assignKeyBtn = document.getElementById('assign-key-btn');
+            const generatePdfBtn = document.getElementById('generate-pdf-btn');
+            
+            const userId = userDropdown.value;
+            if (userId && userId !== '') {
+                assignKeyBtn.removeAttribute('disabled');
+            } else {
+                assignKeyBtn.setAttribute('disabled', 'disabled');
+                generatePdfBtn.setAttribute('disabled', 'disabled');
+            }
         }
-    }
-
-    // Mise à jour initiale
-    updateButtonState();
-
-    // Mise à jour à chaque changement dans le dropdown
-    userDropdown.addEventListener('change', function() {
-        updateButtonState();
-    });
-
-    // Mise à jour lors du reset du dropdown utilisateur
-    document.getElementById('team-dropdown').addEventListener('change', function() {
-        setTimeout(updateButtonState, 100); // Petit délai pour laisser le temps au dropdown de se mettre à jour
-    });
-});
-    </script>
-    <script>
+        
+        function updatePdfButtonState() {
+            const userDropdown = document.getElementById('user-dropdown');
+            const generatePdfBtn = document.getElementById('generate-pdf-btn');
+            const assignedKeysTable = document.getElementById('assigned-keys-table');
+            
+            const userId = userDropdown.value;
+            const rows = assignedKeysTable.querySelectorAll('tbody tr');
+            const hasKeys = rows.length > 0 && !rows[0].textContent.includes('Aucune clé attribuée') && !rows[0].textContent.includes('Veuillez sélectionner');
+            
+            if (userId && hasKeys) {
+                generatePdfBtn.removeAttribute('disabled');
+            } else {
+                generatePdfBtn.setAttribute('disabled', 'disabled');
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             const generatePdfBtn = document.getElementById('generate-pdf-btn');
-            const userDropdown = document.getElementById('user-dropdown');
-            const teamDropdown = document.getElementById('team-dropdown');
-            const assignedKeysTable = document.getElementById('assigned-keys-table');
-        
-            function loadAssignedKeys(user_id) {
-                if (user_id) {
-                    fetch(`/get-assigned-keys/${user_id}/`)
-                        .then(response => response.json())
-                        .then(data => {
-                            const tbody = document.querySelector('#assigned-keys-table tbody');
-                            tbody.innerHTML = '';
-                            if (data.assigned_keys.length > 0) {
-                                data.assigned_keys.forEach(key => {
-                                    const row = document.createElement('tr');
-                                    row.innerHTML = `
-                                        <td>${key.name}</td>
-                                        <td>${key.place}</td>
-                                        <td>${key.assigned_date}</td>
-                                        <td>${key.comments}</td>
-                                    `;
-                                    tbody.appendChild(row);
-                                });
-                            } else {
-                                tbody.innerHTML = `
-                                    <tr>
-                                        <td colspan="7" class="text-center">
-                                            <strong>Aucune clé attribuée à cet utilisateur.</strong><br>
-                                            Cliquez sur le bouton "Attribuer une Clé" ci-dessus pour attribuer des clés.
-                                        </td>
-                                    </tr>
-                                `;
-                            }
-                            updatePdfButtonState();
-                        })
-                        .catch(error => {
-                            console.error('Error fetching assigned keys:', error);
-                        });
-                } else {
-                    const tbody = document.querySelector('#assigned-keys-table tbody');
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="7" class="text-center">
-                                Veuillez sélectionner un utilisateur pour voir ses clés attribuées.
-                            </td>
-                        </tr>
-                    `;
-                    updatePdfButtonState();
-                }
-            }
-        
-            function updatePdfButtonState() {
-                const userId = userDropdown.value;
-                const hasKeys = assignedKeysTable.querySelectorAll('tbody tr').length > 0 && 
-                                assignedKeysTable.querySelectorAll('tbody tr')[0].textContent.trim() !== 'Aucune clé attribuée à cet utilisateur.';
-                
-                if (userId && hasKeys) {
-                    generatePdfBtn.removeAttribute('disabled');
-                } else {
-                    generatePdfBtn.setAttribute('disabled', 'disabled');
-                }
-            }
-        
+            
             generatePdfBtn.addEventListener('click', function() {
                 const { jsPDF } = window.jspdf;
                 
                 // Récupérer les noms de l'utilisateur et de l'équipe
+                const userDropdown = document.getElementById('user-dropdown');
+                const teamDropdown = document.getElementById('team-dropdown');
                 const userName = userDropdown.options[userDropdown.selectedIndex].text;
                 const teamName = teamDropdown.options[teamDropdown.selectedIndex].text || 'Toutes les Équipes';
                 const today = new Date().toLocaleDateString('fr-FR');
                 
                 const doc = new jsPDF('p', 'mm', 'a4');
+                const assignedKeysTable = document.getElementById('assigned-keys-table');
                 
                 html2canvas(assignedKeysTable, {
                     scale: 2,
@@ -716,7 +846,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     
                     // Titre principal
                     doc.setFontSize(16);
-                    doc.text('Récapitulatifs des clés', pageWidth / 2, 40, { align: 'center' });
+                    doc.text('Récapitulatif des clés attribuées', pageWidth / 2, 40, { align: 'center' });
                     
                     const imgWidth = pageWidth - 20;
                     const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -737,23 +867,25 @@ document.addEventListener('DOMContentLoaded', function () {
                     doc.text('Signature :', 140, commentBoxY + 80);
                     doc.line(160, commentBoxY + 80, 190, commentBoxY + 80);
                     
-                    doc.save(`Cles_${userName}_${today.replace(/\//g, '-')}.pdf`);
+                    // Pied de page avec informations légales
+                    doc.setFontSize(8);
+                    doc.setTextColor(100);
+                    doc.text('Ce document atteste de l\'attribution des clés ci-dessus à l\'utilisateur mentionné.', pageWidth/2, pageHeight - 20, { align: 'center' });
+                    doc.text('Église Évangélique Rencontre Espérance - Document généré le ' + today, pageWidth/2, pageHeight - 15, { align: 'center' });
+                    
+                    // Nom du fichier basé sur l'utilisateur et la date
+                    const fileName = `Cles_${userName.replace(/\s+/g, '_')}_${today.replace(/\//g, '-')}.pdf`;
+                    doc.save(fileName);
                 });
             });
-        
-            userDropdown.addEventListener('change', function() {
-                const user_id = this.value;
-                loadAssignedKeys(user_id);
-            });
-        
-            // Écouteur pour la mise à jour du bouton PDF
-            userDropdown.addEventListener('change', updatePdfButtonState);
-            teamDropdown.addEventListener('change', updatePdfButtonState);
-        
+            
             // Mise à jour initiale de l'état du bouton
             updatePdfButtonState();
         });
-        </script>
+    </script>
     
+    <footer class="footer" id="contact">
+        <p>&copy; Copyright 2025 Église Évangélique Rencontre Espérance. Tous droits réservés.</p>
+    </footer>
 </body>
 </html>

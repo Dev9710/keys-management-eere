@@ -23,7 +23,6 @@ urlpatterns = [
     path('hello/', views.hello),
     path('about-us/', views.about),  # ajoutez cette ligne
     path('home/', views.home),
-    path('listing/', views.listing),
     path('contact/', views.contact),
     path('users/', views.user_list, name='user_list'),
     path('teams/', views.team_list, name='team_list'),
@@ -35,7 +34,7 @@ urlpatterns = [
     path('team_create/', views.team_create, name='team_create'),
     path('users/delete/<int:user_id>/', views.user_delete, name="user_delete"),
     path('user_delete/<int:user_id>/', views.user_delete, name="user_delete"),
-    path('teams/delete/<int:teams_id>/', views.team_delete, name="team_delete"),
+    path('teams/delete/<int:team_id>/', views.team_delete, name="team_delete"),
     path('attr/', views.user_keys_view, name='user_keys'),
     path('get-assigned-keys/<int:user_id>/',
          views.get_assigned_keys, name='get_assigned_keys'),  # ok

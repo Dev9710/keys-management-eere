@@ -13,6 +13,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Lien vers Font Awesome pour inclure des icônes dans les boutons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Scripts pour la génération de PDF et XLSX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.18.5/package/dist/xlsx.full.min.js"></script>
     <!-- Style CSS personnalisé pour ajuster les boutons et la mise en page -->
     <style>
         /* Styles pour aligner le contenu des boutons */
@@ -49,12 +54,37 @@
         .nav-menu a:hover {
             color: #2a7562;
         }
-        .footer {
-            background: #3a9f87;
-            color: white;
-            text-align: center;
-            padding: 30px 20px;
-        }
+        html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+}
+
+.footer {
+    width: 100%;
+    background: #3a9f87;
+    color: white;
+    text-align: center;
+    padding: 30px 20px;
+    margin-top: auto;
+}
+
+/* Style pour les boutons d'export */
+.export-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 30px 0;
+}
     </style>
 </head>
 
@@ -69,6 +99,16 @@
         </nav>
     </div>
     <div class="container mt-5">
+        {% if messages %}
+<div class="messages-container">
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
         <!-- Titre de la section principale -->
         <h2 class="mb-4">Gestion par équipes</h2>
         <div class="d-flex flex-row bd-highlight mb-3 gap-3">
@@ -157,74 +197,330 @@
             </div>
             <!-- Add team Modal -->
             <div class="modal fade" id="addTeamModal" tabindex="-1" aria-labelledby="addTeamModalLabel"
-                aria-hidden="true">
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form id="addTeamForm" method="post" action="{% url 'team_create' %}">
+                        {% csrf_token %}
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addTeamModalLabel">Ajouter une équipe</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <!-- Modal Body -->
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="addTeamName" class="form-label">Nom</label>
+                                <input type="text" class="form-control" id="addTeamName" name="name" required>
+                            </div>  
+                        </div>
+                        <!-- Modal Footer -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        </div>
+                    </form>                        
+                </div>
+            </div>
+        </div>
+            <!-- Delete Confirmation Modal -->
+            <div class="modal fade" id="deleteTeamModal" tabindex="-1" aria-labelledby="deleteTeamModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
-                        <form id="addTeamForm" method="post" action="{% url 'team_create' %}">
-                            {% csrf_token %}
-                            <!-- Modal Header -->
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="addTeamModalLabel">Ajouter une équipe</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <!-- Modal Body -->
-                            <div class="modal-body">
-                                <div class="mb-3">
-                                    <label for="addTeamName" class="form-label">Nom</label>
-                                    <input type="text" class="form-control" id="addTeamName" name="name" required>
-                                </div>  
-                        </form>                             
-                            <!-- Modal Footer -->
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                <button type="submit" class="btn btn-primary">Enregistrer</button>
-                            </div>                        
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteTeamModalLabel">Supprimer l'équipe</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Message de confirmation avec le nom de l'équipe -->
+                            Voulez-vous vraiment supprimer l'équipe <strong id="TeamNameToDelete"></strong> ?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <!-- Formulaire explicitement fermé -->
+                            <form id="deleteTeamForm" method="post" action="">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Supprimer</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
-            <!-- Delete Confirmation Modal -->
-           <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteTeamModal" tabindex="-1" aria-labelledby="deleteTeamModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteTeamModalLabel">Supprimer l'équipe</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            
+            <!-- Boutons d'export ajoutés ici -->
+            <div class="export-buttons">
+                <button type="button" class="btn btn-danger" id="generatePdfBtn">
+                    <i class="fas fa-file-pdf"></i> Générer PDF
+                </button>
+                <button type="button" class="btn btn-success" id="generateXlsxBtn">
+                    <i class="fas fa-file-excel"></i> Générer XLSX
+                </button>
             </div>
-            <div class="modal-body">
-                <!-- Dynamically show the team name -->
-                Voulez-vous vraiment supprimer l'équipe <strong id="TeamNameToDelete"></strong> ?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                <form id="deleteTeamForm" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Supprimer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+            
             <script>
-                //evenement pour la suppression d'une équipe
-                document.addEventListener('DOMContentLoaded', function () {
-                    var deleteButtons = document.querySelectorAll('[data-bs-target="#deleteTeamModal"]');
-
-                    deleteButtons.forEach(function (button) {
-                        button.addEventListener('click', function () {
-                            // Get the team name and delete URL from the clicked button
-                            var teamName = this.getAttribute('data-team-name');
-                            var deleteUrl = this.getAttribute('data-delete-url');
-
-                            // Update the modal content with the team name
-                            document.getElementById('TeamNameToDelete').innerText = teamName;
-
-                            // Set the action of the delete form to the delete URL
-                            document.getElementById('deleteTeamForm').setAttribute('action', deleteUrl);
-                        });
+               document.addEventListener('DOMContentLoaded', function() {
+    // Si des alertes/messages existent déjà, leur appliquer le style Bootstrap
+    styleExistingMessages();
+    
+    // Sélectionner tous les boutons qui ouvrent le modal de suppression
+    var deleteButtons = document.querySelectorAll('[data-bs-target="#deleteTeamModal"]');
+    var deleteModal = document.getElementById('deleteTeamModal');
+    var modalInstance = null;
+    
+    if (deleteModal) {
+        modalInstance = new bootstrap.Modal(deleteModal);
+    }
+    
+    deleteButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Récupérer les données de l'équipe
+            var teamName = this.getAttribute('data-team-name');
+            var deleteUrl = this.getAttribute('data-delete-url');
+            
+            // Mettre à jour le contenu du modal
+            var nameElement = document.getElementById('TeamNameToDelete');
+            if (nameElement) nameElement.innerText = teamName;
+            
+            // Stocker l'URL pour l'utilisation ultérieure
+            var deleteForm = document.getElementById('deleteTeamForm');
+            if (deleteForm) deleteForm.setAttribute('action', deleteUrl);
+        });
+    });
+    
+    // Ajouter un gestionnaire d'événement au formulaire de suppression
+    var deleteForm = document.getElementById('deleteTeamForm');
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            var url = this.getAttribute('action');
+            var formData = new FormData(this);
+            
+            // Envoyer la requête AJAX
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                redirect: 'follow'
+            })
+            .then(response => {
+                // Vérifier si c'est une redirection
+                if (response.redirected) {
+                    // Suivre la redirection mais d'abord extraire le contenu pour voir s'il y a des messages
+                    return response.text().then(html => {
+                        return { redirectUrl: response.url, html: html };
                     });
+                }
+                return response.text().then(html => {
+                    return { redirectUrl: null, html: html };
                 });
+            })
+            .then(data => {
+                // Fermer le modal
+                if (modalInstance) modalInstance.hide();
+                
+                // Extraire les messages du HTML
+                var messages = extractMessages(data.html);
+                
+                if (messages.length > 0) {
+                    // Afficher les messages
+                    showMessages(messages);
+                    
+                    // Vérifier si c'est un message d'erreur
+                    var hasError = messages.some(msg => msg.type === 'error');
+                    if (!hasError && data.redirectUrl) {
+                        // Si pas d'erreur et redirection, recharger la page après avoir montré les messages
+                        setTimeout(() => {
+                            window.location.href = data.redirectUrl;
+                        }, 1000);
+                    }
+                } else if (data.redirectUrl) {
+                    // Pas de messages mais redirection
+                    window.location.href = data.redirectUrl;
+                } else {
+                    // Pas de messages, pas de redirection, recharger la page
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error("Erreur:", error);
+                if (modalInstance) modalInstance.hide();
+                
+                // Afficher un message d'erreur générique
+                showMessages([{
+                    text: "Une erreur s'est produite lors de la suppression",
+                    type: "error"
+                }]);
+            });
+        });
+    }
+    
+    // Fonction pour extraire les messages du HTML
+    function extractMessages(html) {
+        // Créer un DOM temporaire pour analyser le HTML
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, 'text/html');
+        
+        var messages = [];
+        var messageElements = doc.querySelectorAll('.alert');
+        
+        messageElements.forEach(el => {
+            var type = 'info';
+            if (el.classList.contains('alert-danger')) type = 'error';
+            if (el.classList.contains('alert-success')) type = 'success';
+            if (el.classList.contains('alert-warning')) type = 'warning';
+            
+            messages.push({
+                text: el.textContent.trim(),
+                type: type
+            });
+        });
+        
+        return messages;
+    }
+    
+    // Fonction pour afficher les messages
+    function showMessages(messages) {
+        // Créer un conteneur pour les messages s'il n'existe pas
+        var container = document.querySelector('.messages-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'messages-container';
+            document.querySelector('.container').prepend(container);
+        }
+        
+        // Vider le conteneur
+        container.innerHTML = '';
+        
+        // Ajouter chaque message
+        messages.forEach(msg => {
+            var alertClass = 'info';
+            if (msg.type === 'error') alertClass = 'danger';
+            if (msg.type === 'success') alertClass = 'success';
+            if (msg.type === 'warning') alertClass = 'warning';
+            
+            var alert = document.createElement('div');
+            alert.className = `alert alert-${alertClass} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${msg.text}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            container.appendChild(alert);
+        });
+    }
+    
+    // Fonction pour appliquer le style Bootstrap aux messages existants
+    function styleExistingMessages() {
+        var djangoMessages = document.querySelectorAll('.messages .message');
+        djangoMessages.forEach(msg => {
+            var type = 'info';
+            if (msg.classList.contains('error')) type = 'danger';
+            if (msg.classList.contains('success')) type = 'success';
+            if (msg.classList.contains('warning')) type = 'warning';
+            
+            msg.classList.add(`alert`, `alert-${type}`, 'alert-dismissible', 'fade', 'show');
+            
+            // Ajouter un bouton de fermeture s'il n'existe pas
+            if (!msg.querySelector('.btn-close')) {
+                var closeBtn = document.createElement('button');
+                closeBtn.type = 'button';
+                closeBtn.className = 'btn-close';
+                closeBtn.setAttribute('data-bs-dismiss', 'alert');
+                closeBtn.setAttribute('aria-label', 'Close');
+                msg.appendChild(closeBtn);
+            }
+        });
+    }
+    
+    // Ajout des gestionnaires pour les boutons d'export
+    document.getElementById('generatePdfBtn').addEventListener('click', function() {
+        // Générer le PDF avec jsPDF
+        generatePDF();
+    });
+    
+    document.getElementById('generateXlsxBtn').addEventListener('click', function() {
+        // Générer le fichier XLSX avec SheetJS
+        generateXLSX();
+    });
+    
+    // Fonction pour générer le PDF
+    function generatePDF() {
+        // Créer un nouveau document PDF
+        const doc = new jsPDF();
+        
+        // Titre du document
+        doc.setFontSize(18);
+        doc.text("Liste des équipes", 14, 20);
+        
+        // Informations du document
+        const date = new Date().toLocaleDateString('fr-FR');
+        doc.setFontSize(11);
+        doc.text(`Généré le: ${date}`, 14, 30);
+        doc.text(`Total des équipes: ${document.querySelector('.ms-auto span:last-child').textContent}`, 14, 35);
+        
+        // Création du tableau
+        const tableData = [];
+        const table = document.getElementById('team_tab');
+        const rows = table.querySelectorAll('tbody tr');
+        
+        // Parcourir toutes les lignes du tableau visible
+        rows.forEach((row) => {
+            if (row.style.display !== 'none') {
+                const name = row.cells[0].textContent.trim();
+                tableData.push([name]);
+            }
+        });
+        
+        // Ajouter le tableau au PDF
+        doc.autoTable({
+            head: [['Nom']],
+            body: tableData,
+            startY: 40,
+            styles: { fontSize: 10, cellPadding: 3 },
+            headStyles: { fillColor: [58, 159, 135] },
+            margin: { top: 40 }
+        });
+        
+        // Ajouter le footer
+        doc.setFontSize(10);
+        doc.text("© Église Évangélique Rencontre Espérance", 14, doc.internal.pageSize.height - 10);
+        
+        // Enregistrer le PDF
+        doc.save("liste_equipes.pdf");
+    }
+    
+    // Fonction pour générer le fichier XLSX
+    function generateXLSX() {
+        // Créer un nouveau workbook
+        const wb = XLSX.utils.book_new();
+        
+        // Préparer les données
+        const tableData = [];
+        const table = document.getElementById('team_tab');
+        const rows = table.querySelectorAll('tbody tr');
+        
+        // Parcourir toutes les lignes du tableau visible
+        rows.forEach((row) => {
+            if (row.style.display !== 'none') {
+                const name = row.cells[0].textContent.trim();
+                tableData.push({ "Nom": name });
+            }
+        });
+        
+        // Créer une feuille de calcul à partir des données
+        const ws = XLSX.utils.json_to_sheet(tableData);
+        
+        // Ajouter la feuille au workbook
+        XLSX.utils.book_append_sheet(wb, ws, "Équipes");
+        
+        // Générer le fichier XLSX et le télécharger
+        XLSX.writeFile(wb, "liste_equipes.xlsx");
+    }
+});
             </script>
             <script>
                 const TeamTableBody = document.querySelector('#team_tab tbody'); // Corps du tableau des éuipes
@@ -425,6 +721,7 @@
                 });
             </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
 <footer class="footer" id="contact">
     <p>&copy; Copyright 2025 Église Évangélique Rencontre Espérance . Tous droits réservés.</p>
 </footer>

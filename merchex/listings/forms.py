@@ -1,16 +1,16 @@
 # listings/forms.py
 from django import forms
-from .models import Key, User, Team
+from .models import KeyType, KeyInstance, User, Team
 
 
 class KeyForm(forms.ModelForm):
     class Meta:
-        model = Key
+        model = KeyType
         fields = [
             'number',
             'name',
             'place',
-            'initial_key_number',
+            'total_quantity',
             'in_cabinet',
             'in_safe',
             'comments'
@@ -19,10 +19,30 @@ class KeyForm(forms.ModelForm):
             'comments': forms.Textarea(attrs={'rows': 3}),
         }
 
+    # Ajouter des indications pour les champs
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['total_quantity'].help_text = "Nombre total d'exemplaires de cette clé"
+        self.fields['in_cabinet'].help_text = "Nombre d'exemplaires stockés dans l'armoire"
+        self.fields['in_safe'].help_text = "Nombre d'exemplaires stockés dans le coffre"
+
+
+class KeyInstanceForm(forms.ModelForm):
+    """Formulaire pour gérer les instances individuelles de clés"""
+    class Meta:
+        model = KeyInstance
+        fields = [
+            'key_type',
+            'serial_number',
+            'condition',
+            'location',
+            'comments'
+        ]
+
 
 class UserForm(forms.ModelForm):
     class Meta:
-        model = User  # Point to the correct model
+        model = User
         fields = [
             'firstname',
             'name',
@@ -33,21 +53,10 @@ class UserForm(forms.ModelForm):
             'team': forms.Select(attrs={'class': 'team-dropdown'}),
         }
 
-    def __init__(self, *args, **kwargs):
-        # Extract user instance from kwargs
-        user_instance = kwargs.pop('user_instance', None)
-        super().__init__(*args, **kwargs)
-        if user_instance:
-            # Filter keys by the user's assigned keys
-            self.fields['keys'].queryset = Key.objects.filter(
-                keys=user_instance)
-
 
 class TeamForm(forms.ModelForm):
     class Meta:
-        model = Team  # Point to the correct model
+        model = Team
         fields = [
             'name',
         ]
-        widgets = {
-        }
