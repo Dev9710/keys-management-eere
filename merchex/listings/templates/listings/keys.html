@@ -159,14 +159,14 @@ button i {
         <thead class="table-dark">
             <tr>
                 <th scope="col">N°</th>
-                <th scope="col">Nom de la clé</th>
-                <th scope="col">Emplacement</th>
-                <th scope="col">Nombre d'exemplaires</th>
-                <th scope="col">Exemplaires attribués</th>
+                <th scope="col">Noms des clés</th>
+                <th scope="col">Emplacements</th>
+                <th scope="col">Nombre total de clés</th>
+                <th scope="col">Clés attribuées</th>
                 <!-- Supprimez cette ligne:
                 <th scope="col">Exemplaires disponibles</th> -->
-                <th scope="col">En armoire</th>
-                <th scope="col">En coffre</th>
+                <th scope="col">Stock armoire</th>
+                <th scope="col">Stock coffre</th>
                 <th scope="col">Commentaires</th>
                 <th scope="col">Actions</th>
             </tr>
@@ -277,21 +277,18 @@ button i {
                     </div>
 
                     <div class="mb-3">
-                        <label for="id_total_quantity" class="form-label fw-bold">Nombre total d'exemplaires</label>
-                        <input type="number" name="total_quantity" id="id_total_quantity" class="form-control" placeholder="Nombre total d'exemplaires">
-                        <small class="form-text text-muted">Nombre total d'exemplaires de cette clé</small>
+                        <label for="id_total_quantity" class="form-label fw-bold">Nombre total d'exemplaire</label>
+                        <input type="number" name="total_quantity" id="id_total_quantity" class="form-control" placeholder="Nombre total d'exemplaires à disposition">
                     </div>
 
                     <div class="mb-3">
-                        <label for="id_in_cabinet" class="form-label fw-bold">Exemplaires en armoire</label>
-                        <input type="number" name="in_cabinet" id="id_in_cabinet" class="form-control" placeholder="Nombre d'exemplaires en armoire">
-                        <small class="form-text text-muted">Nombre d'exemplaires stockés dans l'armoire</small>
+                        <label for="id_in_cabinet" class="form-label fw-bold">Stock armoire</label>
+                        <input type="number" name="in_cabinet" id="id_in_cabinet" class="form-control" placeholder="Nombre de clés stocké dans l'armoire">
                     </div>
 
                     <div class="mb-3">
-                        <label for="id_in_safe" class="form-label fw-bold">Exemplaires en coffre</label>
-                        <input type="number" name="in_safe" id="id_in_safe" class="form-control" placeholder="Nombre d'exemplaires en coffre">
-                        <small class="form-text text-muted">Nombre d'exemplaires stockés dans le coffre</small>
+                        <label for="id_in_safe" class="form-label fw-bold">Stock coffre</label>
+                        <input type="number" name="in_safe" id="id_in_safe" class="form-control" placeholder="Nombre de clé sotcké dans le coffre">
                     </div>
 
                     <div class="mb-3">
@@ -301,7 +298,7 @@ button i {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                    <button type="submit" class="btn btn-primary">Ajouter la Clé</button>
+                    <button type="submit" class="btn btn-primary">Valider les modifications</button>
                 </div>
             </form>
         </div>
@@ -314,7 +311,7 @@ button i {
             <form method="post" action="{% url 'key_update' %}">
                 {% csrf_token %}
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="editKeyModalLabel">Modifier une Clé</h5>
+                    <h5 class="modal-title fw-bold" id="editKeyModalLabel">Modification des informations de la Clé</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                 </div>
                 <div class="modal-body">
@@ -343,19 +340,16 @@ button i {
                     <div class="mb-3">
                         <label for="edit_id_total_quantity" class="form-label fw-bold">Nombre total d'exemplaires</label>
                         <input type="number" name="total_quantity" id="edit_id_total_quantity" class="form-control" placeholder="Nombre total d'exemplaires">
-                        <small class="form-text text-muted">Nombre total d'exemplaires de cette clé</small>
                     </div>
 
                     <div class="mb-3">
-                        <label for="edit_id_in_cabinet" class="form-label fw-bold">Exemplaires en armoire</label>
-                        <input type="number" name="in_cabinet" id="edit_id_in_cabinet" class="form-control" placeholder="Nombre d'exemplaires en armoire">
-                        <small class="form-text text-muted">Nombre d'exemplaires stockés dans l'armoire</small>
+                        <label for="edit_id_in_cabinet" class="form-label fw-bold">Stock armoire</label>
+                        <input type="number" name="in_cabinet" id="edit_id_in_cabinet" class="form-control" placeholder="Nombre de clés  stocké dans l'armoire">
                     </div>
 
                     <div class="mb-3">
-                        <label for="edit_id_in_safe" class="form-label fw-bold">Exemplaires en coffre</label>
-                        <input type="number" name="in_safe" id="edit_id_in_safe" class="form-control" placeholder="Nombre d'exemplaires en coffre">
-                        <small class="form-text text-muted">Nombre d'exemplaires stockés dans le coffre</small>
+                        <label for="edit_id_in_safe" class="form-label fw-bold">Stock coffre</label>
+                        <input type="number" name="in_safe" id="edit_id_in_safe" class="form-control" placeholder="Nombre de clé  sotcké dans le coffre">
                     </div>
 
                     <div class="mb-3">
@@ -381,7 +375,7 @@ button i {
             </div>
             <div class="modal-body">
                 <!-- Dynamically show the key number -->
-                Voulez-vous vraiment supprimer la clé numéro <strong id="keyNumberToDelete"></strong> et tous ses exemplaires ? Cette action ne peut pas être annulée.
+                Voulez-vous vraiment supprimer la clé numéro <strong id="keyNumberToDelete"></strong> et tous ses exemplaires ? Cette action ne peut pas être annulée. Cependant le numéro de clé sera de nouveau disponible pour une nouvelle clé.
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
