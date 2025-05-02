@@ -22,7 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('hello/', views.hello),
     path('about-us/', views.about),  # ajoutez cette ligne
-    path('home/', views.home),
+    path('home/', views.home, name='home'),
     path('contact/', views.contact),
     path('users/', views.user_list, name='user_list'),
     path('teams/', views.team_list, name='team_list'),
@@ -57,4 +57,26 @@ urlpatterns = [
     path('assign-keys/', views.assign_keys, name='assign_keys'),  # ok
     path('remove-all-keys/<int:user_id>/',
          views.remove_all_keys, name='remove_all_keys'),  # ok
+
+
+    # URLs d'authentification de base
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('register/', views.register_view, name='register'),
+    path('profile/', views.profile_view, name='profile'),
+
+    # Pages de tableau de bord par rôle
+    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('editor-dashboard/', views.editor_dashboard, name='editor_dashboard'),
+
+    # Gestion des utilisateurs (admin uniquement)
+    path('owner_management/', views.owner_management, name='owner_management'),
+    path('add-owner/', views.add_owner, name='add_owner'),
+    path('edit-owner/<int:user_id>/', views.update_owner, name='edit_owner'),
+    path('delete-owner/<int:user_id>/', views.delete_owner, name='delete_owner'),
+
+    # Page d'accès refusé
+    path('access-denied/', views.access_denied, name='access_denied'),
+
+    path('register/success/', views.register_success_view, name='register_success'),
 ]

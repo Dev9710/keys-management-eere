@@ -1,0 +1,143 @@
+{% extends "listings/base.html" %}
+{% load static %}
+
+{% block title %}Connexion | Gestion des Clés{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0 rounded-lg">
+                <!-- En-tête de la carte avec logo -->
+                <div class="card-header bg-white text-center p-4 border-0">
+                    <!-- Logo de l'application (à remplacer par votre logo) -->
+                    <div class="mb-3">
+                        <span class="logo text-primary fs-2">EERE</span>
+                    </div>
+                    <h3 class="fw-light">Connexion</h3>
+                    <p class="text-muted small mb-0">Accédez à l'application de gestion des clés</p>
+                </div>
+
+                <!-- Corps de la carte contenant le formulaire -->
+                <div class="card-body p-4">
+                    <!-- Messages d'alerte -->
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <!-- Formulaire de connexion -->
+                    <form method="post" action="{% url 'login' %}" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Champ caché pour stocker l'URL de redirection -->
+                        {% if request.GET.next %}
+                        <input type="hidden" name="next" value="{{ request.GET.next }}">
+                        {% endif %}
+
+                        <!-- Champ Email (corrigé) -->
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">Nom d'utilisateur</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                {{ form.username }}
+                                <div class="invalid-feedback">
+                                    Veuillez saisir votre nom d'utilisateur.
+                                </div>
+                            </div>
+                            {% if form.username.errors %}
+                            <div class="text-danger">
+                                {{ form.username.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Champ Mot de passe -->
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">Mot de passe</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                {{ form.password }}
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword"
+                                    aria-label="Afficher/masquer le mot de passe">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <div class="invalid-feedback">
+                                    Veuillez saisir votre mot de passe.
+                                </div>
+                            </div>
+                            {% if form.password.errors %}
+                            <div class="text-danger">
+                                {{ form.password.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Option "Se souvenir de moi" -->
+                        <div class="mb-3 form-check">
+                            {{ form.remember }}
+                            <label class="form-check-label" for="id_remember">Se souvenir de moi</label>
+                        </div>
+
+                        <!-- Bouton de connexion -->
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i> Se connecter
+                            </button>
+                        </div>
+
+                        <!-- Lien vers la page d'inscription -->
+                        <div class="text-center">
+                            <p class="mb-0">Vous n'avez pas de compte ? <a href="{% url 'register' %}"
+                                    class="fw-semibold">Créer un compte</a></p>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Pied de la carte avec informations de sécurité -->
+                <div class="card-footer bg-white p-3 text-center border-0">
+                    <div class="small text-muted">
+                        <i class="fas fa-shield-alt me-1"></i> Connexion sécurisée
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script pour basculer la visibilité du mot de passe -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Validation du formulaire côté client
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+
+        // Afficher/masquer le mot de passe
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('id_password');
+
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', function () {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+
+                // Changer l'icône
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        }
+    });
+</script>
+{% endblock %}

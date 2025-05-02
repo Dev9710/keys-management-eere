@@ -1,776 +1,693 @@
-<!-- templates/listings/users.html -->
-<!DOCTYPE html>
-<html lang="fr">
+{% extends 'listings/base.html' %}
+{% load static %}
 
-<head>
-    <!-- Définition du charset pour les caractères spéciaux en UTF-8 -->
-    <meta charset="UTF-8">
-    <!-- Configuration pour rendre le site responsive sur différents appareils -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Titre de la page affiché dans l'onglet du navigateur -->
-    <title>Gestion des utilisateurs</title>
-    <!-- Lien vers la librairie Bootstrap pour styliser la page -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Lien vers Font Awesome pour inclure des icônes dans les boutons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Style CSS personnalisé pour ajuster les boutons et la mise en page -->
-      <!-- Ajoutez ces lignes pour les bibliothèques PDF et Excel -->
+{% block title %}Gestion des utilisateurs{% endblock %}
+
+{% block extra_css %}
+    <!-- Ajoutez ces lignes pour les bibliothèques PDF et Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.18.5/package/dist/xlsx.full.min.js"></script>
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .main-content {
-            flex: 1;
-        }
-
-        /* Styles pour aligner le contenu des boutons */
-        .top-header {
-            background: white;
-            color: #3a9f87;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 50px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .nav-menu {
-            display: flex;
-            gap: 30px;
-        }
-
-        .nav-menu a {
-            color: #3a9f87;
-            text-decoration: none;
-            transition: color 0.3s ease;
-            font-weight: 500;
-        }
-
-        .nav-menu a:hover {
-            color: #2a7562;
-        }
-        
-        .footer {
-            width: 100%;
-            background: #3a9f87;
-            color: white;
-            text-align: center;
-            padding: 30px 20px;
-            margin-top: auto;
-        }
-
-    .export-buttons {
-    display: flex;
-    justify-content: center; /* Changé de flex-end à center pour centrer */
-    gap: 10px;
-    margin: 20px 0;
-}
-    </style>
-</head>
-
-<body>
-    <div class="top-header">
-        <div class="logo" onclick="window.location.href='/home/'">EERE</div>
-        <nav class="nav-menu">
-            <a href="/keys/list/">Gestion des clés</a>
-            <a href="/teams">Gestion des équipes</a>
-            <a href="/users">Gestion des fidèles</a>
-            <a href="/attr">Attribuer des clés</a>
-        </nav>
-    </div>
     
-    <div class="main-content">
-        <div class="container mt-5">
-            <!-- Titre de la section principale -->
-            <h2 class="mb-4">Gestion des utilisateurs</h2>
-            <div class="d-flex flex-row bd-highlight mb-3 gap-3">
-                <!-- Bouton Ajouter une Nouvelle Clé -->
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                    <i class="fas fa-plus"></i> Ajouter un nouvel utilisateur
-                </button>
-                <!-- Champ de Recherche -->
-                <div class="search-container">
-                    <input type="text" id="searchInput" placeholder="Rechercher un utilisateur..."
-                        class="form-control w-100">
-                </div>
+    .export-buttons {
+        display: flex;
+        justify-content: center; /* Changé de flex-end à center pour centrer */
+        gap: 10px;
+        margin: 20px 0;
+    }
+{% endblock %}
 
-                <!-- Total des utilisateur aligné à droite -->
-                <div class="mb-3 ms-auto text-end">
-                    <span class="fw-bold">Total des utilisateurs :</span>
-                    <span>{{ users_count }}</span>
+{% block content %}
+<div class="container mt-5">
+    <!-- Titre de la section principale -->
+    <h2 class="mb-4">Gestion des utilisateurs</h2>
+    <div class="d-flex flex-row bd-highlight mb-3 gap-3">
+        <!-- Bouton Ajouter une Nouvelle Clé -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="fas fa-plus"></i> Ajouter un nouvel utilisateur
+        </button>
+        <!-- Champ de Recherche -->
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Rechercher un utilisateur..."
+                class="form-control w-100">
+        </div>
+
+        <!-- Total des utilisateur aligné à droite -->
+        <div class="mb-3 ms-auto text-end">
+            <span class="fw-bold">Total des utilisateurs :</span>
+            <span>{{ users_count }}</span>
+        </div>
+    </div>
+    <form method="get" action="{% url 'user_list' %}">
+        <div class="row mb-4">
+            <div class="d-flex align-items-end gap-3">
+                <div class="me-3" style="width: 250px;">
+                    <label for="team-dropdown" class="form-label fw-bold">Sélectionner une équipe :</label>
+                    <select id="team-dropdown" name="team_id" class="form-select" data-url="{% url 'user_team' %}">
+                        <option value="">-- Toutes les Équipes --</option>
+                        {% for team in teams %}
+                        <option value="{{ team.id }}" {% if team.id == selected_team_id %}selected{% endif %}>
+                            {{ team.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-check d-flex align-items-center">
+                    <input class="form-check-input me-2" type="checkbox" id="hasKeysFilter">
+                    <label class="form-check-label" for="hasKeysFilter">
+                        Afficher les détenteurs de clé
+                    </label>
                 </div>
             </div>
-            <form method="get" action="{% url 'user_list' %}">
-                <div class="row mb-4">
-                    <div class="d-flex align-items-end gap-3">
-                        <div class="me-3" style="width: 250px;">
-                            <label for="team-dropdown" class="form-label fw-bold">Sélectionner une équipe :</label>
-                            <select id="team-dropdown" name="team_id" class="form-select" data-url="{% url 'user_team' %}">
-                                <option value="">-- Toutes les Équipes --</option>
+        </div>
+    </form>
+    <!-- Table pour afficher les utilisateurs -->
+    <table class="table table-striped table-hover" id="user_tab">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col">Nom</th>
+                <th scope="col">Prénom</th>
+                <th scope="col">Equipe</th>
+                <th scope="col">Commentaire</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.name }}</td>
+                <td>{{ user.firstname }}</td>
+                <td>{{ user.team }}</td>
+                <td>{{ user.comment }}</td>
+                <!-- Edit Button -->
+                <td>
+                    <div class="d-flex gap-2">
+                        <!-- Bouton Modifier -->
+                        <button type="button" class="btn btn-warning btn-sm edit-btn flex-fill action-btn"
+                            data-bs-toggle="modal" data-bs-target="#editUserModal" data-id="{{ user.id }}"
+                            data-name="{{ user.name }}" data-firstname="{{ user.firstname }}"
+                            data-team="{{ user.team.id }}" data-comment="{{ user.comment }}">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                        
+                        <!-- Bouton Supprimer -->
+                        <button type="button" class="btn btn-danger btn-sm" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#deleteUserModal" 
+                            data-delete-url="{% url 'user_delete' user.id %}" 
+                            data-user-name="{{ user.name }}">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </div>
+                </td> 
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">Aucun utilisateurs</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Boutons d'export -->
+    <div class="export-buttons">
+        <button id="generate-pdf-btn" class="btn btn-success">
+            <i class="fas fa-file-pdf"></i> Générer PDF
+        </button>
+        <button id="generate-xlsx-btn" class="btn btn-primary">
+            <i class="fas fa-file-excel"></i> Générer XLSX
+        </button>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Modifier l'utilisateur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <form id="editUserForm" action="{% url 'user_update' %}">
+                        <input type="hidden" id="editUserId" name="user_id">
+                        <div class="mb-3">
+                            <label for="editUserName" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="editUserName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserFirstname" class="form-label">Prénom</label>
+                            <input type="text" class="form-control" id="editUserFirstname" name="firstname"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserTeam" class="form-label">Équipe</label>
+                            <select id="editUserTeam" class="form-control">
+                                <option value="" disabled selected>Choisir une équipe</option>
                                 {% for team in teams %}
-                                <option value="{{ team.id }}" {% if team.id == selected_team_id %}selected{% endif %}>
-                                    {{ team.name }}
-                                </option>
+                                <option value="{{ team.id }}">{{ team.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="form-check d-flex align-items-center">
-                            <input class="form-check-input me-2" type="checkbox" id="hasKeysFilter">
-                            <label class="form-check-label" for="hasKeysFilter">
-                                Afficher les détenteurs de clé
-                            </label>
+                        <div class="mb-3">
+                            <label for="editUserComment" class="form-label">Commentaire</label>
+                            <textarea class="form-control" id="editUserComment" name="comment"
+                                rows="3"></textarea>
                         </div>
-                    </div>
+                    </form>
                 </div>
-            </form>
-            <!-- Table pour afficher les utilisateurs -->
-            <table class="table table-striped table-hover" id="user_tab">
-                <thead class="table-dark">
-                    <tr>
-                        <th scope="col">Nom</th>
-                        <th scope="col">Prénom</th>
-                        <th scope="col">Equipe</th>
-                        <th scope="col">Commentaire</th>
-                        <th scope="col">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                    <tr>
-                        <td>{{ user.name }}</td>
-                        <td>{{ user.firstname }}</td>
-                        <td>{{ user.team }}</td>
-                        <td>{{ user.comment }}</td>
-                        <!-- Edit Button -->
-                        <td>
-                            <div class="d-flex gap-2">
-                                <!-- Bouton Modifier -->
-                                <button type="button" class="btn btn-warning btn-sm edit-btn flex-fill action-btn"
-                                    data-bs-toggle="modal" data-bs-target="#editUserModal" data-id="{{ user.id }}"
-                                    data-name="{{ user.name }}" data-firstname="{{ user.firstname }}"
-                                    data-team="{{ user.team.id }}" data-comment="{{ user.comment }}">
-                                    <i class="fas fa-edit"></i> Modifier
-                                </button>
-                                
-                                <!-- Bouton Supprimer -->
-                                <button type="button" class="btn btn-danger btn-sm" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#deleteUserModal" 
-                                    data-delete-url="{% url 'user_delete' user.id %}" 
-                                    data-user-name="{{ user.name }}">
-                                    <i class="fas fa-trash"></i> Supprimer
-                                </button>
-                            </div>
-                        </td> 
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center">Aucun utilisateurs</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <!-- Boutons d'export -->
-            <div class="export-buttons">
-                <button id="generate-pdf-btn" class="btn btn-success">
-                    <i class="fas fa-file-pdf"></i> Générer PDF
-                </button>
-                <button id="generate-xlsx-btn" class="btn btn-primary">
-                    <i class="fas fa-file-excel"></i> Générer XLSX
-                </button>
-            </div>
-        
-            <!-- Edit User Modal -->
-            <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <!-- Modal Header -->
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="editUserModalLabel">Modifier l'utilisateur</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <!-- Modal Body -->
-                        <div class="modal-body">
-                            <form id="editUserForm" action="{% url 'user_update' %}">
-                                <input type="hidden" id="editUserId" name="user_id">
-                                <div class="mb-3">
-                                    <label for="editUserName" class="form-label">Nom</label>
-                                    <input type="text" class="form-control" id="editUserName" name="name" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editUserFirstname" class="form-label">Prénom</label>
-                                    <input type="text" class="form-control" id="editUserFirstname" name="firstname"
-                                        required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editUserTeam" class="form-label">Équipe</label>
-                                    <select id="editUserTeam" class="form-control">
-                                        <option value="" disabled selected>Choisir une équipe</option>
-                                        {% for team in teams %}
-                                        <option value="{{ team.id }}">{{ team.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="editUserComment" class="form-label">Commentaire</label>
-                                    <textarea class="form-control" id="editUserComment" name="comment"
-                                        rows="3"></textarea>
-                                </div>
-                            </form>
-                        </div>
-                        <!-- Modal Footer -->
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                            <button type="button" class="btn btn-primary" id="saveUserChanges">Enregistrer</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Add User Modal -->
-            <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <form id="addUserForm" method="post" action="{% url 'user_create' %}">
-                            {% csrf_token %}
-                            <!-- Modal Header -->
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="addUserModalLabel">Ajouter un utilisateur</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <!-- Modal Body -->
-                            <div class="modal-body">
-                                <div class="mb-3">
-                                    <label for="addUserName" class="form-label">Nom</label>
-                                    <input type="text" class="form-control" id="addUserName" name="name" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="addUserFirstname" class="form-label">Prénom</label>
-                                    <input type="text" class="form-control" id="addUserFirstname" name="firstname"
-                                        required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="addUserTeam" class="form-label">Équipe</label>
-                                    <select class="form-select" id="addUserTeam" name="team">
-                                        {% for team in teams %}
-                                        <option value="{{ team.id }}">{{ team.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="addUserComment" class="form-label">Commentaire</label>
-                                    <textarea class="form-control" id="addUserComment" name="comment"
-                                        rows="3"></textarea>
-                                </div>
-                            </div>
-                            <!-- Modal Footer -->
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                <button type="submit" class="btn btn-primary">Enregistrer</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <!-- Section du modal de suppression -->
-            <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel"
-            aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="deleteUserModalLabel">Supprimer l'utilisateur</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <!-- Dynamically show the user name -->
-                            Voulez-vous vraiment supprimer l'utilisateur <strong id="UserNameToDelete"></strong> ?
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                            <!-- This form will submit the delete action -->
-                            <form id="deleteUserForm" method="post">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-danger">Supprimer</button>
-                            </form>
-                        </div>
-                    </div>
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="saveUserChanges">Enregistrer</button>
                 </div>
             </div>
         </div>
     </div>
-    
-    <footer class="footer" id="contact">
-        <p>&copy; Copyright 2025 Église Évangélique Rencontre Espérance. Tous droits réservés.</p>
-    </footer>
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="addUserForm" method="post" action="{% url 'user_create' %}">
+                    {% csrf_token %}
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addUserModalLabel">Ajouter un utilisateur</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <!-- Modal Body -->
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="addUserName" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="addUserName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addUserFirstname" class="form-label">Prénom</label>
+                            <input type="text" class="form-control" id="addUserFirstname" name="firstname"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addUserTeam" class="form-label">Équipe</label>
+                            <select class="form-select" id="addUserTeam" name="team">
+                                {% for team in teams %}
+                                <option value="{{ team.id }}">{{ team.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addUserComment" class="form-label">Commentaire</label>
+                            <textarea class="form-control" id="addUserComment" name="comment"
+                                rows="3"></textarea>
+                        </div>
+                    </div>
+                    <!-- Modal Footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Section du modal de suppression -->
+    <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel"
+    aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteUserModalLabel">Supprimer l'utilisateur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Dynamically show the user name -->
+                    Voulez-vous vraiment supprimer l'utilisateur <strong id="UserNameToDelete"></strong> ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <!-- This form will submit the delete action -->
+                    <form id="deleteUserForm" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-    <script>
-        console.log("Script de suppression chargé");
-        document.addEventListener('DOMContentLoaded', function () {
-            var deleteButtons = document.querySelectorAll('[data-bs-target="#deleteUserModal"]');
-            
-            deleteButtons.forEach(function (button) {
-                button.addEventListener('click', function () {
-                    // Récupérer le nom d'utilisateur et l'URL de suppression depuis le bouton cliqué
-                    var userName = this.getAttribute('data-user-name');
-                    var deleteUrl = this.getAttribute('data-delete-url');
-                    
-                    console.log("Suppression utilisateur :", userName, "URL :", deleteUrl);
-                    
-                    // Mettre à jour le contenu du modal avec le nom d'utilisateur
-                    document.getElementById('UserNameToDelete').innerText = userName;
-                    
-                    // Définir l'action du formulaire de suppression vers l'URL de suppression
-                    document.getElementById('deleteUserForm').setAttribute('action', deleteUrl);
-                });
-            });
-        });
-    </script>
-    <script>
-        const teamDropdown = document.getElementById('team-dropdown'); // Liste déroulante des équipes
-        const userTableBody = document.querySelector('#user_tab tbody'); // Corps du tableau des utilisateurs
-        const hasKeysFilter = document.getElementById('hasKeysFilter'); // Checkbox pour filtrer les détenteurs de clés
-
-        function attachDeleteButtonEvents() {
-            var deleteButtons = document.querySelectorAll('[data-bs-target="#deleteUserModal"]');
-            
-            deleteButtons.forEach(function (button) {
-                button.addEventListener('click', function () {
-                    var userName = this.getAttribute('data-user-name');
-                    var deleteUrl = this.getAttribute('data-delete-url');
-                    
-                    console.log("Bouton de suppression cliqué pour :", userName, "URL :", deleteUrl);
-                    
-                    document.getElementById('UserNameToDelete').innerText = userName;
-                    document.getElementById('deleteUserForm').setAttribute('action', deleteUrl);
-                });
-            });
-        }
-
-        function loadUserbyTeam(teamId) {
-            const baseUrl = teamDropdown.getAttribute('data-url'); // URL de base
-            // Ajout du paramètre has_keys à l'URL si la checkbox est cochée
-            const hasKeys = hasKeysFilter.checked;
-            const url = `${baseUrl}?team_id=${teamId}${hasKeys ? '&has_keys=true' : ''}`; // Construire l'URL complète
-
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    userTableBody.innerHTML = ''; // Vider le tableau
-
-                    if (data.users.length > 0) {
-                        data.users.forEach(user => {
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                            <td>${user.name}</td>
-                            <td>${user.firstname}</td>
-                            <td>${user.team}</td>
-                            <td>${user.comment}</td>
-                            <td>
-                                <div class="d-flex gap-2">
-                                    <button type="button" class="btn btn-warning btn-sm edit-btn" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#editUserModal" 
-                                        data-id="${user.id}" 
-                                        data-name="${user.name}" 
-                                        data-firstname="${user.firstname}" 
-                                        data-team="${user.team_id}"
-                                        data-comment="${user.comment}">
-                                        <i class="fas fa-edit"></i> Modifier
-                                    </button>
-                                    <form method="post" action="/user_delete/${user.id}/">
-                                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" 
-                data-bs-target="#deleteUserModal" 
-                data-delete-url="/user_delete/${user.id}/" 
-                data-user-name="${user.name}">
-                <i class="fas fa-trash"></i> Supprimer
-            </button>
-                                    </form>
-                                </div>
-                            </td>
-                        `;
-                            userTableBody.appendChild(row);
-                        });
-                    } else {
-                        // Si aucun utilisateur n'est trouvé
-                        const row = document.createElement('tr');
-                        row.innerHTML = `<td colspan="6" class="text-center">Aucun utilisateur trouvé.</td>`;
-                        userTableBody.appendChild(row);
-                    }
-
-                    // Réattacher les événements aux boutons dynamiques
-                    attachEditButtonEvents();
-                    attachDeleteButtonEvents();
-                })
-                .catch(error => {
-                    console.error('Erreur lors du chargement des utilisateurs :', error);
-                });
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            // Écouter les changements dans la liste déroulante
-            teamDropdown.addEventListener('change', function () {
-                const selectedTeamId = teamDropdown.value; // Récupérer l'ID de l'équipe sélectionnée
-                loadUserbyTeam(selectedTeamId); // Charger les utilisateurs pour l'équipe sélectionnée
-            });
-
-            // Écouter les changements de la checkbox
-            hasKeysFilter.addEventListener('change', function () {
-                const selectedTeamId = teamDropdown.value; // Récupérer l'ID de l'équipe sélectionnée
-                loadUserbyTeam(selectedTeamId); // Recharger les utilisateurs avec le nouveau filtre
-            });
-
-            // Charger la liste initiale
-            loadUserbyTeam(teamDropdown.value);
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const editUserModal = document.getElementById('editUserModal');
-            const editUserForm = document.getElementById('editUserForm');
-            const saveUserChangesButton = document.getElementById('saveUserChanges');
-
-            // Ajoutez ici le gestionnaire d'événements pour les boutons "Modifier"
-            document.querySelectorAll('.edit-btn').forEach(button => {
-                button.addEventListener('click', function () {
-                    const userId = this.getAttribute('data-id');
-                    const userName = this.getAttribute('data-name');
-                    const userFirstname = this.getAttribute('data-firstname');
-                    const userTeam = this.getAttribute('data-team'); // Cela contiendra maintenant le nom de l'équipe
-                    const userComment = this.getAttribute('data-comment');
-
-                    console.log("Chargement de l'utilisateur :", { userId, userName, userFirstname, userTeam, userComment });
-
-                    // Remplir les champs du formulaire de la modal avec les données de l'utilisateur
-                    document.getElementById('editUserId').value = userId;
-                    document.getElementById('editUserName').value = userName;
-                    document.getElementById('editUserFirstname').value = userFirstname;
-
-                    // Remplir le champ "Équipe" dans la modal avec le nom de l'équipe
-                    const teamSelect = document.getElementById('editUserTeam');
-                    // Trouver l'option qui correspond au nom de l'équipe
-                    Array.from(teamSelect.options).forEach(option => {
-                        if (option.textContent === userTeam) {
-                            option.selected = true; // Sélectionner l'option correspondante
-                        }
-                    });
-
-                    document.getElementById('editUserComment').value = userComment;
-                });
-            });
-
-            saveUserChangesButton.addEventListener('click', function() {
-                const formData = new FormData(editUserForm);
-
-                // Ajouter explicitement la valeur de l'équipe
-                const teamSelect = document.getElementById('editUserTeam');
-                formData.append('team', teamSelect.value);
-
-                // Vérifier les données avant l'envoi
-                console.log("FormData avant envoi:");
-                for (let pair of formData.entries()) {
-                    console.log(pair[0] + ': ' + pair[1]);
-                }
+{% block extra_js %}
+<script>
+    console.log("Script de suppression chargé");
+    document.addEventListener('DOMContentLoaded', function () {
+        var deleteButtons = document.querySelectorAll('[data-bs-target="#deleteUserModal"]');
+        
+        deleteButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                // Récupérer le nom d'utilisateur et l'URL de suppression depuis le bouton cliqué
+                var userName = this.getAttribute('data-user-name');
+                var deleteUrl = this.getAttribute('data-delete-url');
                 
-                fetch('/user_update/', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                console.log("Suppression utilisateur :", userName, "URL :", deleteUrl);
+                
+                // Mettre à jour le contenu du modal avec le nom d'utilisateur
+                document.getElementById('UserNameToDelete').innerText = userName;
+                
+                // Définir l'action du formulaire de suppression vers l'URL de suppression
+                document.getElementById('deleteUserForm').setAttribute('action', deleteUrl);
+            });
+        });
+    });
+</script>
+<script>
+    const teamDropdown = document.getElementById('team-dropdown'); // Liste déroulante des équipes
+    const userTableBody = document.querySelector('#user_tab tbody'); // Corps du tableau des utilisateurs
+    const hasKeysFilter = document.getElementById('hasKeysFilter'); // Checkbox pour filtrer les détenteurs de clés
+
+    function attachDeleteButtonEvents() {
+        var deleteButtons = document.querySelectorAll('[data-bs-target="#deleteUserModal"]');
+        
+        deleteButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                var userName = this.getAttribute('data-user-name');
+                var deleteUrl = this.getAttribute('data-delete-url');
+                
+                console.log("Bouton de suppression cliqué pour :", userName, "URL :", deleteUrl);
+                
+                document.getElementById('UserNameToDelete').innerText = userName;
+                document.getElementById('deleteUserForm').setAttribute('action', deleteUrl);
+            });
+        });
+    }
+
+    function loadUserbyTeam(teamId) {
+        const baseUrl = teamDropdown.getAttribute('data-url'); // URL de base
+        // Ajout du paramètre has_keys à l'URL si la checkbox est cochée
+        const hasKeys = hasKeysFilter.checked;
+        const url = `${baseUrl}?team_id=${teamId}${hasKeys ? '&has_keys=true' : ''}`; // Construire l'URL complète
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                userTableBody.innerHTML = ''; // Vider le tableau
+
+                if (data.users.length > 0) {
+                    data.users.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                        <td>${user.name}</td>
+                        <td>${user.firstname}</td>
+                        <td>${user.team}</td>
+                        <td>${user.comment}</td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-warning btn-sm edit-btn" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#editUserModal" 
+                                    data-id="${user.id}" 
+                                    data-name="${user.name}" 
+                                    data-firstname="${user.firstname}" 
+                                    data-team="${user.team_id}"
+                                    data-comment="${user.comment}">
+                                    <i class="fas fa-edit"></i> Modifier
+                                </button>
+                                <form method="post" action="/user_delete/${user.id}/">
+                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" 
+            data-bs-target="#deleteUserModal" 
+            data-delete-url="/user_delete/${user.id}/" 
+            data-user-name="${user.name}">
+            <i class="fas fa-trash"></i> Supprimer
+        </button>
+                                </form>
+                            </div>
+                        </td>
+                    `;
+                        userTableBody.appendChild(row);
+                    });
+                } else {
+                    // Si aucun utilisateur n'est trouvé
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="6" class="text-center">Aucun utilisateur trouvé.</td>`;
+                    userTableBody.appendChild(row);
+                }
+
+                // Réattacher les événements aux boutons dynamiques
+                attachEditButtonEvents();
+                attachDeleteButtonEvents();
+            })
+            .catch(error => {
+                console.error('Erreur lors du chargement des utilisateurs :', error);
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Écouter les changements dans la liste déroulante
+        teamDropdown.addEventListener('change', function () {
+            const selectedTeamId = teamDropdown.value; // Récupérer l'ID de l'équipe sélectionnée
+            loadUserbyTeam(selectedTeamId); // Charger les utilisateurs pour l'équipe sélectionnée
+        });
+
+        // Écouter les changements de la checkbox
+        hasKeysFilter.addEventListener('change', function () {
+            const selectedTeamId = teamDropdown.value; // Récupérer l'ID de l'équipe sélectionnée
+            loadUserbyTeam(selectedTeamId); // Recharger les utilisateurs avec le nouveau filtre
+        });
+
+        // Charger la liste initiale
+        loadUserbyTeam(teamDropdown.value);
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const editUserModal = document.getElementById('editUserModal');
+        const editUserForm = document.getElementById('editUserForm');
+        const saveUserChangesButton = document.getElementById('saveUserChanges');
+
+        // Ajoutez ici le gestionnaire d'événements pour les boutons "Modifier"
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const userId = this.getAttribute('data-id');
+                const userName = this.getAttribute('data-name');
+                const userFirstname = this.getAttribute('data-firstname');
+                const userTeam = this.getAttribute('data-team'); // Cela contiendra maintenant le nom de l'équipe
+                const userComment = this.getAttribute('data-comment');
+
+                console.log("Chargement de l'utilisateur :", { userId, userName, userFirstname, userTeam, userComment });
+
+                // Remplir les champs du formulaire de la modal avec les données de l'utilisateur
+                document.getElementById('editUserId').value = userId;
+                document.getElementById('editUserName').value = userName;
+                document.getElementById('editUserFirstname').value = userFirstname;
+
+                // Remplir le champ "Équipe" dans la modal avec le nom de l'équipe
+                const teamSelect = document.getElementById('editUserTeam');
+                // Trouver l'option qui correspond au nom de l'équipe
+                Array.from(teamSelect.options).forEach(option => {
+                    if (option.textContent === userTeam) {
+                        option.selected = true; // Sélectionner l'option correspondante
                     }
-                })
-                .then(response => response.json())
+                });
+
+                document.getElementById('editUserComment').value = userComment;
+            });
+        });
+
+        saveUserChangesButton.addEventListener('click', function() {
+            const formData = new FormData(editUserForm);
+
+            // Ajouter explicitement la valeur de l'équipe
+            const teamSelect = document.getElementById('editUserTeam');
+            formData.append('team', teamSelect.value);
+
+            // Vérifier les données avant l'envoi
+            console.log("FormData avant envoi:");
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+            
+            fetch('/user_update/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Fermer la modal
+                    const modal = bootstrap.Modal.getInstance(editUserModal);
+                    modal.hide();
+                    
+                    // Afficher un message de succès
+                    alert(data.message);  // ou utilisez une notification plus élégante
+                    
+                    // Mettre à jour le tableau sans recharger la page
+                    const currentTeamId = document.getElementById('team-dropdown').value;
+                    loadUserbyTeam(currentTeamId);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la mise à jour');
+            });
+        });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        attachEditButtonEvents(); // Attacher les événements aux boutons existants
+    });
+</script>
+<script>
+    function attachEditButtonEvents() {
+        console.log("Attachement des événements...");
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            //console.log("Bouton détecté :", button);
+            button.addEventListener('click', function () {
+                const userId = this.getAttribute('data-id');
+                const userName = this.getAttribute('data-name');
+                const userFirstname = this.getAttribute('data-firstname');
+                const userTeam = this.getAttribute('data-team'); // Utiliser cette variable
+                const userComment = this.getAttribute('data-comment');
+
+                // Vérifiez si l'ID de l'équipe est défini
+                if (!userTeam || userTeam === 'undefined') {
+                    console.error("L'ID de l'équipe est manquant ou incorrect.");
+                    return; // Arrêter l'exécution si l'ID est invalide
+                }
+
+                console.log("Données utilisateur :", { userId, userName, userFirstname, userTeam, userComment });
+
+                // Remplir les champs de la modal
+                document.getElementById('editUserId').value = userId;
+                document.getElementById('editUserName').value = userName;
+                document.getElementById('editUserFirstname').value = userFirstname;
+
+                const teamSelect = document.getElementById('editUserTeam');
+                teamSelect.value = userTeam;
+
+                if (teamSelect.value !== userTeam) {
+                    console.warn(`L'équipe avec l'ID ${userTeam} n'a pas été trouvée dans la liste déroulante.`);
+                    console.log("Valeurs disponibles dans la liste déroulante :", [...teamSelect.options].map(option => option.value));
+                }
+
+                document.getElementById('editUserComment').value = userComment;
+            });
+        });
+    }
+</script>
+<script>
+    //Fonction de recherche dans le tableau
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('searchInput');
+        const table = document.getElementById('user_tab');
+        const rows = table.getElementsByTagName('tr');
+    
+        searchInput.addEventListener('keyup', function () {
+            const filter = searchInput.value.toLowerCase();
+    
+            for (let i = 1; i < rows.length; i++) { // Commence à 1 pour ignorer l'en-tête
+                const cells = rows[i].getElementsByTagName('td');
+                let match = false;
+    
+                for (let cell of cells) {
+                    if (cell.textContent.toLowerCase().includes(filter)) {
+                        match = true;
+                        break;
+                    }
+                }
+    
+                rows[i].style.display = match ? '' : 'none'; // Affiche ou cache la ligne
+            }
+        });
+    });
+</script>
+<script>
+    //script pour la validation du formation d'ajout utilisateur
+    document.addEventListener('DOMContentLoaded', function () {
+        const addUserForm = document.getElementById('addUserForm');
+
+        addUserForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+                .then(response => response.text())
                 .then(data => {
-                    if (data.success) {
-                        // Fermer la modal
-                        const modal = bootstrap.Modal.getInstance(editUserModal);
-                        modal.hide();
-                        
-                        // Afficher un message de succès
-                        alert(data.message);  // ou utilisez une notification plus élégante
-                        
-                        // Mettre à jour le tableau sans recharger la page
-                        const currentTeamId = document.getElementById('team-dropdown').value;
-                        loadUserbyTeam(currentTeamId);
-                    } else {
-                        alert(data.message);
-                    }
+                    // Fermer la modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addUserModal'));
+                    modal.hide();
+
+                    // Recharger la page pour voir le nouvel utilisateur
+                    window.location.reload();
                 })
                 .catch(error => {
                     console.error('Erreur:', error);
-                    alert('Une erreur est survenue lors de la mise à jour');
+                    alert('Une erreur est survenue lors de l\'ajout de l\'utilisateur');
                 });
-            });
         });
-        document.addEventListener('DOMContentLoaded', function () {
-            attachEditButtonEvents(); // Attacher les événements aux boutons existants
-        });
-    </script>
-    <script>
-        function attachEditButtonEvents() {
-            console.log("Attachement des événements...");
-            document.querySelectorAll('.edit-btn').forEach(button => {
-                //console.log("Bouton détecté :", button);
-                button.addEventListener('click', function () {
-                    const userId = this.getAttribute('data-id');
-                    const userName = this.getAttribute('data-name');
-                    const userFirstname = this.getAttribute('data-firstname');
-                    const userTeam = this.getAttribute('data-team'); // Utiliser cette variable
-                    const userComment = this.getAttribute('data-comment');
-
-                    // Vérifiez si l'ID de l'équipe est défini
-                    if (!userTeam || userTeam === 'undefined') {
-                        console.error("L'ID de l'équipe est manquant ou incorrect.");
-                        return; // Arrêter l'exécution si l'ID est invalide
+    });
+</script>
+<script>
+    // Scripts pour l'export PDF et XLSX
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Script d'export chargé");
+        
+        const generatePdfBtn = document.getElementById('generate-pdf-btn');
+        const generateXlsxBtn = document.getElementById('generate-xlsx-btn');
+        
+        // Vérifier que les bibliothèques sont correctement chargées
+        console.log("jsPDF disponible:", typeof jsPDF !== 'undefined');
+        console.log("XLSX disponible:", typeof XLSX !== 'undefined');
+        
+        // Fonction pour générer un PDF du tableau sans la colonne "Action"
+        generatePdfBtn.addEventListener('click', function() {
+            console.log("Bouton PDF cliqué");
+            
+            try {
+                // Création directe d'un PDF avec autotable (plus simple)
+                const doc = new jsPDF('l', 'mm', 'a4');
+                
+                // Informations pour l'en-tête
+                const teamName = document.getElementById('team-dropdown').options[document.getElementById('team-dropdown').selectedIndex].text;
+                const today = new Date().toLocaleDateString('fr-FR');
+                
+                // Titre
+                doc.setFontSize(18);
+                doc.text('Liste des utilisateurs', doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+                
+                // Sous-titre avec équipe et date
+                doc.setFontSize(12);
+                doc.text(`Équipe: ${teamName}`, 15, 25);
+                doc.text(`Date: ${today}`, doc.internal.pageSize.getWidth() - 15, 25, { align: 'right' });
+                
+                // Récupérer les données du tableau sans la colonne Action
+                const table = document.getElementById('user_tab');
+                const headers = [];
+                const data = [];
+                
+                // En-têtes (sans la dernière colonne Action)
+                const headerCells = table.querySelectorAll('thead th');
+                for (let i = 0; i < headerCells.length - 1; i++) {
+                    headers.push(headerCells[i].textContent.trim());
+                }
+                
+                // Données (sans la dernière colonne Action)
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length > 0) {
+                        const rowData = [];
+                        for (let i = 0; i < cells.length - 1; i++) {
+                            rowData.push(cells[i].textContent.trim());
+                        }
+                        data.push(rowData);
                     }
-
-                    console.log("Données utilisateur :", { userId, userName, userFirstname, userTeam, userComment });
-
-                    // Remplir les champs de la modal
-                    document.getElementById('editUserId').value = userId;
-                    document.getElementById('editUserName').value = userName;
-                    document.getElementById('editUserFirstname').value = userFirstname;
-
-                    const teamSelect = document.getElementById('editUserTeam');
-                    teamSelect.value = userTeam;
-
-                    if (teamSelect.value !== userTeam) {
-                        console.warn(`L'équipe avec l'ID ${userTeam} n'a pas été trouvée dans la liste déroulante.`);
-                        console.log("Valeurs disponibles dans la liste déroulante :", [...teamSelect.options].map(option => option.value));
-                    }
-
-                    document.getElementById('editUserComment').value = userComment;
                 });
-            });
-        }
-    </script>
-    <script>
-        //Fonction de recherche dans le tableau
-        document.addEventListener('DOMContentLoaded', function () {
-            const searchInput = document.getElementById('searchInput');
-            const table = document.getElementById('user_tab');
-            const rows = table.getElementsByTagName('tr');
-        
-            searchInput.addEventListener('keyup', function () {
-                const filter = searchInput.value.toLowerCase();
-        
-                for (let i = 1; i < rows.length; i++) { // Commence à 1 pour ignorer l'en-tête
-                    const cells = rows[i].getElementsByTagName('td');
-                    let match = false;
-        
-                    for (let cell of cells) {
-                        if (cell.textContent.toLowerCase().includes(filter)) {
-                            match = true;
-                            break;
-                        }
-                    }
-        
-                    rows[i].style.display = match ? '' : 'none'; // Affiche ou cache la ligne
-                }
-            });
-        });
-    </script>
-    <script>
-        //script pour la validation du formation d'ajout utilisateur
-        document.addEventListener('DOMContentLoaded', function () {
-            const addUserForm = document.getElementById('addUserForm');
-
-            addUserForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                const formData = new FormData(this);
-
-                fetch(this.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                    }
-                })
-                    .then(response => response.text())
-                    .then(data => {
-                        // Fermer la modal
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('addUserModal'));
-                        modal.hide();
-
-                        // Recharger la page pour voir le nouvel utilisateur
-                        window.location.reload();
-                    })
-                    .catch(error => {
-                        console.error('Erreur:', error);
-                        alert('Une erreur est survenue lors de l\'ajout de l\'utilisateur');
-                    });
-            });
-        });
-    </script>
-    <script>
-        // Scripts pour l'export PDF et XLSX
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log("Script d'export chargé");
-            
-            const generatePdfBtn = document.getElementById('generate-pdf-btn');
-            const generateXlsxBtn = document.getElementById('generate-xlsx-btn');
-            
-            // Vérifier que les bibliothèques sont correctement chargées
-            console.log("jsPDF disponible:", typeof jsPDF !== 'undefined');
-            console.log("XLSX disponible:", typeof XLSX !== 'undefined');
-            
-            // Fonction pour générer un PDF du tableau sans la colonne "Action"
-            generatePdfBtn.addEventListener('click', function() {
-                console.log("Bouton PDF cliqué");
                 
-                try {
-                    // Création directe d'un PDF avec autotable (plus simple)
-                    const doc = new jsPDF('l', 'mm', 'a4');
-                    
-                    // Informations pour l'en-tête
-                    const teamName = document.getElementById('team-dropdown').options[document.getElementById('team-dropdown').selectedIndex].text;
-                    const today = new Date().toLocaleDateString('fr-FR');
-                    
-                    // Titre
-                    doc.setFontSize(18);
-                    doc.text('Liste des utilisateurs', doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
-                    
-                    // Sous-titre avec équipe et date
-                    doc.setFontSize(12);
-                    doc.text(`Équipe: ${teamName}`, 15, 25);
-                    doc.text(`Date: ${today}`, doc.internal.pageSize.getWidth() - 15, 25, { align: 'right' });
-                    
-                    // Récupérer les données du tableau sans la colonne Action
-                    const table = document.getElementById('user_tab');
-                    const headers = [];
-                    const data = [];
-                    
-                    // En-têtes (sans la dernière colonne Action)
-                    const headerCells = table.querySelectorAll('thead th');
-                    for (let i = 0; i < headerCells.length - 1; i++) {
-                        headers.push(headerCells[i].textContent.trim());
+                // Créer le tableau dans le PDF avec autotable
+                doc.autoTable({
+                    head: [headers],
+                    body: data,
+                    startY: 35,
+                    theme: 'grid',
+                    styles: {
+                        fontSize: 10
+                    },
+                    headStyles: {
+                        fillColor: [58, 159, 135],
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold'
                     }
-                    
-                    // Données (sans la dernière colonne Action)
-                    const rows = table.querySelectorAll('tbody tr');
-                    rows.forEach(row => {
-                        const cells = row.querySelectorAll('td');
-                        if (cells.length > 0) {
-                            const rowData = [];
-                            for (let i = 0; i < cells.length - 1; i++) {
-                                rowData.push(cells[i].textContent.trim());
-                            }
-                            data.push(rowData);
-                        }
-                    });
-                    
-                    // Créer le tableau dans le PDF avec autotable
-                    doc.autoTable({
-                        head: [headers],
-                        body: data,
-                        startY: 35,
-                        theme: 'grid',
-                        styles: {
-                            fontSize: 10
-                        },
-                        headStyles: {
-                            fillColor: [58, 159, 135],
-                            textColor: [255, 255, 255],
-                            fontStyle: 'bold'
-                        }
-                    });
-                    
-                    // Pied de page
-                    doc.setFontSize(8);
-                    doc.setTextColor(100);
-                    doc.text('Église Évangélique Rencontre Espérance - Document généré le ' + today, 
-                        doc.internal.pageSize.getWidth()/2, 
-                        doc.internal.pageSize.getHeight() - 10, 
-                        { align: 'center' });
-                    
-                    // Enregistrer le PDF
-                    doc.save(`Liste_utilisateurs_${teamName.replace(/\s+/g, '_')}_${today.replace(/\//g, '-')}.pdf`);
-                    
-                    console.log("PDF généré avec succès");
-                } catch (e) {
-                    console.error("Erreur lors de la génération du PDF:", e);
-                    alert("Une erreur s'est produite lors de la génération du PDF: " + e.message);
-                }
-            });
-            
-            // Fonction pour générer un XLSX du tableau sans la colonne "Action"
-            generateXlsxBtn.addEventListener('click', function() {
-                console.log("Bouton XLSX cliqué");
+                });
                 
-                try {
-                    // Création d'un tableau de données pour l'export
-                    const table = document.getElementById('user_tab');
-                    const data = [];
-                    
-                    // En-têtes sans la colonne "Action"
-                    const headers = [];
-                    const headerCells = table.querySelectorAll('thead th');
-                    for (let i = 0; i < headerCells.length - 1; i++) {
-                        headers.push(headerCells[i].textContent.trim());
-                    }
-                    data.push(headers);
-                    
-                    // Parcourir toutes les lignes et ajouter les données
-                    const rows = table.querySelectorAll('tbody tr');
-                    rows.forEach(row => {
-                        const cells = row.querySelectorAll('td');
-                        if (cells.length > 0) {
-                            const rowData = [];
-                            // Ne pas inclure la dernière colonne (Action)
-                            for (let i = 0; i < cells.length - 1; i++) {
-                                rowData.push(cells[i].textContent.trim());
-                            }
-                            data.push(rowData);
-                        }
-                    });
-                    
-                    console.log("Données récupérées pour XLSX:", data);
-                    
-                    // Utiliser SheetJS pour créer le fichier XLSX
-                    const worksheet = XLSX.utils.aoa_to_sheet(data);
-                    const workbook = XLSX.utils.book_new();
-                    XLSX.utils.book_append_sheet(workbook, worksheet, "Utilisateurs");
-                    
-                    // Récupérer le nom de l'équipe et la date pour le nom du fichier
-                    const teamName = document.getElementById('team-dropdown').options[document.getElementById('team-dropdown').selectedIndex].text;
-                    const today = new Date().toLocaleDateString('fr-FR');
-                    
-                    // Télécharger le fichier XLSX
-                    XLSX.writeFile(workbook, `Liste_utilisateurs_${teamName.replace(/\s+/g, '_')}_${today.replace(/\//g, '-')}.xlsx`);
-                    
-                    console.log("XLSX généré avec succès");
-                } catch (e) {
-                    console.error("Erreur lors de la génération du XLSX:", e);
-                    alert("Une erreur s'est produite lors de la génération du fichier Excel: " + e.message);
-                }
-            });
+                // Pied de page
+                doc.setFontSize(8);
+                doc.setTextColor(100);
+                doc.text('Église Évangélique Rencontre Espérance - Document généré le ' + today, 
+                    doc.internal.pageSize.getWidth()/2, 
+                    doc.internal.pageSize.getHeight() - 10, 
+                    { align: 'center' });
+                
+                // Enregistrer le PDF
+                doc.save(`Liste_utilisateurs_${teamName.replace(/\s+/g, '_')}_${today.replace(/\//g, '-')}.pdf`);
+                
+                console.log("PDF généré avec succès");
+            } catch (e) {
+                console.error("Erreur lors de la génération du PDF:", e);
+                alert("Une erreur s'est produite lors de la génération du PDF: " + e.message);
+            }
         });
-    </script>
+        
+        // Fonction pour générer un XLSX du tableau sans la colonne "Action"
+        generateXlsxBtn.addEventListener('click', function() {
+            console.log("Bouton XLSX cliqué");
+            
+            try {
+                // Création d'un tableau de données pour l'export
+                const table = document.getElementById('user_tab');
+                const data = [];
+                
+                // En-têtes sans la colonne "Action"
+                const headers = [];
+                const headerCells = table.querySelectorAll('thead th');
+                for (let i = 0; i < headerCells.length - 1; i++) {
+                    headers.push(headerCells[i].textContent.trim());
+                }
+                data.push(headers);
+                
+                // Parcourir toutes les lignes et ajouter les données
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length > 0) {
+                        const rowData = [];
+                        // Ne pas inclure la dernière colonne (Action)
+                        for (let i = 0; i < cells.length - 1; i++) {
+                            rowData.push(cells[i].textContent.trim());
+                        }
+                        data.push(rowData);
+                    }
+                });
+                
+                console.log("Données récupérées pour XLSX:", data);
+                
+                // Utiliser SheetJS pour créer le fichier XLSX
+                const worksheet = XLSX.utils.aoa_to_sheet(data);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Utilisateurs");
+                
+                // Récupérer le nom de l'équipe et la date pour le nom du fichier
+                const teamName = document.getElementById('team-dropdown').options[document.getElementById('team-dropdown').selectedIndex].text;
+                const today = new Date().toLocaleDateString('fr-FR');
+                
+                // Télécharger le fichier XLSX
+                XLSX.writeFile(workbook, `Liste_utilisateurs_${teamName.replace(/\s+/g, '_')}_${today.replace(/\//g, '-')}.xlsx`);
+                
+                console.log("XLSX généré avec succès");
+            } catch (e) {
+                console.error("Erreur lors de la génération du XLSX:", e);
+                alert("Une erreur s'est produite lors de la génération du fichier Excel: " + e.message);
+            }
+        });
+    });
+</script>
+{% endblock %}

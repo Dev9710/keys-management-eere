@@ -1,0 +1,452 @@
+{% extends "listings/base.html" %}
+{% load static %}
+
+{% block title %}Mon Profil | Gestion des Clés{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Carte de profil -->
+        <div class="col-lg-4">
+            <div class="card mb-4 shadow-sm border-0 rounded-lg">
+                <div class="card-body text-center">
+                    <!-- Avatar/Initiales de l'utilisateur -->
+                    <div class="d-flex justify-content-center mb-4">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto" style="width: 120px; height: 120px; font-size: 48px;">
+                            {{ user.first_name|first }}{{ user.last_name|first }}
+                        </div>
+                    </div>
+                    
+                    <!-- Informations de base -->
+                    <h5 class="mb-1">{{ user.first_name }} {{ user.last_name }}</h5>
+                    <p class="text-muted mb-3">{{ user.email }}</p>
+                    
+                    <!-- Badge de rôle -->
+                    <div class="mb-3">
+                        <span class="badge {% if user.role == 'admin' %}bg-danger{% elif user.role == 'editor' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %} px-3 py-2">
+                            {{ user.get_role_display }}
+                        </span>
+                    </div>
+                    
+                    <!-- Date de création du compte -->
+                    <div class="small text-muted mt-3">
+                        <i class="fas fa-calendar-alt me-1"></i> Inscrit depuis le {{ user.date_joined|date:"d/m/Y" }}
+                    </div>
+                    
+                    <!-- Dernière connexion -->
+                    <div class="small text-muted mt-1">
+                        <i class="fas fa-clock me-1"></i> Dernière connexion le {{ user.last_login|date:"d/m/Y à H:i" }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Carte de navigation rapide -->
+            <div class="card mb-4 shadow-sm border-0 rounded-lg">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Navigation rapide</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-4 py-3">
+                            <a href="{% url 'home' %}" class="text-decoration-none">
+                                <i class="fas fa-home me-2"></i> Accueil
+                            </a>
+                        </li>
+                        <li class="list-group-item px-4 py-3">
+                            <a href="{% url 'key_list' %}" class="text-decoration-none">
+                                <i class="fas fa-key me-2"></i> Gestion des clés
+                            </a>
+                        </li>
+                        {% if user.is_admin %}
+                        <li class="list-group-item px-4 py-3">
+                            <a href="{% url 'owner_management' %}" class="text-decoration-none">
+                                <i class="fas fa-users-cog me-2"></i> Gestion des utilisateurs
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Onglets de modification du profil -->
+        <div class="col-lg-8">
+            <!-- Messages d'alerte -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <!-- Onglets -->
+            <div class="card shadow-sm border-0 rounded-lg mb-4">
+                <div class="card-header bg-white p-0">
+                    <ul class="nav nav-tabs card-header-tabs" id="profileTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="info" aria-selected="true">
+                                <i class="fas fa-user me-2"></i> Informations personnelles
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab" aria-controls="security" aria-selected="false">
+                                <i class="fas fa-lock me-2"></i> Sécurité
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="card-body">
+                    <div class="tab-content" id="profileTabsContent">
+                        <!-- Onglet Informations personnelles -->
+                        <div class="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
+                            <h5 class="card-title mb-4">Modifier vos informations</h5>
+                            
+                            <form method="post" action="{% url 'profile' %}" class="needs-validation" novalidate>
+                                {% csrf_token %}
+                                <input type="hidden" name="update_profile" value="1">
+                                
+                                <!-- Nom et prénom sur la même ligne -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="{{ form.first_name.id_for_label }}" class="form-label">Prénom</label>
+                                        {{ form.first_name }}
+                                        <div class="invalid-feedback">
+                                            Veuillez saisir votre prénom.
+                                        </div>
+                                        {% if form.first_name.errors %}
+                                            <div class="text-danger">
+                                                {{ form.first_name.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="{{ form.last_name.id_for_label }}" class="form-label">Nom</label>
+                                        {{ form.last_name }}
+                                        <div class="invalid-feedback">
+                                            Veuillez saisir votre nom.
+                                        </div>
+                                        {% if form.last_name.errors %}
+                                            <div class="text-danger">
+                                                {{ form.last_name.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Email -->
+                                <div class="mb-3">
+                                    <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                                    {{ form.email }}
+                                    <div class="invalid-feedback">
+                                        Veuillez saisir une adresse email valide.
+                                    </div>
+                                    {% if form.email.errors %}
+                                        <div class="text-danger">
+                                            {{ form.email.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Informations non modifiables -->
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Identifiant</label>
+                                    <input type="text" class="form-control bg-light" id="username" value="{{ user.username }}" readonly>
+                                    <div class="form-text text-muted">
+                                        L'identifiant ne peut pas être modifié.
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        <i class="fas fa-save me-2"></i> Enregistrer les modifications
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Onglet Sécurité -->
+                        <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+                            <h5 class="card-title mb-4">Modifier votre mot de passe</h5>
+                            
+                            <div class="alert alert-info mb-4">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-info-circle fa-lg"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <p class="mb-0">Un mot de passe fort doit :</p>
+                                        <ul class="mb-0">
+                                            <li>Contenir au moins 8 caractères</li>
+                                            <li>Inclure des lettres majuscules et minuscules</li>
+                                            <li>Inclure au moins un chiffre</li>
+                                            <li>Inclure au moins un caractère spécial</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <form method="post" action="{% url 'profile' %}" id="password-form" class="needs-validation" novalidate>
+                                {% csrf_token %}
+                                <input type="hidden" name="change_password" value="1">
+                                
+                                <!-- Ancien mot de passe -->
+                                <div class="mb-3">
+                                    <label for="{{ password_form.old_password.id_for_label }}" class="form-label">Mot de passe actuel</label>
+                                    <div class="input-group">
+                                        {{ password_form.old_password }}
+                                        <button class="btn btn-outline-secondary toggle-password" type="button" tabindex="-1">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Veuillez saisir votre mot de passe actuel.
+                                    </div>
+                                    {% if password_form.old_password.errors %}
+                                        <div class="text-danger">
+                                            {{ password_form.old_password.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Nouveau mot de passe -->
+                                <div class="mb-3">
+                                    <label for="{{ password_form.new_password1.id_for_label }}" class="form-label">Nouveau mot de passe</label>
+                                    <div class="input-group">
+                                        {{ password_form.new_password1 }}
+                                        <button class="btn btn-outline-secondary toggle-password" type="button" tabindex="-1">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Le mot de passe doit contenir au moins 8 caractères.
+                                    </div>
+                                    
+                                    <!-- Indicateur de force du mot de passe -->
+                                    <div id="passwordStrength" class="mt-2">
+                                        <div class="progress" style="height: 5px;">
+                                            <div id="passwordStrengthBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        <div class="d-flex justify-content-between mt-1">
+                                            <small class="text-muted">Faible</small>
+                                            <small class="text-muted">Fort</small>
+                                        </div>
+                                        <small id="passwordFeedback" class="form-text"></small>
+                                    </div>
+                                    
+                                    {% if password_form.new_password1.errors %}
+                                        <div class="text-danger">
+                                            {{ password_form.new_password1.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Confirmation du nouveau mot de passe -->
+                                <div class="mb-4">
+                                    <label for="{{ password_form.new_password2.id_for_label }}" class="form-label">Confirmer le nouveau mot de passe</label>
+                                    <div class="input-group">
+                                        {{ password_form.new_password2 }}
+                                        <button class="btn btn-outline-secondary toggle-password" type="button" tabindex="-1">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Veuillez confirmer votre mot de passe.
+                                    </div>
+                                    <div id="passwordMatch" class="form-text"></div>
+                                    {% if password_form.new_password2.errors %}
+                                        <div class="text-danger">
+                                            {{ password_form.new_password2.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" class="btn btn-primary px-4" id="changePasswordBtn">
+                                        <i class="fas fa-key me-2"></i> Changer le mot de passe
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Activation de l'onglet approprié si un paramètre est présent dans l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    
+    if (tab === 'security') {
+        const securityTab = document.getElementById('security-tab');
+        securityTab.click();
+    }
+
+    // Validation des formulaires
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            // Si c'est le formulaire de mot de passe, faire des vérifications supplémentaires
+            if (form.id === 'password-form') {
+                const password1 = document.getElementById('id_new_password1').value;
+                const password2 = document.getElementById('id_new_password2').value;
+                
+                // Vérifier que les mots de passe correspondent
+                if (password1 !== password2) {
+                    event.preventDefault();
+                    document.getElementById('passwordMatch').textContent = 'Les mots de passe ne correspondent pas.';
+                    document.getElementById('passwordMatch').className = 'form-text text-danger';
+                    return;
+                }
+                
+                // Vérifier la longueur minimale
+                if (password1.length < 8 && password1.length > 0) {
+                    event.preventDefault();
+                    document.getElementById('passwordFeedback').textContent = 'Le mot de passe doit contenir au moins 8 caractères.';
+                    document.getElementById('passwordFeedback').className = 'form-text text-danger';
+                    return;
+                }
+            }
+            
+            form.classList.add('was-validated');
+        }, false);
+    });
+
+    // Afficher/masquer le mot de passe
+    document.querySelectorAll('.toggle-password').forEach(button => {
+        button.addEventListener('click', function() {
+            const passwordField = this.previousElementSibling;
+            const icon = this.querySelector('i');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    });
+
+    // Vérification de la force du mot de passe
+    const passwordInput = document.getElementById('id_new_password1');
+    if (passwordInput) {
+        const strengthBar = document.getElementById('passwordStrengthBar');
+        const feedback = document.getElementById('passwordFeedback');
+        
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            
+            // Réinitialiser
+            strengthBar.className = 'progress-bar';
+            strengthBar.style.width = '0%';
+            
+            if (password.length === 0) {
+                feedback.textContent = '';
+                return;
+            }
+            
+            // Calculer la force
+            let strength = 0;
+            let messages = [];
+            
+            // Longueur
+            if (password.length > 8) {
+                strength += 1;
+            } else {
+                messages.push('Plus long');
+            }
+            
+            // Lettres majuscules et minuscules
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) {
+                strength += 1;
+            } else {
+                messages.push('Majuscules et minuscules');
+            }
+            
+            // Chiffres
+            if (password.match(/\d/)) {
+                strength += 1;
+            } else {
+                messages.push('Chiffres');
+            }
+            
+            // Caractères spéciaux
+            if (password.match(/[^a-zA-Z\d]/)) {
+                strength += 1;
+            } else {
+                messages.push('Caractères spéciaux');
+            }
+            
+            // Mise à jour de l'UI
+            switch (strength) {
+                case 0:
+                    strengthBar.style.width = '20%';
+                    strengthBar.classList.add('bg-danger');
+                    feedback.textContent = 'Très faible';
+                    feedback.className = 'form-text text-danger';
+                    break;
+                case 1:
+                    strengthBar.style.width = '40%';
+                    strengthBar.classList.add('bg-danger');
+                    feedback.textContent = 'Faible: ' + messages.join(', ');
+                    feedback.className = 'form-text text-danger';
+                    break;
+                case 2:
+                    strengthBar.style.width = '60%';
+                    strengthBar.classList.add('bg-warning');
+                    feedback.textContent = 'Moyen: ' + messages.join(', ');
+                    feedback.className = 'form-text text-warning';
+                    break;
+                case 3:
+                    strengthBar.style.width = '80%';
+                    strengthBar.classList.add('bg-info');
+                    feedback.textContent = 'Bon: ' + messages.join(', ');
+                    feedback.className = 'form-text text-info';
+                    break;
+                case 4:
+                    strengthBar.style.width = '100%';
+                    strengthBar.classList.add('bg-success');
+                    feedback.textContent = 'Excellent!';
+                    feedback.className = 'form-text text-success';
+                    break;
+            }
+        });
+
+        // Vérification de la correspondance des mots de passe
+        const confirmPasswordInput = document.getElementById('id_new_password2');
+        const passwordMatchFeedback = document.getElementById('passwordMatch');
+        
+        confirmPasswordInput.addEventListener('input', function() {
+            const password1 = passwordInput.value;
+            const password2 = this.value;
+            
+            if (password2.length === 0) {
+                passwordMatchFeedback.textContent = '';
+                passwordMatchFeedback.className = 'form-text';
+            } else if (password1 === password2) {
+                passwordMatchFeedback.textContent = 'Les mots de passe correspondent.';
+                passwordMatchFeedback.className = 'form-text text-success';
+            } else {
+                passwordMatchFeedback.textContent = 'Les mots de passe ne correspondent pas.';
+                passwordMatchFeedback.className = 'form-text text-danger';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+                                

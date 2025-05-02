@@ -1,83 +1,9 @@
-<!-- templates/listings/Team.html -->
-<!DOCTYPE html>
-<html lang="fr">
+{% extends 'listings/base.html' %}
+{% load static %}
 
-<head>
-    <!-- Définition du charset pour les caractères spéciaux en UTF-8 -->
-    <meta charset="UTF-8">
-    <!-- Configuration pour rendre le site responsive sur différents appareils -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Titre de la page affiché dans l'onglet du navigateur -->
-    <title>Gestion des équipes</title>
-    <!-- Lien vers la librairie Bootstrap pour styliser la page -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Lien vers Font Awesome pour inclure des icônes dans les boutons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Scripts pour la génération de PDF et XLSX -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.18.5/package/dist/xlsx.full.min.js"></script>
-    <!-- Style CSS personnalisé pour ajuster les boutons et la mise en page -->
-    <style>
-        /* Styles pour aligner le contenu des boutons */
-        .top-header {
-            background: white;
-            color: #3a9f87;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 50px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
+{% block title %}Gestion des équipes{% endblock %}
 
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .nav-menu {
-            display: flex;
-            gap: 30px;
-        }
-
-        .nav-menu a {
-            color: #3a9f87;
-            text-decoration: none;
-            transition: color 0.3s ease;
-            font-weight: 500;
-        }
-
-        .nav-menu a:hover {
-            color: #2a7562;
-        }
-        html, body {
-    height: 100%;
-    margin: 0;
-}
-
-body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
-.main-content {
-    flex: 1;
-}
-
-.footer {
-    width: 100%;
-    background: #3a9f87;
-    color: white;
-    text-align: center;
-    padding: 30px 20px;
-    margin-top: auto;
-}
-
+{% block extra_css %}
 /* Style pour les boutons d'export */
 .export-buttons {
     display: flex;
@@ -85,181 +11,190 @@ body {
     gap: 20px;
     margin: 30px 0;
 }
-    </style>
-</head>
 
-<body>
-    <div class="top-header">
-        <div class="logo" onclick="window.location.href='/home/'">EERE</div>
-        <nav class="nav-menu">
-            <a href="/keys/list/">Gestion des clés</a>
-            <a href="/teams">Gestion des équipes</a>
-            <a href="/users">Gestion des fidèles</a>
-            <a href="/attr">Attribuer des clés</a>
-        </nav>
-    </div>
-    <div class="container mt-5">
-        {% if messages %}
-<div class="messages-container">
-    {% for message in messages %}
-    <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
-        <!-- Titre de la section principale -->
-        <h2 class="mb-4">Gestion par équipes</h2>
-        <div class="d-flex flex-row bd-highlight mb-3 gap-3">
-            <!-- Bouton Ajouter une Nouvelle Clé -->
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTeamModal">
-                <i class="fas fa-plus"></i> Ajouter une nouvelle équipe
-            </button>
-            <!-- Champ de Recherche -->
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Rechercher une équipe..."
-                    class="form-control w-100">
-            </div>
+/* Styles pour les actions */
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-            <!-- Total des équipes aligné à droite -->
-            <div class="mb-3 ms-auto text-end">
-                <span class="fw-bold">Total des équipes :</span>
-                <span>{{ teams_count }}</span>
-            </div>
+.action-btn i {
+    margin-right: 5px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <!-- Table pour afficher les éuipes -->
-        <table class="table table-striped table-hover" id="team_tab">
-            <thead class="table-dark">
-                <tr>
-                    <!-- Définir une largeur fixe pour chaque colonne -->
-                    <th scope="col" style="width: 40%">Nom</th>
-                    <th scope="col" style="width: 20%">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for team in teams %}
-                <tr>
-                    <td>{{ team.name }}</td>
-                    <td>
-                        <div class="d-flex gap-2">
-                            <!-- Bouton Modifier -->
-                            <button type = 'button' class="btn btn-warning btn-sm edit-btn flex-fill action-btn" style="width: 10Opx;"
-                                 data-bs-toggle="modal" data-bs-target="#editTeamModal" data-id="{{ team.id }}">
-                                <i class="fas fa-edit"></i> Modifier
-                            </button>
-                             <!-- Bouton Supprimer -->
-                            <button type="button" class="btn btn-danger btn-sm" style="width: 100px;"
-                                data-bs-toggle="modal"
-                                data-bs-target="#deleteTeamModal"
-                                data-delete-url="{% url 'team_delete' team.id %}"
-                                data-team-name="{{ team.name }}">
-                                <i class="fas fa-trash"></i> Supprimer
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="2" class="text-center">Aucune équipe</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-            <!-- Edit Team Modal -->
-            <div class="modal fade" id="editTeamModal" tabindex="-1" aria-labelledby="editTeamModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <!-- Modal Header -->
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="editTeamModalLabel">Modifier l'équipe</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <!-- Modal Body -->
-                        <div class="modal-body">
-                            <form id="editTeamForm" action="{% url 'team_update' %}" method="POST">
-                                {% csrf_token %}
-                                <input type="hidden" id="editTeamId" name="id">
-                                <div class="mb-3">
-                                    <label for="editTeamName" class="form-label">Nom</label>
-                                    <input type="text" class="form-control" id="editTeamName" name="name" required>
-                                </div>
-                            </form>
-                        </div>
-                        <!-- Modal Footer -->
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                            <button type="button" class="btn btn-primary" id="saveTeamChanges">Enregistrer</button>
-                        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <!-- Titre de la section principale -->
+    <h2 class="mb-4">Gestion par équipes</h2>
+    <div class="d-flex flex-row bd-highlight mb-3 gap-3">
+        <!-- Bouton Ajouter une Nouvelle Clé -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTeamModal">
+            <i class="fas fa-plus"></i> Ajouter une nouvelle équipe
+        </button>
+        <!-- Champ de Recherche -->
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Rechercher une équipe..."
+                class="form-control w-100">
+        </div>
+        <!-- Total des équipes aligné à droite -->
+        <div class="mb-3 ms-auto text-end">
+            <span class="fw-bold">Total des équipes :</span>
+            <span>{{ teams_count }}</span>
+        </div>
+    </div>
+    <!-- Table pour afficher les éuipes -->
+    <table class="table table-striped table-hover" id="team_tab">
+        <thead class="table-dark">
+            <tr>
+                <!-- Définir une largeur fixe pour chaque colonne -->
+                <th scope="col" style="width: 40%">Nom</th>
+                <th scope="col" style="width: 20%">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for team in teams %}
+            <tr>
+                <td>{{ team.name }}</td>
+                <td>
+                    <div class="d-flex gap-2">
+                        <!-- Bouton Modifier -->
+                        <button type = 'button' class="btn btn-warning btn-sm edit-btn flex-fill action-btn" style="width: 10Opx;"
+                             data-bs-toggle="modal" data-bs-target="#editTeamModal" data-id="{{ team.id }}">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                         <!-- Bouton Supprimer -->
+                        <button type="button" class="btn btn-danger btn-sm" style="width: 100px;"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteTeamModal"
+                            data-delete-url="{% url 'team_delete' team.id %}"
+                            data-team-name="{{ team.name }}">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
                     </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2" class="text-center">Aucune équipe</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!-- Edit Team Modal -->
+    <div class="modal fade" id="editTeamModal" tabindex="-1" aria-labelledby="editTeamModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editTeamModalLabel">Modifier l'équipe</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            </div>
-            <!-- Add team Modal -->
-            <div class="modal fade" id="addTeamModal" tabindex="-1" aria-labelledby="addTeamModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form id="addTeamForm" method="post" action="{% url 'team_create' %}">
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <form id="editTeamForm" action="{% url 'team_update' %}" method="POST">
                         {% csrf_token %}
-                        <!-- Modal Header -->
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="addTeamModalLabel">Ajouter une équipe</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
+                        <input type="hidden" id="editTeamId" name="id">
+                        <div class="mb-3">
+                            <label for="editTeamName" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="editTeamName" name="name" required>
                         </div>
-                        <!-- Modal Body -->
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="addTeamName" class="form-label">Nom</label>
-                                <input type="text" class="form-control" id="addTeamName" name="name" required>
-                            </div>  
-                        </div>
-                        <!-- Modal Footer -->
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                            <button type="submit" class="btn btn-primary">Enregistrer</button>
-                        </div>
-                    </form>                        
+                    </form>
+                </div>
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="saveTeamChanges">Enregistrer</button>
                 </div>
             </div>
         </div>
-            <!-- Delete Confirmation Modal -->
-            <div class="modal fade" id="deleteTeamModal" tabindex="-1" aria-labelledby="deleteTeamModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="deleteTeamModalLabel">Supprimer l'équipe</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <!-- Message de confirmation avec le nom de l'équipe -->
-                            Voulez-vous vraiment supprimer l'équipe <strong id="TeamNameToDelete"></strong> ?
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                            <!-- Formulaire explicitement fermé -->
-                            <form id="deleteTeamForm" method="post" action="">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-danger">Supprimer</button>
-                            </form>
-                        </div>
+    </div>
+    <!-- Add team Modal -->
+    <div class="modal fade" id="addTeamModal" tabindex="-1" aria-labelledby="addTeamModalLabel"
+    aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="addTeamForm" method="post" action="{% url 'team_create' %}">
+                    {% csrf_token %}
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addTeamModalLabel">Ajouter une équipe</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
+                    <!-- Modal Body -->
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="addTeamName" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="addTeamName" name="name" required>
+                        </div>  
+                    </div>
+                    <!-- Modal Footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>                        
+            </div>
+        </div>
+    </div>
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteTeamModal" tabindex="-1" aria-labelledby="deleteTeamModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteTeamModalLabel">Supprimer l'équipe</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Message de confirmation avec le nom de l'équipe -->
+                    Voulez-vous vraiment supprimer l'équipe <strong id="TeamNameToDelete"></strong> ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <!-- Formulaire explicitement fermé -->
+                    <form id="deleteTeamForm" method="post" action="">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                    </form>
                 </div>
             </div>
-            
-            <!-- Boutons d'export ajoutés ici -->
-            <div class="export-buttons">
-                <button type="button" class="btn btn-danger" id="generatePdfBtn">
-                    <i class="fas fa-file-pdf"></i> Générer PDF
-                </button>
-                <button type="button" class="btn btn-success" id="generateXlsxBtn">
-                    <i class="fas fa-file-excel"></i> Générer XLSX
-                </button>
-            </div>
-            
-            <script>
-               document.addEventListener('DOMContentLoaded', function() {
+        </div>
+    </div>
+    
+    <!-- Boutons d'export ajoutés ici -->
+    <div class="export-buttons">
+        <button type="button" class="btn btn-danger" id="generatePdfBtn">
+            <i class="fas fa-file-pdf"></i> Générer PDF
+        </button>
+        <button type="button" class="btn btn-success" id="generateXlsxBtn">
+            <i class="fas fa-file-excel"></i> Générer XLSX
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Scripts pour la génération de PDF et XLSX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.18.5/package/dist/xlsx.full.min.js"></script>
+
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
     // Si des alertes/messages existent déjà, leur appliquer le style Bootstrap
     styleExistingMessages();
     
@@ -521,209 +456,190 @@ body {
         XLSX.writeFile(wb, "liste_equipes.xlsx");
     }
 });
-            </script>
-            <script>
-                const TeamTableBody = document.querySelector('#team_tab tbody'); // Corps du tableau des éuipes
-                function loadUserbyTeam(teamId) {
-                        const baseUrl = teamDropdown.getAttribute('data-url'); // URL de base
-                        const url = `${baseUrl}?id=${teamId}`; // Construire l'URL complète
-                        
+</script>
 
-                        fetch(url)
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error(`HTTP error! status: ${response.status}`);
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                                teamTableBody.innerHTML = ''; // Vider le tableau
-
-                                if (data.teams.length > 0) {
-                                    data.teams.forEach(team => {
-                                        const row = document.createElement('tr');
-                                        row.innerHTML = `
-                        <td>${team.name}</td>
-                           <td>
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-warning btn-sm edit-btn" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#editTeamModal" 
-                                    data-id="${team.id}" 
-                                    data-name="${team.name}" 
-                                    <i class="fas fa-edit"></i> Modifier
-                                </button>
-                                <form method="post" action="/team_delete/${team.id}/">
-                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" 
-        data-bs-target="#deleteTeamModal" 
-        data-delete-url="/team_delete/${team.id}/" 
-        data-user-name="${team.name}">
-        <i class="fas fa-trash"></i> Supprimer
-    </button>
-                            </form>
-                            </div>
-                        </td>
-                    `;
-                                        teamTableBody.appendChild(row);
-                                    });
-                                } else {
-                                    // Si aucune équipe n'est trouvé
-                                    const row = document.createElement('tr');
-                                    row.innerHTML = `<td colspan="6" class="text-center">Aucun équipe trouvé.</td>`;
-                                    teamTableBody.appendChild(row);
-                                }
-
-                                // Réattacher les événements aux boutons dynamiques
-                                attachEditButtonEvents();
-                            })
-                            .catch(error => {
-                                console.error('Erreur lors du chargement des éuipes :', error);
-                            });
-                    }
-                document.addEventListener('DOMContentLoaded', function () {
-                });
-            </script>
-            <script>
-                //Fonction de recherche dans le tableau
-                document.addEventListener('DOMContentLoaded', function () {
-                    const searchInput = document.getElementById('searchInput');
-                    const table = document.getElementById('team_tab');
-                    const rows = table.getElementsByTagName('tr');
-                
-                    searchInput.addEventListener('keyup', function () {
-                        const filter = searchInput.value.toLowerCase();
-                
-                        for (let i = 1; i < rows.length; i++) { // Commence à 1 pour ignorer l'en-tête
-                            const cells = rows[i].getElementsByTagName('td');
-                            let match = false;
-                
-                            for (let cell of cells) {
-                                if (cell.textContent.toLowerCase().includes(filter)) {
-                                    match = true;
-                                    break;
-                                }
-                            }
-                
-                            rows[i].style.display = match ? '' : 'none'; // Affiche ou cache la ligne
-                        }
-                    });
-                });
-                
-                </script>
+<script>
+    const TeamTableBody = document.querySelector('#team_tab tbody'); // Corps du tableau des éuipes
+    function loadUserbyTeam(teamId) {
+            const baseUrl = teamDropdown.getAttribute('data-url'); // URL de base
+            const url = `${baseUrl}?id=${teamId}`; // Construire l'URL complète
             
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-  
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    teamTableBody.innerHTML = ''; // Vider le tableau
+                    if (data.teams.length > 0) {
+                        data.teams.forEach(team => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+            <td>${team.name}</td>
+               <td>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-warning btn-sm edit-btn" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#editTeamModal" 
+                        data-id="${team.id}" 
+                        data-name="${team.name}" 
+                        <i class="fas fa-edit"></i> Modifier
+                    </button>
+                    <form method="post" action="/team_delete/${team.id}/">
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" 
+data-bs-target="#deleteTeamModal" 
+data-delete-url="/team_delete/${team.id}/" 
+data-user-name="${team.name}">
+<i class="fas fa-trash"></i> Supprimer
+</button>
+                </form>
+                </div>
+            </td>
+        `;
+                            teamTableBody.appendChild(row);
+                        });
+                    } else {
+                        // Si aucune équipe n'est trouvé
+                        const row = document.createElement('tr');
+                        row.innerHTML = `<td colspan="6" class="text-center">Aucun équipe trouvé.</td>`;
+                        teamTableBody.appendChild(row);
+                    }
+                    // Réattacher les événements aux boutons dynamiques
+                    attachEditButtonEvents();
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement des éuipes :', error);
+                });
+        }
+    document.addEventListener('DOMContentLoaded', function () {
+    });
+</script>
 
-    // Pour sauvegarder les modifications
-    document.getElementById('saveTeamChanges').addEventListener('click', function() {
-        const form = document.getElementById('editTeamForm');
-        const formData = new FormData(form);
-
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+<script>
+    //Fonction de recherche dans le tableau
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('searchInput');
+        const table = document.getElementById('team_tab');
+        const rows = table.getElementsByTagName('tr');
+    
+        searchInput.addEventListener('keyup', function () {
+            const filter = searchInput.value.toLowerCase();
+    
+            for (let i = 1; i < rows.length; i++) { // Commence à 1 pour ignorer l'en-tête
+                const cells = rows[i].getElementsByTagName('td');
+                let match = false;
+    
+                for (let cell of cells) {
+                    if (cell.textContent.toLowerCase().includes(filter)) {
+                        match = true;
+                        break;
+                    }
+                }
+    
+                rows[i].style.display = match ? '' : 'none'; // Affiche ou cache la ligne
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('editTeamModal'));
-                modal.hide();
-                alert(data.message);
-                window.location.reload();
-            } else {
-                alert(data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-            alert('Une erreur est survenue lors de la modification.');
         });
     });
-});
-                document.addEventListener('DOMContentLoaded', function () {
-                    attachEditButtonEvents(); // Attacher les événements aux boutons existants
-                });
-            </script>
-            <script>
-                  // Pour éditer une équipe
-    function editTeam(id, name) {
-        document.getElementById('editTeamId').value = id;
-        document.getElementById('editTeamName').value = name;
-        
-        const modal = new bootstrap.Modal(document.getElementById('editTeamModal'));
-        modal.show();
-    }
-            </script>
-            <script>
-                function attachEditButtonEvents() {
-                    console.log("Attachement des événements...");
-                    document.querySelectorAll('.edit-btn').forEach(button => {
-                        //console.log("Bouton détecté :", button);
-                        button.addEventListener('click', function () {
+    
+</script>
 
-                            const teamName = this.getAttribute('data-name');
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
 
-
-                            // Vérifiez si l'ID de l'équipe est défini
-                            if (!userTeam || userTeam === 'undefined') {
-                                console.error("L'ID de l'équipe est manquant ou incorrect.");
-                                return; // Arrêter l'exécution si l'ID est invalide
-                            }
-
-                            console.log("Données équipe :", { teamName });
-
-                            // Remplir les champs de la modal
-
-                            document.getElementById('editTeamName').value = teamName;          
-
-                        });
-                    });
+        // Pour sauvegarder les modifications
+        document.getElementById('saveTeamChanges').addEventListener('click', function() {
+            const form = document.getElementById('editTeamForm');
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editTeamModal'));
+                    modal.hide();
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la modification.');
+            });
+        });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        attachEditButtonEvents(); // Attacher les événements aux boutons existants
+    });
+</script>
 
-            </script>
+<script>
+      // Pour éditer une équipe
+function editTeam(id, name) {
+    document.getElementById('editTeamId').value = id;
+    document.getElementById('editTeamName').value = name;
+    
+    const modal = new bootstrap.Modal(document.getElementById('editTeamModal'));
+    modal.show();
+}
+</script>
 
-            <script>
-                //script pour la validation du formation d'ajout équi^pe
-                document.addEventListener('DOMContentLoaded', function () {
-                    const addTeamForm = document.getElementById('addTeamForm');
+<script>
+    function attachEditButtonEvents() {
+        console.log("Attachement des événements...");
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            //console.log("Bouton détecté :", button);
+            button.addEventListener('click', function () {
+                const teamName = this.getAttribute('data-name');
+                // Vérifiez si l'ID de l'équipe est défini
+                if (!userTeam || userTeam === 'undefined') {
+                    console.error("L'ID de l'équipe est manquant ou incorrect.");
+                    return; // Arrêter l'exécution si l'ID est invalide
+                }
+                console.log("Données équipe :", { teamName });
+                // Remplir les champs de la modal
+                document.getElementById('editTeamName').value = teamName;          
+            });
+        });
+    }
+</script>
 
-                    addTeamForm.addEventListener('submit', function (e) {
-                        e.preventDefault();
-
-                        const formData = new FormData(this);
-
-                        fetch(this.action, {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                            }
-                        })
-                            .then(response => response.text())
-                            .then(data => {
-                                // Fermer la modal
-                                const modal = bootstrap.Modal.getInstance(document.getElementById('addTeamModal'));
-                                modal.hide();
-
-                                // Recharger la page pour voir le nouvelle équipe
-                                window.location.reload();
-                            })
-                            .catch(error => {
-                                console.error('Erreur:', error);
-                                alert('Une erreur est survenue lors de l\'ajout de l\'équipe');
-                            });
-                    });
+<script>
+    //script pour la validation du formation d'ajout équi^pe
+    document.addEventListener('DOMContentLoaded', function () {
+        const addTeamForm = document.getElementById('addTeamForm');
+        addTeamForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+                .then(response => response.text())
+                .then(data => {
+                    // Fermer la modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addTeamModal'));
+                    modal.hide();
+                    // Recharger la page pour voir le nouvelle équipe
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Une erreur est survenue lors de l\'ajout de l\'équipe');
                 });
-            </script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    </div>
-<footer class="footer" id="contact">
-    <p>&copy; Copyright 2025 Église Évangélique Rencontre Espérance . Tous droits réservés.</p>
-</footer>
-</body>
-</html>
+        });
+    });
+</script>
+{% endblock %}

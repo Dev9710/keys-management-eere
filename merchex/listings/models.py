@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.db.models import Sum
+from django.contrib.auth.models import AbstractUser
 
 
 class Team(models.Model):
@@ -17,8 +18,78 @@ class User(models.Model):
         Team, on_delete=models.CASCADE, related_name='members', null=True, blank=True)
     comment = models.CharField(max_length=200, default='', blank=True)
 
+    class Meta:
+        verbose_name = "Utilisateur"  # Nom au singulier
+        verbose_name_plural = "Utilisateurs"  # Nom au pluriel
+
     def __str__(self):
         return f"{self.firstname} {self.name} | Team: {self.team.name if self.team else 'Aucune équipe'}"
+
+
+class Owner(AbstractUser):
+    """
+    Modèle personnalisé pour les utilisateurs de l'application.
+    Hérite de AbstractUser pour conserver les fonctionnalités d'authentification de Django.
+    Ajoute un champ 'role' pour gérer les permissions dans l'application.
+    """
+    # Définition des constantes pour les rôles
+    ADMINISTRATOR = 'admin'
+    EDITOR = 'editor'
+    VISITOR = 'visitor'
+
+    # Choix possibles pour le champ 'role'
+    ROLE_CHOICES = [
+        # Accès complet à toutes les fonctionnalités
+        (ADMINISTRATOR, 'Administrateur'),
+        (EDITOR, 'Éditeur'),                # Peut modifier mais pas administrer
+        (VISITOR, 'Visiteur'),              # Accès en lecture seule
+    ]
+
+    # Champ pour stocker le rôle de l'utilisateur, avec 'visitor' comme valeur par défaut
+    role = models.CharField(
+        max_length=10,
+        choices=ROLE_CHOICES,
+        default=VISITOR,
+        help_text="Détermine les permissions de l'utilisateur dans l'application"
+    )
+
+    # Résolution des conflits de related_name avec User standard de Django
+    groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name='groups',
+        blank=True,
+        help_text='The groups this user belongs to.',
+        related_name='owner_set',
+        related_query_name='owner',
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name='user permissions',
+        blank=True,
+        help_text='Specific permissions for this user.',
+        related_name='owner_set',
+        related_query_name='owner',
+    )
+
+    class Meta:
+        verbose_name = "Gestionnaire"
+        verbose_name_plural = "Gestionnaires"
+
+    def is_admin(self):
+        """Vérifie si l'utilisateur a le rôle d'administrateur"""
+        return self.role == self.ADMINISTRATOR
+
+    def is_editor(self):
+        """Vérifie si l'utilisateur a le rôle d'éditeur"""
+        return self.role == self.EDITOR
+
+    def is_visitor(self):
+        """Vérifie si l'utilisateur a le rôle de visiteur"""
+        return self.role == self.VISITOR
+
+    def __str__(self):
+        """Représentation sous forme de chaîne de caractères pour l'affichage"""
+        return f"{self.first_name} {self.last_name} ({self.username})"
 
 
 class KeyType(models.Model):

@@ -1,294 +1,235 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Web App</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-        }
+{% extends 'listings/base.html' %}
+{% load static %}
 
-        .top-header {
-            background: white;
-            color: #3a9f87;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 50px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
+{% block title %}Accueil - Gestion des Clés{% endblock %}
 
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-        }
+{% block extra_css %}
+/* Style personnalisé pour la page d'accueil */
+.hero-section {
+    background: linear-gradient(135deg, #3a9f87, #2a7562);
+    padding: 80px 20px;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
 
-        .nav-menu {
-            display: flex;
-            gap: 30px;
-        }
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    margin: 0 auto;
+}
 
-        .nav-menu a {
-            color: #3a9f87;
-            text-decoration: none;
-            transition: color 0.3s ease;
-            font-weight: 500;
-        }
+.hero-title {
+    font-size: 3.5em;
+    margin-bottom: 20px;
+    animation: slideUp 0.8s ease-out;
+}
 
-        .nav-menu a:hover {
-            color: #2a7562;
-        }
+.hero-description {
+    font-size: 1.5em;
+    margin-bottom: 30px;
+    opacity: 0;
+    animation: fadeIn 0.8s ease-out 0.4s forwards;
+}
 
-        .hero-section {
-            background: linear-gradient(135deg, #3a9f87, #2a7562);
-            padding: 80px 20px;
-            text-align: center;
-            color: white;
-            position: relative;
-            overflow: hidden;
-            min-height: 400px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
+.section-separator {
+    height: 100px;
+    background-color: #f5f5f5;
+    position: relative;
+    overflow: hidden;
+    margin: -1px 0;
+}
 
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            max-width: 800px;
-            margin: 0 auto;
-        }
+.separator-wave {
+    position: absolute;
+    width: 100%;
+    height: 100px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' d='M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+    background-size: cover;
+}
 
-        .hero-title {
-            font-size: 3.5em;
-            margin-bottom: 20px;
-            animation: slideUp 0.8s ease-out;
-        }
+.features-section {
+    background-color: white;
+    padding: 80px 20px;
+}
 
-        .hero-description {
-            font-size: 1.5em;
-            margin-bottom: 30px;
-            opacity: 0;
-            animation: fadeIn 0.8s ease-out 0.4s forwards;
-        }
+.features {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
 
-        .section-separator {
-            height: 100px;
-            background-color: #f5f5f5;
-            position: relative;
-            overflow: hidden;
-            margin: -1px 0;
-        }
+.feature {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
 
-        .separator-wave {
-            position: absolute;
-            width: 100%;
-            height: 100px;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' d='M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
-            background-size: cover;
-        }
+.features-section h2 {
+    text-align: center;
+    color: #2c786c;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
 
-        .features-section {
-            background-color: white;
-            padding: 80px 20px;
-        }
+.feature:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
 
-        .features {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+.feature i {
+    font-size: 40px;
+    color: #3a9f87;
+    margin-bottom: 20px;
+}
 
-        .feature {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 200px;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-        .features-section h2 {
-            text-align: center;
-            color: #2c786c; /* Teinte plus adaptée au style général */
-            font-size: 2rem; /* Augmente la taille pour plus de visibilité */
-            font-weight: bold;
-            margin-bottom: 40px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-        .feature:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
+.feature h3 {
+    color: #333;
+    margin-bottom: 15px;
+}
 
-        .feature i {
-            font-size: 40px;
-            color: #3a9f87;
-            margin-bottom: 20px;
-        }
+.feature p {
+    color: #666;
+    line-height: 1.6;
+}
 
-        .feature h3 {
-            color: #333;
-            margin-bottom: 15px;
-        }
+.get-started-section {
+    background-color: #ffffff;
+    padding: 100px 20px;
+    text-align: center;
+    position: relative;
+}
 
-        .feature p {
-            color: #666;
-            line-height: 1.6;
-        }
+.get-started-section::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background: linear-gradient(to bottom right, transparent 49%, #f8f9fa 50%);
+}
 
-        .get-started-section {
-            background-color: #ffffff;
-            padding: 100px 20px;
-            text-align: center;
-            position: relative;
-        }
+.cta-button {
+    padding: 15px 40px;
+    font-size: 1.2em;
+    background: #3a9f87;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: bounceIn 1s ease 0.8s both;
+}
 
-        .get-started-section::before {
-            content: '';
-            position: absolute;
-            top: -50px;
-            left: 0;
-            width: 100%;
-            height: 50px;
-            background: linear-gradient(to bottom right, transparent 49%, #f8f9fa 50%);
-        }
+.cta-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    background: #2a7562;
+}
 
-        .cta-button {
-            padding: 15px 40px;
-            font-size: 1.2em;
-            background: #3a9f87;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            animation: bounceIn 1s ease 0.8s both;
-        }
+.wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+    background-size: cover;
+}
 
-        .cta-button:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-            background: #2a7562;
-        }
+@keyframes waveAnimation {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(-50%); }
+    100% { transform: translateX(0); }
+}
 
-        .footer {
-            background: #3a9f87;
-            color: white;
-            text-align: center;
-            padding: 30px 20px;
-        }
+@keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
 
-        .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100px;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
-            background-size: cover;
-        }
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 
-        @keyframes waveAnimation {
-            0% { transform: translateX(0); }
-            50% { transform: translateX(-50%); }
-            100% { transform: translateX(0); }
-        }
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+}
 
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5em;
+    }
+    .hero-description {
+        font-size: 1.2em;
+    }
+    .feature {
+        width: 100%;
+        max-width: 350px;
+    }
+}
+{% endblock %}
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes bounceIn {
-            0% { transform: scale(0.3); opacity: 0; }
-            50% { transform: scale(1.05); }
-            70% { transform: scale(0.9); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5em;
-            }
-            .hero-description {
-                font-size: 1.2em;
-            }
-            .feature {
-                width: 100%;
-                max-width: 350px;
-            }
-            .nav-menu {
-                gap: 15px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="top-header">
-        <div class="logo" onclick="window.location.href='/home/'">EERE</div>
-        <nav class="nav-menu">
-            <a href="/keys/list/">Gestion des clés</a>
-            <a href="/teams">Gestion des équipes</a>
-            <a href="/users">Gestion des fidèles</a>
-            <a href="/attr">Attribuer des clés</a>
-        </nav>
+{% block content %}
+<!-- Section Hero -->
+<section class="hero-section" id="home">
+    <div class="wave"></div>
+    <div class="hero-content">
+        <h2 class="hero-title">Bienvenue</h2>
+        <p class="hero-description">Ce portail à pour but d'aider à la gestion des clés au sein de l'Eglise Evangélique Rencontre Espérance.</p>
+        <button class="cta-button" onclick="window.location.href='{% url 'key_list' %}'">On y va !</button>
     </div>
+</section>
 
-    <section class="hero-section" id="home">
-        <div class="wave"></div>
-        <div class="hero-content">
-            <h2 class="hero-title">Bienvenue</h2>
-            <p class="hero-description">Ce portail à pour but d'aider à la gestion des clés au sein de l'Eglise Evangélique Rencontre Espérance.</p>
-            <button class="cta-button">On y va !</button>
-        </div>
-    </section>
+<div class="section-separator">
+    <div class="separator-wave"></div>
+</div>
 
-    <div class="section-separator">
-        <div class="separator-wave"></div>
-    </div>
-
-   <!-- Features Section -->
-   <section class="features-section" id="features">
+<!-- Features Section -->
+<section class="features-section" id="features">
     <h2>Fonctionnalités</h2>
     <div class="features">
-        <div class="feature" onclick="window.location.href='/keys/list/'">
+        <div class="feature" onclick="window.location.href='{% url 'key_list' %}'">
             <i class="fas fa-key"></i>
             <h3>Gestion des clés</h3>
-            <p>Ajouter,modifier et consulter la liste des clés de l'église.</p>
+            <p>Ajouter, modifier et consulter la liste des clés de l'église.</p>
         </div>
-        <div class="feature" onclick="window.location.href='/teams'">
+        <div class="feature" onclick="window.location.href='{% url 'team_list' %}'">
             <i class="fas fa-users"></i>
             <h3>Gestion des équipes</h3>
             <p>Ajouter, supprimer ou modifier le nom d'une équipe.</p>
         </div>
-        <div class="feature" onclick="window.location.href='/users'">
+        <div class="feature" onclick="window.location.href='{% url 'user_list' %}'">
             <i class="fas fa-user"></i>
             <h3>Gestion des fidèles</h3>
             <p>Administrer les fidèles par équipe.</p>
         </div>
-        <div class="feature" onclick="window.location.href='/attr'">
+        <div class="feature" onclick="window.location.href='{% url 'user_keys' %}'">
             <i class="fas fa-id-badge"></i>
             <h3>Attribution des clés</h3>
             <p>Attribuer une ou plusieurs clés aux fidèles</p>
@@ -296,18 +237,13 @@
     </div>
 </section>
 
-    <div class="section-separator">
-        <div class="separator-wave"></div>
-    </div>
+<div class="section-separator">
+    <div class="separator-wave"></div>
+</div>
 
-    <section class="get-started-section" id="about">
-        <h2>Get Started Today</h2>
-        <p>Sign up now to explore all the features and transform your workflow.</p>
-        <button class="cta-button">Start Free Trial</button>
-    </section>
-
-    <footer class="footer" id="contact">
-        <p>&copy; Copyright 2025 Église Évangélique Rencontre Espérance . Tous droits réservés.</p>
-    </footer>
-</body>
-</html>
+<section class="get-started-section" id="about">
+    <h2>Commencez dès aujourd'hui</h2>
+    <p>Utilisez notre application pour faciliter la gestion des clés de l'église.</p>
+    <button class="cta-button" onclick="window.location.href='{% url 'key_list' %}'">Commencer</button>
+</section>
+{% endblock %}

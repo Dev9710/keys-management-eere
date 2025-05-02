@@ -3,13 +3,21 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Case, When, Value, CharField, F, Count
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
-from .models import KeyType, KeyInstance, KeyAssignment, User, Team
-from .forms import KeyForm, KeyInstanceForm, UserForm, TeamForm
+from .models import KeyType, KeyInstance, KeyAssignment, User, Team, Owner
+from .forms import KeyForm, KeyInstanceForm, UserForm, TeamForm, CustomAuthenticationForm, CustomPasswordChangeForm
 from django.views.decorators.http import require_POST
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils import timezone
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.paginator import Paginator
+from .forms import OwnerCreationForm, OwnerUpdateForm
+from django.urls import reverse
+from django.contrib.auth import update_session_auth_hash
 
 
 def hello(request):
@@ -268,6 +276,7 @@ def teams(request):
     return render(request, 'listings/teams.html', {'teams': teams})
 
 
+@login_required
 def user_keys_view(request):
     # Récupérer les paramètres depuis la requête
     user_id = request.GET.get('user_id', None)
@@ -276,7 +285,7 @@ def user_keys_view(request):
     # Initialiser les variables
     assigned_key_instances = []
     available_key_instances = []
-    user = None
+    selected_user = None
     users = []
 
     # Récupérer toutes les équipes pour les filtres
@@ -293,9 +302,10 @@ def user_keys_view(request):
 
     # Filtrer les clés attribuées par utilisateur si un utilisateur est sélectionné
     if user_id:
-        user = get_object_or_404(User, id=user_id)
+        selected_user = get_object_or_404(User, id=user_id)
         # Récupérer les instances de clés attribuées à cet utilisateur
-        assignments = KeyAssignment.objects.filter(user=user, is_active=True)
+        assignments = KeyAssignment.objects.filter(
+            user=selected_user, is_active=True)
         assigned_key_instances = [
             assignment.key_instance for assignment in assignments]
 
@@ -309,7 +319,9 @@ def user_keys_view(request):
         'assigned_keys': assigned_key_instances,
         'user_id': user_id,
         'team_id': team_id,
-        'user': user,
+        'selected_user': selected_user,
+        # L'objet request.user est automatiquement disponible dans les templates
+        # grâce au contexte par défaut de Django, donc pas besoin de l'ajouter
     }
 
     return render(request, 'listings/attribute.html', context)
@@ -825,3 +837,336 @@ def team_create(request):
             messages.error(
                 request, "Erreur lors de l\'ajout de l'équipe.")
     return redirect('team_list')  # If not POST, redirect back to the key list
+
+
+def login_view(request):
+    """
+    Vue pour gérer la connexion des utilisateurs.
+    Authentifie l'utilisateur et crée une session s'il existe.
+    """
+    # Redirection si l'utilisateur est déjà connecté
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    if request.method == 'POST':
+        # Utilisez le formulaire pour valider les données
+        form = CustomAuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            remember_me = form.cleaned_data.get('remember_me', False)
+
+            # Tentative d'authentification avec username
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                # Connexion réussie
+                login(request, user)
+
+                # Gestion de l'option "Se souvenir de moi"
+                if not remember_me:
+                    # La session expire à la fermeture du navigateur
+                    request.session.set_expiry(0)
+
+                messages.success(
+                    request, f'Bienvenue, {user.first_name} {user.last_name}!')
+
+                # Redirection vers la page demandée ou la page d'accueil
+                next_url = request.POST.get('next', 'home')
+                return redirect(next_url)
+        else:
+            # Le formulaire n'est pas valide, les erreurs seront affichées dans le template
+            messages.error(request, 'Identifiant ou mot de passe incorrect.')
+    else:
+        # Initialiser un formulaire vide pour une requête GET
+        form = CustomAuthenticationForm()
+
+    # Passer le formulaire au contexte
+    return render(request, 'listings/login.html', {'form': form})
+
+
+def register_view(request):
+    """
+    Vue pour gérer l'inscription de nouveaux utilisateurs.
+    Crée un nouveau compte avec le rôle 'visiteur' par défaut.
+    """
+    # Redirection si l'utilisateur est déjà connecté
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    if request.method == 'POST':
+        # Traitement du formulaire soumis
+        form = OwnerCreationForm(request.POST)
+        if form.is_valid():
+            # Création du compte avec le rôle par défaut
+            owner = form.save(commit=False)
+            owner.role = 'visitor'  # Rôle par défaut: visiteur
+            owner.save()
+
+            # Rediriger vers la page de succès au lieu de l'accueil
+            return redirect('register_success')  # URL à définir dans urls.py
+        else:
+            # Affichage des erreurs de validation
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+    else:
+        # Affichage du formulaire vide (GET)
+        form = OwnerCreationForm()
+
+    return render(request, 'listings/register.html', {'form': form})
+
+
+def register_success_view(request):
+    """
+    Vue pour afficher la page de succès après création de compte
+    """
+    return render(request, 'listings/success.html')
+
+
+def logout_view(request):
+    """
+    Vue pour déconnecter l'utilisateur et détruire sa session.
+    """
+    logout(request)
+    messages.info(request, 'Vous avez été déconnecté.')
+    return redirect('login')
+
+
+@login_required
+def profile_view(request):
+    """
+    Vue pour afficher et modifier les informations du profil utilisateur.
+    """
+    # Initialiser les formulaires avec l'instance de l'utilisateur connecté
+    form = OwnerUpdateForm(instance=request.user)
+    password_form = CustomPasswordChangeForm(
+        user=request.user)  # Le paramètre user est important!
+
+    if request.method == 'POST':
+        # Vérifier quel formulaire a été soumis
+        if 'update_profile' in request.POST:
+            # Traitement du formulaire de mise à jour du profil
+            form = OwnerUpdateForm(request.POST, instance=request.user)
+            if form.is_valid():
+                form.save()
+                messages.success(
+                    request, 'Vos informations ont été mises à jour avec succès.')
+                return redirect('profile')
+
+        elif 'change_password' in request.POST:
+            # Traitement du formulaire de changement de mot de passe
+            password_form = CustomPasswordChangeForm(
+                user=request.user, data=request.POST)
+            if password_form.is_valid():
+                password_form.save()
+                # Mettre à jour la session pour éviter la déconnexion
+                update_session_auth_hash(request, password_form.user)
+                messages.success(
+                    request, 'Votre mot de passe a été modifié avec succès.')
+                return redirect('profile')
+
+    # Préparer le contexte avec les deux formulaires
+    context = {
+        'form': form,
+        'password_form': password_form,
+    }
+
+    return render(request, 'listings/profile.html', context)
+
+# Fonction pour vérifier si l'utilisateur est un administrateur
+
+
+def is_admin(user):
+    """
+    Fonction de vérification utilisée par le décorateur @user_passes_test.
+    Vérifie si l'utilisateur connecté a le rôle d'administrateur.
+    """
+    return user.role == 'admin'
+
+
+def is_editor_or_admin(user):
+    """Vérifie si l'utilisateur a le rôle d'éditeur ou d'administrateur."""
+    return user.is_authenticated and (user.role == 'editor' or user.role == 'admin')
+
+
+@login_required
+@user_passes_test(is_admin, login_url='access_denied')
+def admin_dashboard(request):
+    """
+    Vue pour le tableau de bord d'administration.
+    Accessible uniquement aux utilisateurs avec le rôle 'admin'.
+    """
+    # Liste de tous les utilisateurs pour l'administration
+    users = Owner.objects.all().order_by('last_name', 'first_name')
+
+    return render(request, 'auth/admin_dashboard.html', {
+        'users': users
+    })
+
+# Vue réservée aux éditeurs et administrateurs
+
+
+@login_required
+@user_passes_test(is_editor_or_admin, login_url='access_denied')
+def editor_dashboard(request):
+    """
+    Vue pour le tableau de bord d'édition.
+    Accessible aux utilisateurs avec le rôle 'editor' ou 'admin'.
+    """
+    return render(request, 'auth/editor_dashboard.html')
+
+# Vue pour la page d'accès refusé
+
+
+def access_denied(request):
+    """
+    Vue pour la page d'accès refusé.
+    Affichée lorsqu'un utilisateur tente d'accéder à une page sans les permissions nécessaires.
+    """
+    messages.error(
+        request, "Vous n'avez pas les permissions nécessaires pour accéder à cette page.")
+    return render(request, 'auth/access_denied.html')
+
+
+@login_required
+@user_passes_test(is_admin)
+def owner_management(request):
+    """
+    Vue pour gérer la liste des utilisateurs (administrateurs uniquement).
+    Affiche la liste paginée de tous les utilisateurs.
+    Nécessite d'être connecté (@login_required) et d'être administrateur (@user_passes_test).
+    """
+    # Récupération de tous les utilisateurs, triés par nom puis prénom
+    owners_list = Owner.objects.all().order_by('last_name', 'first_name')
+
+    # Pagination (10 utilisateurs par page)
+    paginator = Paginator(owners_list, 10)
+    page_number = request.GET.get('page')
+    owners = paginator.get_page(page_number)
+
+    return render(request, 'listings/owner_management.html', {'owners': owners})
+
+
+@login_required
+@user_passes_test(is_admin)
+def add_owner(request):
+    """
+    Vue pour ajouter un nouvel utilisateur (administrateurs uniquement).
+    """
+    # Si c'est une requête POST, traiter le formulaire
+    if request.method == 'POST':
+        form = OwnerCreationForm(request.POST)
+        if form.is_valid():
+            # Enregistrer l'utilisateur
+            owner = form.save(commit=False)
+
+            # Définir les attributs supplémentaires
+            owner.role = request.POST.get('role', 'visitor')
+            owner.is_active = 'is_active' in request.POST
+
+            # Sauvegarder dans la base de données
+            owner.save()
+
+            messages.success(
+                request, f'Utilisateur {owner.username} créé avec succès.')
+            return redirect('owner_management')
+        else:
+            # Afficher les erreurs
+            messages.error(
+                request, 'Erreur dans le formulaire. Veuillez corriger les erreurs ci-dessous.')
+    else:
+        # Pour une requête GET, afficher un formulaire vide
+        form = OwnerCreationForm()
+
+    # Rendre le template avec le formulaire
+    return render(request, 'listings/add_owner.html', {'form': form})
+
+
+@login_required
+@user_passes_test(is_admin)
+def update_owner(request, user_id):
+    """
+    Vue pour mettre à jour un utilisateur existant (administrateurs uniquement).
+    Traite le formulaire de modification et applique les changements.
+    """
+    try:
+        # Récupération de l'utilisateur à modifier
+        user_obj = Owner.objects.get(id=user_id)
+    except Owner.DoesNotExist:
+        messages.error(request, "Cet utilisateur n'existe pas.")
+        # ou 'user_management' selon votre URL
+        return redirect('owner_management')
+
+    if request.method == 'POST':
+        # Création du formulaire avec les données soumises
+        form = OwnerUpdateForm(request.POST, instance=user_obj)
+
+        if form.is_valid():
+            # Sauvegarde des modifications du formulaire
+            owner = form.save(commit=False)
+
+            # Mise à jour du rôle et du statut actif (qui ne sont pas dans le formulaire)
+            owner.role = request.POST.get('role')
+            owner.is_active = 'is_active' in request.POST
+
+            # Sauvegarde des modifications
+            owner.save()
+
+            messages.success(
+                request, f'Utilisateur {owner.username} mis à jour avec succès.')
+            # ou 'user_management' selon votre URL
+            return redirect('owner_management')
+    else:
+        # Création du formulaire avec les données de l'utilisateur
+        form = OwnerUpdateForm(instance=user_obj)
+
+    # Rendu du template avec le formulaire
+    return render(request, 'listings/edit_owner.html', {
+        'form': form,
+        'user_obj': user_obj  # Utilisation de user_obj comme dans le template
+    })
+
+
+@login_required
+@user_passes_test(is_admin)
+def delete_owner(request, user_id=None):  # Ajout du paramètre user_id
+    """
+    Vue pour supprimer un utilisateur (administrateurs uniquement).
+    Vérifie que l'administrateur ne supprime pas son propre compte.
+    """
+    # Pour les requêtes GET, afficher une page de confirmation
+    if request.method == 'GET' and user_id:
+        try:
+            owner = Owner.objects.get(id=user_id)
+            return render(request, 'listings/delete_owner_confirm.html', {'owner': owner})
+        except Owner.DoesNotExist:
+            messages.error(request, "Cet utilisateur n'existe pas.")
+            return redirect('owner_management')
+
+    # Pour les requêtes POST, procéder à la suppression
+    if request.method == 'POST':
+        # Utiliser user_id s'il est fourni
+        owner_id = request.POST.get('owner_id') or user_id
+
+        # Vérifier que l'utilisateur ne se supprime pas lui-même
+        if int(owner_id) == request.user.id:
+            messages.error(
+                request, "Vous ne pouvez pas supprimer votre propre compte.")
+            return redirect('owner_management')
+
+        try:
+            # Suppression de l'utilisateur
+            owner = Owner.objects.get(id=owner_id)
+            username = owner.username
+            owner.delete()
+
+            messages.success(
+                request, f'Utilisateur {username} supprimé avec succès.')
+        except Owner.DoesNotExist:
+            messages.error(request, "Cet utilisateur n'existe pas.")
+        except Exception as e:
+            messages.error(request, f'Erreur lors de la suppression: {str(e)}')
+
+    # Redirection vers la page de gestion des utilisateurs
+    return redirect('owner_management')
