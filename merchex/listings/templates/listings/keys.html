@@ -148,17 +148,26 @@ button i {
                             <i class="fas fa-trash"></i> Retirer
                         </button>
                     </form>
-            
                     <!-- Bouton Attributions avec popover et badge de détenteurs -->
                     <button type="button" class="btn btn-info btn-sm action-btn" 
-                            data-bs-toggle="popover" 
-                            title="Attributions" 
-                            tabindex="0"
-                            data-bs-content="{% if key_data.assigned_count > 0 %}{{ key_data.assigned_count }} exemplaire(s) attribué(s){% else %}Aucune attribution{% endif %}">
-                        <i class="fas fa-key"></i> 
-                        <span class="badge bg-secondary">{{ key_data.assigned_count }}</span>
-                    </button>
-                    
+        data-bs-toggle="popover" 
+        data-bs-trigger="focus"
+        data-bs-html="true"
+        data-bs-title="Attributions pour clé n°{{ key_data.key_type.number }}"
+        data-bs-content="{% if key_data.assigned_count > 0 %}
+                            <p><strong>{{ key_data.assigned_count }} exemplaire(s) attribué(s)</strong></p>
+                            <hr class='my-2'>
+                            <ul class='list-unstyled mb-0'>
+                                {% for holder in key_data.key_holders %}
+                                    <li><strong>{{ holder.name }}</strong> (depuis le {{ holder.assignment_date }})</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            Aucune attribution
+                        {% endif %}">
+    <i class="fas fa-key"></i> 
+    <span class="badge bg-secondary">{{ key_data.assigned_count }}</span>
+</button>
                     {% if not key_data.is_consistent %}
                     <span class="badge bg-warning text-dark" title="{{ key_data.consistency_message }}">
                         <i class="fas fa-exclamation-triangle"></i> Incohérence
@@ -236,60 +245,63 @@ button i {
 </div>
 <!-- Modal for Editing a Key -->
 <div class="modal fade" id="editKeyModal" tabindex="-1" aria-labelledby="editKeyModalLabel" aria-hidden="true">
-<div class="modal-dialog">
-    <div class="modal-content">
-        <form method="post" action="{% url 'key_update' %}">
-            {% csrf_token %}
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="editKeyModalLabel">Modification des informations de la Clé</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Hidden field to store key ID -->
-                <input type="hidden" name="key_id" id="editKeyId">
-                
-                <!-- Styled Form Fields for Editing -->
-                <div class="mb-3 d-flex align-items-center">
-                    <!-- Champ Numéro de la clé -->
-                    <div style="width: 100px;">
-                        <label for="edit_id_number" class="form-label fw-bold">N°</label>
-                        <input type="number" name="number" id="edit_id_number" class="form-control" placeholder="000" readonly>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'key_update' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="editKeyModalLabel">Modification des informations de la Clé</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Hidden fields to store original values -->
+                    <input type="hidden" name="key_id" id="editKeyId">
+                    <input type="hidden" id="original_total_quantity">
+                    <input type="hidden" id="original_in_cabinet">
+                    
+                    <!-- Styled Form Fields for Editing -->
+                    <div class="mb-3 d-flex align-items-center">
+                        <!-- Champ Numéro de la clé -->
+                        <div style="width: 100px;">
+                            <label for="edit_id_number" class="form-label fw-bold">N°</label>
+                            <input type="number" name="number" id="edit_id_number" class="form-control" placeholder="000" readonly>
+                        </div>
+                        <!-- Champ Nom de la clé -->
+                        <div class="flex-grow-1 me-3">
+                            <label for="edit_id_name" class="form-label fw-bold">Nom de la clé</label>
+                            <input type="text" name="name" id="edit_id_name" class="form-control" placeholder="Entrez le nom de la clé">
+                        </div>                        
                     </div>
-                    <!-- Champ Nom de la clé -->
-                    <div class="flex-grow-1 me-3">
-                        <label for="edit_id_name" class="form-label fw-bold">Nom de la clé</label>
-                        <input type="text" name="name" id="edit_id_name" class="form-control" placeholder="Entrez le nom de la clé">
-                    </div>                        
+                    <div class="mb-3">
+                        <label for="edit_id_place" class="form-label fw-bold">Emplacement</label>
+                        <input type="text" name="place" id="edit_id_place" class="form-control" placeholder="Emplacement de la clé">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_id_total_quantity" class="form-label fw-bold">Nombre total d'exemplaires</label>
+                        <input type="number" name="total_quantity" id="edit_id_total_quantity" class="form-control" placeholder="Nombre total d'exemplaires">
+                        <small class="form-text text-muted">Augmenter ce nombre ajoutera automatiquement des clés dans l'armoire.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_id_in_cabinet" class="form-label fw-bold">Stock armoire</label>
+                        <input type="number" name="in_cabinet" id="edit_id_in_cabinet" class="form-control" placeholder="Nombre de clés stocké dans l'armoire">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_id_in_safe" class="form-label fw-bold">Stock coffre</label>
+                        <input type="number" name="in_safe" id="edit_id_in_safe" class="form-control" placeholder="Nombre de clé sotcké dans le coffre">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_id_comments" class="form-label fw-bold">Commentaires</label>
+                        <textarea name="comments" id="edit_id_comments" class="form-control" rows="3" placeholder="Ajoutez des commentaires..."></textarea>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="edit_id_place" class="form-label fw-bold">Emplacement</label>
-                    <input type="text" name="place" id="edit_id_place" class="form-control" placeholder="Emplacement de la clé">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer les Modifications</button>
                 </div>
-                <div class="mb-3">
-                    <label for="edit_id_total_quantity" class="form-label fw-bold">Nombre total d'exemplaires</label>
-                    <input type="number" name="total_quantity" id="edit_id_total_quantity" class="form-control" placeholder="Nombre total d'exemplaires">
-                </div>
-                <div class="mb-3">
-                    <label for="edit_id_in_cabinet" class="form-label fw-bold">Stock armoire</label>
-                    <input type="number" name="in_cabinet" id="edit_id_in_cabinet" class="form-control" placeholder="Nombre de clés  stocké dans l'armoire">
-                </div>
-                <div class="mb-3">
-                    <label for="edit_id_in_safe" class="form-label fw-bold">Stock coffre</label>
-                    <input type="number" name="in_safe" id="edit_id_in_safe" class="form-control" placeholder="Nombre de clé  sotcké dans le coffre">
-                </div>
-                <div class="mb-3">
-                    <label for="edit_id_comments" class="form-label fw-bold">Commentaires</label>
-                    <textarea name="comments" id="edit_id_comments" class="form-control" rows="3" placeholder="Ajoutez des commentaires..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                <button type="submit" class="btn btn-primary">Enregistrer les Modifications</button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
-</div>
+    </div>
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteKeyModal" tabindex="-1" aria-labelledby="deleteKeyModalLabel" aria-hidden="true">
 <div class="modal-dialog">
@@ -474,7 +486,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <!-- JavaScript to Populate Edit Modal -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+   document.addEventListener('DOMContentLoaded', function () {
     // Get all edit buttons
     var editButtons = document.querySelectorAll('.edit-btn');
     
@@ -490,62 +502,61 @@ document.addEventListener('DOMContentLoaded', function () {
             var keyInCabinet = this.getAttribute('data-in-cabinet');
             var keyInSafe = this.getAttribute('data-in-safe');
             var keyComments = this.getAttribute('data-comments');
+            
             // Populate the modal fields
             document.getElementById('editKeyId').value = keyId;
             document.getElementById('edit_id_number').value = keyNumber;
             document.getElementById('edit_id_name').value = keyName;
             document.getElementById('edit_id_place').value = keyPlace;
             document.getElementById('edit_id_total_quantity').value = keyTotal;
+            document.getElementById('original_total_quantity').value = keyTotal; // Stocker la valeur originale
+            document.getElementById('original_in_cabinet').value = keyInCabinet; // Stocker la valeur originale du stock armoire
             document.getElementById('edit_id_in_cabinet').value = keyInCabinet;
             document.getElementById('edit_id_in_safe').value = keyInSafe;
             document.getElementById('edit_id_comments').value = keyComments;
         });
     });
-});
-</script>
-
-<script>
-//Fonction de recherche dans le tableau
-document.addEventListener('DOMContentLoaded', function () {
-    const searchInput = document.getElementById('searchInput');
-    const table = document.getElementById('keyTable');
-    const rows = table.getElementsByTagName('tr');
-    searchInput.addEventListener('keyup', function () {
-        const filter = searchInput.value.toLowerCase();
-        for (let i = 1; i < rows.length; i++) { // Commence à 1 pour ignorer l'en-tête
-            const cells = rows[i].getElementsByTagName('td');
-            let match = false;
-            for (let cell of cells) {
-                if (cell.textContent.toLowerCase().includes(filter)) {
-                    match = true;
-                    break;
-                }
-            }
-            rows[i].style.display = match ? '' : 'none'; // Affiche ou cache la ligne
+    
+    // Add event listener for total quantity changes
+    const totalQuantityInput = document.getElementById('edit_id_total_quantity');
+    const inCabinetInput = document.getElementById('edit_id_in_cabinet');
+    
+    totalQuantityInput.addEventListener('input', function() {
+        // Get original values
+        const originalTotal = parseInt(document.getElementById('original_total_quantity').value) || 0;
+        const originalCabinet = parseInt(document.getElementById('original_in_cabinet').value) || 0;
+        const newTotal = parseInt(this.value) || 0;
+        
+        // Calculate the difference from original
+        const difference = newTotal - originalTotal;
+        
+        // If total has increased from original, add the difference to the original cabinet value
+        if (difference > 0) {
+            inCabinetInput.value = originalCabinet + difference;
+            
+            // Visual feedback (optional)
+            inCabinetInput.classList.add('is-valid');
+            setTimeout(() => {
+                inCabinetInput.classList.remove('is-valid');
+            }, 1000);
+        } else {
+            // If total is less than or equal to original, reset to original cabinet value
+            inCabinetInput.value = originalCabinet;
         }
     });
 });
 </script>
-
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-    var popoverList = popoverTriggerList.map(function(popoverTriggerEl) {
-        return new bootstrap.Popover(popoverTriggerEl, {
-            trigger: 'focus'  // Permet de fermer le popover en cliquant ailleurs
-        });
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialisation des popovers
+        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+        [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl, {
+            html: true,
+            trigger: 'focus',
+            container: 'body'
+        }));
+        
+        console.log('Nombre de popovers initialisés:', popoverTriggerList.length);
     });
-    // Fermer les autres popovers lorsqu'un nouveau est ouvert
-    document.addEventListener("click", function(event) {
-        popoverTriggerList.forEach(function(popoverTriggerEl) {
-            if (!popoverTriggerEl.contains(event.target)) {
-                var popover = bootstrap.Popover.getInstance(popoverTriggerEl);
-                if (popover) {
-                    popover.hide();
-                }
-            }
-        });
-    });
-});
-</script>
+    </script>
 {% endblock %}

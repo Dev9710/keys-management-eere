@@ -52,12 +52,53 @@ def key_list(request):
 
     # Pour chaque type de clé, récupérer les informations sur les exemplaires
     key_types_with_data = []
+
+    # Dictionnaire pour associer chaque détenteur à son nombre de clés
+    holders_count = {}
+
+    # Liste complète de tous les détenteurs pour toutes les clés
+    all_key_holders = []
+
     for key_type in key_types:
         # Calcul du nombre d'exemplaires attribués
-        assigned_count = KeyInstance.objects.filter(
+        key_instances = KeyInstance.objects.filter(
             key_type=key_type,
             is_available=False
-        ).count()
+        )
+        assigned_count = key_instances.count()
+
+        # Récupérer les détenteurs de cette clé
+        key_holders = []
+        # Requête pour obtenir les utilisateurs qui détiennent des exemplaires de cette clé
+        assignments = KeyAssignment.objects.filter(
+            key_instance__key_type=key_type,
+            is_active=True
+        ).select_related('user')
+
+        # Construire la liste des détenteurs
+        for assignment in assignments:
+            user = assignment.user
+            holder_name = f"{user.firstname} {user.name}"
+            key_holders.append({
+                'id': user.id,
+                'name': holder_name,
+                'assignment_date': assignment.assigned_date.strftime('%d/%m/%Y') if assignment.assigned_date else "Date inconnue"
+            })
+
+            # Ajouter ou incrémenter le compteur pour ce détenteur
+            if holder_name in holders_count:
+                holders_count[holder_name] += 1
+            else:
+                holders_count[holder_name] = 1
+
+            # Ajouter à la liste complète
+            all_key_holders.append({
+                'id': user.id,
+                'name': holder_name,
+                'key_number': key_type.number,
+                'key_name': key_type.name,
+                'assignment_date': assignment.assigned_date.strftime('%d/%m/%Y') if assignment.assigned_date else "Date inconnue"
+            })
 
         # Vérification de la cohérence des données
         is_consistent = (assigned_count + key_type.in_cabinet +
@@ -77,14 +118,23 @@ def key_list(request):
             'key_type': key_type,
             'assigned_count': assigned_count,
             'is_consistent': is_consistent,
-            'consistency_message': consistency_message
+            'consistency_message': consistency_message,
+            'key_holders': key_holders  # Ajouter la liste des détenteurs
         })
+
+    # Convertir le dictionnaire des détenteurs en liste pour l'affichage
+    holders_list = [{'name': name, 'count': count}
+                    for name, count in holders_count.items()]
+    # Trier par nombre de clés détenues (décroissant)
+    holders_list.sort(key=lambda x: x['count'], reverse=True)
 
     context = {
         'keys': key_types_with_data,
         'keys_count': keys_count,
         'form': form,
         'available_numbers': available_numbers,
+        'holders_count': holders_list,  # Ajouter les compteurs de détenteurs
+        'all_key_holders': all_key_holders,  # Ajouter la liste complète des détenteurs
     }
     return render(request, 'listings/keys.html', context)
 
@@ -170,42 +220,68 @@ def key_update(request):
             messages.error(request, 'Clé non spécifiée.')
             return redirect('key_list')
 
+        # Récupérer l'objet KeyType existant
         key_type = get_object_or_404(KeyType, id=key_id)
-        old_cabinet = key_type.in_cabinet
-        old_safe = key_type.in_safe
 
-        # Print for debugging
+        # Sauvegarder les valeurs originales avant la mise à jour
+        old_total_quantity = key_type.total_quantity
+        old_in_cabinet = key_type.in_cabinet
+        old_in_safe = key_type.in_safe
+
+        # Debug prints
         print(
-            f"Avant validation - in_cabinet: {key_type.in_cabinet}, in_safe: {key_type.in_safe}")
+            f"Avant validation - total: {old_total_quantity}, in_cabinet: {old_in_cabinet}, in_safe: {old_in_safe}")
         print(f"POST data: {request.POST}")
 
+        # Appliquer les modifications du formulaire à l'objet
         form = KeyForm(request.POST, instance=key_type)
+
         if form.is_valid():
             try:
                 # Récupérer les données du formulaire avant de sauvegarder
                 key_type = form.save(commit=False)
 
+                # Nouvelles valeurs après mise à jour du formulaire
+                new_total_quantity = key_type.total_quantity
+                new_in_cabinet = key_type.in_cabinet
+                new_in_safe = key_type.in_safe
+
+                # Vérifier si le nombre total d'exemplaires a augmenté
+                if new_total_quantity > old_total_quantity:
+                    # Calculer l'augmentation du nombre total d'exemplaires
+                    quantity_increase = new_total_quantity - old_total_quantity
+
+                    # Ajouter automatiquement cette augmentation au nombre de clés dans l'armoire
+                    key_type.in_cabinet = old_in_cabinet + quantity_increase
+
+                    # Informer l'utilisateur de l'ajustement automatique
+                    messages.info(
+                        request,
+                        f"Le nombre de clés dans l'armoire a été automatiquement augmenté de {quantity_increase} "
+                        f"pour correspondre à l'augmentation du nombre total d'exemplaires."
+                    )
+
+                    # Mettre à jour la variable pour le calcul de cohérence ci-dessous
+                    new_in_cabinet = key_type.in_cabinet
+
                 # Print for debugging
                 print(
-                    f"Après validation - in_cabinet: {key_type.in_cabinet}, in_safe: {key_type.in_safe}")
+                    f"Après validation - total: {new_total_quantity}, in_cabinet: {new_in_cabinet}, in_safe: {new_in_safe}")
 
                 # Obtenir le nombre d'instances attribuées (qui ne doivent pas être supprimées)
                 assigned_count = KeyInstance.objects.filter(
                     key_type=key_type, is_available=False).count()
 
                 # S'assurer que les quantités sont cohérentes
-                total_quantity = key_type.total_quantity
-                in_cabinet = key_type.in_cabinet
-                in_safe = key_type.in_safe
-                storage_total = in_cabinet + in_safe
+                storage_total = new_in_cabinet + new_in_safe
 
                 # Vérifier si le nouveau total est suffisant pour couvrir les attributions existantes
-                if storage_total + assigned_count != total_quantity:
+                if storage_total + assigned_count != new_total_quantity:
                     # Ajuster le total pour qu'il soit cohérent
                     key_type.total_quantity = storage_total + assigned_count
                     messages.warning(request,
                                      f"Le total a été ajusté pour être cohérent avec la somme des exemplaires "
-                                     f"(armoire: {in_cabinet}, coffre: {in_safe}, attribués: {assigned_count}).")
+                                     f"(armoire: {new_in_cabinet}, coffre: {new_in_safe}, attribués: {assigned_count}).")
 
                 # Enregistrer les modifications
                 key_type.save()
@@ -217,7 +293,7 @@ def key_update(request):
 
                 # Créer les nouvelles instances dans l'armoire
                 cabinet_instances = []
-                for i in range(in_cabinet):
+                for i in range(key_type.in_cabinet):
                     cabinet_instances.append(
                         KeyInstance(
                             key_type=key_type,
@@ -229,7 +305,7 @@ def key_update(request):
 
                 # Créer les nouvelles instances dans le coffre
                 safe_instances = []
-                for i in range(in_safe):
+                for i in range(key_type.in_safe):
                     safe_instances.append(
                         KeyInstance(
                             key_type=key_type,
@@ -268,11 +344,11 @@ def users(request):
             form.save()
     else:
         form = UserForm()
-    return render(request, 'listings/attribute.html', {'users': User.objects.all(), 'form': form})
+    return render(request, 'listings/attribute.html', {'users': User.objects.all().order_by('name', 'firstname'), 'form': form})
 
 
 def teams(request):
-    teams = Team.objects.all()
+    teams = Team.objects.all().order_by('name')
     return render(request, 'listings/teams.html', {'teams': teams})
 
 
@@ -289,13 +365,13 @@ def user_keys_view(request):
     users = []
 
     # Récupérer toutes les équipes pour les filtres
-    teams = Team.objects.all()
+    teams = Team.objects.all().order_by('name')
 
     # Filtrer par équipe si une équipe est sélectionnée
     if team_id:
         team = get_object_or_404(Team, id=team_id)
         # Filtrer les utilisateurs par équipe
-        users = User.objects.filter(team=team)
+        users = User.objects.filter(team=team).order_by('name', 'firstname')
     else:
         # Si aucune équipe n'est sélectionnée, ne pas montrer d'utilisateurs
         users = []
@@ -330,8 +406,8 @@ def user_keys_view(request):
 def get_users_by_team(request, team_id):
     try:
         # Récupérer les membres de l'équipe avec les champs requis
-        team_members = User.objects.filter(team_id=team_id).values(
-            'id', 'firstname', 'name')
+        team_members = User.objects.filter(team_id=team_id).order_by(
+            'name', 'firstname').values('id', 'firstname', 'name')
 
         # Formatter les données pour l'API
         users_list = [{
@@ -608,8 +684,9 @@ def assign_keys(request):
 
 def user_list(request):
     # Récupérer tous les utilisateurs avec leurs équipes
-    users = User.objects.select_related('team').all()
-    teams = Team.objects.all()
+    users = User.objects.select_related(
+        'team').all().order_by('name', 'firstname')
+    teams = Team.objects.all().order_by('name')
     users_count = users.count()
 
     # Récupérer les paramètres GET
@@ -668,7 +745,7 @@ def user_team(request):
     has_keys = request.GET.get('has_keys') == 'true'
 
     # Commencer avec tous les utilisateurs
-    users = User.objects.all()
+    users = User.objects.all().order_by('name', 'firstname')
 
     # Filtrer par équipe si une équipe est sélectionnée
     if team_id:
@@ -752,8 +829,9 @@ def user_create(request):
 
 def team_list(request):
     # Récupérer tous les utilisateurs avec leurs équipes
-    users = User.objects.select_related('team').all()
-    teams = Team.objects.all()
+    users = User.objects.select_related(
+        'team').all().order_by('name', 'firstname')
+    teams = Team.objects.all().order_by('name')
     teams_count = teams.count()
 
     # Récupérer les paramètres GET

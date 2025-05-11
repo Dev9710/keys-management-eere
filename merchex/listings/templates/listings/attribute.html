@@ -207,11 +207,15 @@
             {% endif %}
         </tbody>
     </table>
-    <div class="container mt-3 text-end">
-        <button id="generate-pdf-btn" class="btn btn-success" disabled>
-            <i class="fas fa-file-pdf"></i> Générer un PDF
-        </button>
-    </div>
+    <!-- Boutons d'export -->
+<div class="export-buttons" style="display: flex; justify-content: center; gap: 20px; margin: 40px 0; padding-bottom: 40px;">
+    <button id="generate-pdf-btn" class="btn btn-danger" style="min-width: 140px;">
+        <i class="fas fa-file-pdf"></i> Générer PDF
+    </button>
+    <button id="generate-xlsx-btn" class="btn btn-success" style="min-width: 140px;">
+        <i class="fas fa-file-excel"></i> Générer XLSX
+    </button>
+</div>
 </div>
 <!-- Modal pour attribuer des clés -->
 <div class="modal fade bd-example-modal-lg" id="keyModal" role="dialog" tabindex="-1" aria-labelledby="assignKeyModalLabel" aria-hidden="true">
