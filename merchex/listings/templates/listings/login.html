@@ -76,7 +76,9 @@
                             </div>
                             {% endif %}
                         </div>
-
+                        <div class="mb-3 text-end">
+                            <a href="{% url 'password_reset' %}" class="small">Mot de passe oublié ?</a>
+                        </div>
                         <!-- Option "Se souvenir de moi" -->
                         <div class="mb-3 form-check">
                             {{ form.remember }}

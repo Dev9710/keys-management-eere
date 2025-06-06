@@ -17,6 +17,18 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from listings import views
+from listings.views import (
+    CustomPasswordResetView,
+    CustomPasswordResetDoneView,
+    CustomPasswordResetConfirmView,
+    CustomPasswordResetCompleteView,
+    # AJOUTER CES IMPORTS POUR L'HISTORIQUE
+    history_view,
+    history_detail_view,
+    history_stats_view,
+    export_history_csv,
+    history_api_search
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -79,4 +91,23 @@ urlpatterns = [
     path('access-denied/', views.access_denied, name='access_denied'),
 
     path('register/success/', views.register_success_view, name='register_success'),
+
+    # URLs pour la réinitialisation du mot de passe
+    path('password-reset/', CustomPasswordResetView.as_view(), name='password_reset'),
+    path('password-reset/done/', CustomPasswordResetDoneView.as_view(),
+         name='password_reset_done'),
+    path('password-reset-confirm/<uidb64>/<token>/',
+         CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('password-reset-complete/', CustomPasswordResetCompleteView.as_view(),
+         name='password_reset_complete'),
+
+    # URLs pour l'historique (accès admin uniquement)
+    path('management/history/', history_view, name='history_view'),
+    path('management/history/<int:action_id>/',
+         history_detail_view, name='history_detail'),
+    path('management/history/stats/', history_stats_view, name='history_stats'),
+    path('management/history/export/',
+         export_history_csv, name='export_history_csv'),
+    path('management/history/api/search/',
+         history_api_search, name='history_api_search'),
 ]

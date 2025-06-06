@@ -1,6 +1,9 @@
-from django.shortcuts import redirect
-from django.urls import reverse
 from django.contrib import messages
+from django.shortcuts import redirect
+
+# ================================
+# 3. MIDDLEWARE POUR CAPTURER L'UTILISATEUR COURANT
+# ================================
 
 
 class LoginRequiredMiddleware:
@@ -15,7 +18,6 @@ class LoginRequiredMiddleware:
         Le paramètre get_response est la fonction qui sera appelée après ce middleware.
         """
         self.get_response = get_response
-
         # Liste des URLs qui ne nécessitent pas d'authentification
         self.public_urls = [
             '/login/',
@@ -25,6 +27,12 @@ class LoginRequiredMiddleware:
             '/static/',
             '/media/',  # Pour les fichiers média
             '/favicon.ico',  # Pour l'icône du site
+
+            # Ajouter les URLs de réinitialisation de mot de passe
+            '/password-reset/',
+            '/password-reset/done/',
+            '/password-reset-confirm/',
+            '/password-reset-complete/',
         ]
 
     def __call__(self, request):
@@ -53,3 +61,26 @@ class LoginRequiredMiddleware:
 
         # Traiter la requête normalement si toutes les vérifications sont passées
         return self.get_response(request)
+
+
+class HistoryMiddleware:
+    """
+    Middleware pour capturer l'utilisateur courant et l'associer aux actions
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Stocker l'utilisateur courant dans le thread local
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            set_current_user(request.user)
+        else:
+            set_current_user(None)
+
+        response = self.get_response(request)
+
+        # Nettoyer le thread local après la requête
+        set_current_user(None)
+
+        return response

@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'listings',
+    # Modifiez cette ligne pour utiliser la config complète
+    'listings.apps.ListingsConfig',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'listings.middleware.LoginRequiredMiddleware',  # add
+    'listings.utils.HistoryMiddleware',  # NOUVEAU : Middleware pour l'historique
 ]
 
 ROOT_URLCONF = 'merchex.urls'
@@ -146,3 +148,17 @@ MESSAGE_TAGS = {
 # 2 semaines en secondes (pour "Se souvenir de moi")
 SESSION_COOKIE_AGE = 1209600
 SESSION_SAVE_EVERY_REQUEST = True  # Prolonger la session à chaque requête
+
+
+# Configuration pour l'envoi d'emails
+
+# Pour le développement : afficher les emails dans la console
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Ex: smtp.gmail.com
+EMAIL_PORT = 587  # Port standard pour SMTP sécurisé
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'noreply.eere@gmail.com'
+EMAIL_HOST_PASSWORD = 'berx vabq yztk irnq'  # 'eerenoreplyparis12'
+DEFAULT_FROM_EMAIL = 'Gestion des Clés EERE <noreply.eere@gmail.com>'
+# Configuration pour la conservation des logs
+HISTORY_RETENTION_DAYS = 365  # Conserver l'historique pendant 1 an

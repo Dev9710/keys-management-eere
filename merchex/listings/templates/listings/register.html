@@ -3,6 +3,28 @@
 
 {% block title %}Création de compte | Gestion des Clés{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Style personnalisé pour les infobulles */
+    .form-text.text-info {
+        color: #0056b3 !important; /* Bleu foncé au lieu du bleu clair par défaut */
+    }
+    
+    .form-text.text-info i {
+        color: #0056b3 !important; /* Même couleur pour l'icône */
+    }
+    
+    /* Alternative avec un bleu encore plus foncé si nécessaire */
+    .form-text.text-dark-info {
+        color: #0056b3 !important;
+    }
+    
+    .form-text.text-dark-info i {
+        color: #0056b3 !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -83,7 +105,7 @@
                                 {{ form.email.errors }}
                             </div>
                             {% endif %}
-                            <div class="form-text text-info mt-2">
+                            <div class="form-text text-dark-info mt-2">
                                 <i class="fas fa-info-circle me-1"></i> Cette adresse email sera utilisée comme
                                 identifiant de connexion.
                             </div>
@@ -103,7 +125,7 @@
                                 {{ form.username.errors }}
                             </div>
                             {% endif %}
-                            <div class="form-text text-info mt-2">
+                            <div class="form-text text-dark-info mt-2">
                                 <i class="fas fa-info-circle me-1"></i> Ce nom d'utilisateur sera utilisé pour vous
                                 connecter.
                             </div>

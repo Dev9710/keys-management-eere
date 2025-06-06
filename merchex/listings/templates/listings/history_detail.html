@@ -1,0 +1,202 @@
+<!-- ================================ -->
+<!-- TEMPLATE DÉTAIL ACTION (history_detail.html) -->
+<!-- ================================ -->
+{% extends "listings/base.html" %}
+{% load static %}
+
+{% block title %}Détail de l'action | Historique{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Navigation -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'history_view' %}">
+                            <i class="fas fa-history me-1"></i>
+                            Historique
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Détail de l'action
+                    </li>
+                </ol>
+            </nav>
+
+            <!-- Détail de l'action -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Détail de l'action #{{ action.id }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Informations générales -->
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-info me-2"></i>
+                                Informations générales
+                            </h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Date et heure :</strong></td>
+                                    <td>{{ action.timestamp|date:"d/m/Y à H:i:s" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Utilisateur :</strong></td>
+                                    <td>
+                                        {{ action.user_name }}
+                                        <span class="badge bg-secondary ms-2">{{ action.user_role|upper }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Action :</strong></td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if action.action_type == 'CREATE' %}bg-success
+                                            {% elif action.action_type == 'UPDATE' %}bg-warning text-dark
+                                            {% elif action.action_type == 'DELETE' %}bg-danger
+                                            {% elif action.action_type == 'ASSIGN' %}bg-info
+                                            {% elif action.action_type == 'UNASSIGN' %}bg-secondary
+                                            {% elif action.action_type == 'LOGIN' %}bg-primary
+                                            {% elif action.action_type == 'LOGOUT' %}bg-dark
+                                            {% else %}bg-light text-dark
+                                            {% endif %}">
+                                            {{ action.get_action_type_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Type d'objet :</strong></td>
+                                    <td>{{ action.get_object_type_display }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Objet concerné :</strong></td>
+                                    <td><code>{{ action.object_name }}</code></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-file-alt me-2"></i>
+                                Description
+                            </h5>
+                            <div class="alert alert-light">
+                                {{ action.description }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Changements (si applicable) -->
+                    {% if old_values or new_values %}
+                    <hr>
+                    <div class="row">
+                        {% if old_values %}
+                        <div class="col-md-6">
+                            <h5 class="text-danger mb-3">
+                                <i class="fas fa-minus-circle me-2"></i>
+                                Anciennes valeurs
+                            </h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    {% for key, value in old_values.items %}
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>{{ key }} :</strong></div>
+                                        <div class="col-sm-8">
+                                            <code class="text-danger">{{ value|default:"(vide)" }}</code>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if new_values %}
+                        <div class="col-md-6">
+                            <h5 class="text-success mb-3">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                Nouvelles valeurs
+                            </h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    {% for key, value in new_values.items %}
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>{{ key }} :</strong></div>
+                                        <div class="col-sm-8">
+                                            <code class="text-success">{{ value|default:"(vide)" }}</code>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Actions liées -->
+                    {% if related_actions %}
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-link me-2"></i>
+                                Actions liées (même utilisateur, même jour)
+                            </h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Heure</th>
+                                            <th>Action</th>
+                                            <th>Objet</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for related in related_actions %}
+                                        <tr>
+                                            <td>{{ related.timestamp|time:"H:i:s" }}</td>
+                                            <td>
+                                                <span class="badge bg-secondary">
+                                                    {{ related.get_action_type_display }}
+                                                </span>
+                                            </td>
+                                            <td>{{ related.object_name|truncatechars:30 }}</td>
+                                            <td>{{ related.description|truncatechars:50 }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Boutons d'action -->
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'history_view' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Retour à l'historique
+                        </a>
+                        <div>
+                            <button class="btn btn-outline-primary" onclick="window.print()">
+                                <i class="fas fa-print me-2"></i>
+                                Imprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -2,6 +2,114 @@ from django.db import models
 from django.utils import timezone
 from django.db.models import Sum
 from django.contrib.auth.models import AbstractUser
+from django.db import models
+
+from django.utils import timezone
+import json
+
+
+class ActionLog(models.Model):
+    """
+    Modèle pour enregistrer toutes les actions effectuées dans l'application
+    Accessible uniquement aux administrateurs
+    """
+    ACTION_TYPES = [
+        ('CREATE', 'Création'),
+        ('UPDATE', 'Modification'),
+        ('DELETE', 'Suppression'),
+        ('ASSIGN', 'Attribution'),
+        ('UNASSIGN', 'Désattribution'),
+        ('LOGIN', 'Connexion'),
+        ('LOGOUT', 'Déconnexion'),
+        ('PASSWORD_CHANGE', 'Changement de mot de passe'),
+        ('PASSWORD_RESET', 'Réinitialisation de mot de passe'),
+        ('BULK_DELETE', 'Suppression en masse'),
+    ]
+
+    OBJECT_TYPES = [
+        ('USER', 'Utilisateur'),
+        ('TEAM', 'Équipe'),
+        ('KEYTYPE', 'Type de clé'),
+        ('KEYINSTANCE', 'Instance de clé'),
+        ('KEYASSIGNMENT', 'Attribution de clé'),
+        ('OWNER', 'Propriétaire'),
+        ('SYSTEM', 'Système'),
+    ]
+
+    # Informations sur l'action
+    action_type = models.CharField(
+        max_length=20, choices=ACTION_TYPES, verbose_name="Type d'action")
+    object_type = models.CharField(
+        max_length=20, choices=OBJECT_TYPES, verbose_name="Type d'objet")
+    object_id = models.PositiveIntegerField(
+        null=True, blank=True, verbose_name="ID de l'objet")
+    object_name = models.CharField(
+        max_length=255, verbose_name="Nom de l'objet")
+
+    # Informations sur l'utilisateur qui a effectué l'action
+    # MODIFIÉ : Référence directe au modèle Owner au lieu d'utiliser get_user_model()
+    user = models.ForeignKey('Owner', on_delete=models.SET_NULL,
+                             null=True, blank=True, verbose_name="Utilisateur")
+    user_name = models.CharField(
+        max_length=255, verbose_name="Nom utilisateur")
+    user_role = models.CharField(
+        max_length=50, default='visitor', verbose_name="Rôle utilisateur")
+
+    # Informations temporelles
+    timestamp = models.DateTimeField(
+        default=timezone.now, verbose_name="Date et heure", db_index=True)
+    date_only = models.DateField(
+        default=timezone.now, verbose_name="Date", db_index=True)
+
+    # Détails de l'action
+    description = models.TextField(verbose_name="Description")
+    old_values = models.TextField(
+        null=True, blank=True, verbose_name="Anciennes valeurs")
+    new_values = models.TextField(
+        null=True, blank=True, verbose_name="Nouvelles valeurs")
+
+    # Métadonnées supplémentaires
+    affected_users = models.TextField(
+        null=True, blank=True, verbose_name="Utilisateurs affectés")
+
+    class Meta:
+        verbose_name = "Action"
+        verbose_name_plural = "Historique des actions"
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['timestamp']),
+            models.Index(fields=['date_only']),
+            models.Index(fields=['action_type']),
+            models.Index(fields=['object_type']),
+            models.Index(fields=['user']),
+        ]
+
+    def __str__(self):
+        return f"{self.timestamp.strftime('%d/%m/%Y %H:%M:%S')} - {self.user_name} - {self.get_action_type_display()} - {self.object_name}"
+
+    def get_old_values_dict(self):
+        """Retourne les anciennes valeurs sous forme de dictionnaire"""
+        if self.old_values:
+            try:
+                return json.loads(self.old_values)
+            except json.JSONDecodeError:
+                return {}
+        return {}
+
+    def get_new_values_dict(self):
+        """Retourne les nouvelles valeurs sous forme de dictionnaire"""
+        if self.new_values:
+            try:
+                return json.loads(self.new_values)
+            except json.JSONDecodeError:
+                return {}
+        return {}
+
+    def save(self, *args, **kwargs):
+        """Override save pour automatiquement remplir date_only"""
+        if self.timestamp:
+            self.date_only = self.timestamp.date()
+        super().save(*args, **kwargs)
 
 
 class Team(models.Model):

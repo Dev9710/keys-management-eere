@@ -18,6 +18,58 @@ from django.core.paginator import Paginator
 from .forms import OwnerCreationForm, OwnerUpdateForm
 from django.urls import reverse
 from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.views import (
+    PasswordResetView,
+    PasswordResetDoneView,
+    PasswordResetConfirmView,
+    PasswordResetCompleteView,
+)
+from django.urls import reverse_lazy
+from django.contrib.auth.views import (
+    PasswordResetView,
+    PasswordResetDoneView,
+    PasswordResetConfirmView,
+    PasswordResetCompleteView,
+)
+from django.urls import reverse_lazy
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.paginator import Paginator
+from django.db.models import Q, Count
+from django.http import JsonResponse, HttpResponse
+from django.utils import timezone
+from datetime import datetime, timedelta
+import csv
+from .utils import log_action, log_bulk_delete, log_password_change, log_password_reset
+from .models import KeyType, KeyInstance, KeyAssignment, User, Team, Owner, ActionLog
+from datetime import datetime
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+
+
+class CustomPasswordResetView(PasswordResetView):
+    """Vue pour demander la réinitialisation du mot de passe"""
+    template_name = 'listings/password_reset_form.html'
+    email_template_name = 'listings/password_reset_email.html'
+    subject_template_name = 'listings/password_reset_subject.txt'
+    success_url = reverse_lazy('password_reset_done')
+
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    """Vue affichée après l'envoi du courriel de réinitialisation"""
+    template_name = 'listings/password_reset_done.html'
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    """Vue pour le formulaire de saisie du nouveau mot de passe"""
+    template_name = 'listings/password_reset_confirm.html'
+    success_url = reverse_lazy('password_reset_complete')
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    """Vue confirmant que le mot de passe a été réinitialisé"""
+    template_name = 'listings/password_reset_complete.html'
 
 
 def hello(request):
@@ -608,7 +660,22 @@ def assign_keys(request):
 
         # Récupérer les instances de clés sélectionnées et la date d'attribution
         selected_key_instances = data.get('selected_keys', [])
-        assignment_date = data.get('assignment_date', current_date)
+        assignment_date_str = data.get('assignment_date')
+
+        # CORRECTION : Convertir la date string en objet date
+        if assignment_date_str:
+            try:
+                # Importer datetime si ce n'est pas déjà fait
+                from datetime import datetime
+                # Convertir la chaîne en objet date
+                assignment_date = datetime.strptime(
+                    assignment_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                # Si le format est incorrect, utiliser la date actuelle
+                assignment_date = current_date
+        else:
+            # Si pas de date fournie, utiliser la date actuelle
+            assignment_date = current_date
 
         # Récupérer les attributions actuelles
         current_assignments = KeyAssignment.objects.filter(
@@ -642,7 +709,7 @@ def assign_keys(request):
                     KeyAssignment.objects.create(
                         key_instance=key_instance,
                         user=user,
-                        assigned_date=assignment_date,
+                        assigned_date=assignment_date,  # Maintenant c'est un objet date
                         is_active=True
                     )
                 except KeyInstance.DoesNotExist:
@@ -654,13 +721,19 @@ def assign_keys(request):
             user=user, is_active=True)
         updated_keys = []
         for assignment in updated_assignments:
+            # Assurer que assigned_date est bien un objet date
+            if assignment.assigned_date:
+                formatted_date = assignment.assigned_date.strftime('%d/%m/%Y')
+            else:
+                formatted_date = None
+
             updated_keys.append({
                 'id': assignment.key_instance.id,
                 'number': assignment.key_instance.key_type.number,
                 'name': assignment.key_instance.key_type.name,
                 'place': assignment.key_instance.key_type.place,
                 'location': assignment.key_instance.location,
-                'formatted_date': assignment.assigned_date.strftime('%d/%m/%Y') if assignment.assigned_date else None,
+                'formatted_date': formatted_date,
                 'comments': assignment.comments,
             })
 
@@ -676,6 +749,10 @@ def assign_keys(request):
             'message': 'Format JSON invalide'
         }, status=400)
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Erreur dans assign_keys: {str(e)}", exc_info=True)
+
         return JsonResponse({
             'success': False,
             'message': f'Erreur serveur: {str(e)}'
@@ -1248,3 +1325,291 @@ def delete_owner(request, user_id=None):  # Ajout du paramètre user_id
 
     # Redirection vers la page de gestion des utilisateurs
     return redirect('owner_management')
+
+
+def is_admin(user):
+    """Vérifie si l'utilisateur est administrateur"""
+    return user.is_authenticated and hasattr(user, 'role') and user.role == 'admin'
+
+
+@login_required
+@user_passes_test(is_admin, login_url='access_denied')
+def history_view(request):
+    """Vue principale pour l'historique des actions - ACCÈS RÉSERVÉ AUX ADMINISTRATEURS"""
+    # Récupérer les paramètres de filtrage
+    action_type = request.GET.get('action_type', '')
+    object_type = request.GET.get('object_type', '')
+    user_filter = request.GET.get('user_filter', '')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    search = request.GET.get('search', '')
+
+    # Construire la requête de base
+    actions = ActionLog.objects.all()
+
+    # Filtrer par type d'action
+    if action_type:
+        actions = actions.filter(action_type=action_type)
+
+    # Filtrer par type d'objet
+    if object_type:
+        actions = actions.filter(object_type=object_type)
+
+    # Filtrer par utilisateur
+    if user_filter:
+        actions = actions.filter(user_name__icontains=user_filter)
+
+    # Filtrer par date
+    if date_from:
+        try:
+            date_from_parsed = datetime.strptime(date_from, '%Y-%m-%d').date()
+            actions = actions.filter(date_only__gte=date_from_parsed)
+        except ValueError:
+            pass
+
+    if date_to:
+        try:
+            date_to_parsed = datetime.strptime(date_to, '%Y-%m-%d').date()
+            actions = actions.filter(date_only__lte=date_to_parsed)
+        except ValueError:
+            pass
+
+    # Recherche textuelle
+    if search:
+        actions = actions.filter(
+            Q(description__icontains=search) |
+            Q(object_name__icontains=search) |
+            Q(user_name__icontains=search)
+        )
+
+    # Pagination
+    paginator = Paginator(actions, 50)  # 50 actions par page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Statistiques rapides
+    total_actions = actions.count()
+    today_actions = actions.filter(date_only=timezone.now().date()).count()
+    week_actions = actions.filter(
+        date_only__gte=timezone.now().date() - timedelta(days=7)).count()
+
+    # Récupérer les choix pour les filtres
+    action_choices = ActionLog.ACTION_TYPES
+    object_choices = ActionLog.OBJECT_TYPES
+
+    context = {
+        'page_obj': page_obj,
+        'action_choices': action_choices,
+        'object_choices': object_choices,
+        'total_actions': total_actions,
+        'today_actions': today_actions,
+        'week_actions': week_actions,
+        'current_filters': {
+            'action_type': action_type,
+            'object_type': object_type,
+            'user_filter': user_filter,
+            'date_from': date_from,
+            'date_to': date_to,
+            'search': search,
+        }
+    }
+
+    return render(request, 'listings/history.html', context)
+
+
+@login_required
+@user_passes_test(is_admin, login_url='access_denied')
+def history_detail_view(request, action_id):
+    """Vue détaillée pour une action spécifique - ACCÈS RÉSERVÉ AUX ADMINISTRATEURS"""
+    action = get_object_or_404(ActionLog, id=action_id)
+
+    # Récupérer les actions liées (même utilisateur, même période)
+    related_actions = ActionLog.objects.filter(
+        user=action.user,
+        timestamp__date=action.timestamp.date()
+    ).exclude(id=action.id).order_by('-timestamp')[:10]
+
+    context = {
+        'action': action,
+        'old_values': action.get_old_values_dict(),
+        'new_values': action.get_new_values_dict(),
+        'related_actions': related_actions,
+    }
+
+    return render(request, 'listings/history_detail.html', context)
+
+
+@login_required
+@user_passes_test(is_admin, login_url='access_denied')
+def history_stats_view(request):
+    """Vue pour les statistiques de l'historique - ACCÈS RÉSERVÉ AUX ADMINISTRATEURS"""
+    # Statistiques par type d'action
+    action_stats = ActionLog.objects.values('action_type').annotate(
+        count=Count('id')).order_by('-count')
+
+    # Statistiques par type d'objet
+    object_stats = ActionLog.objects.values('object_type').annotate(
+        count=Count('id')).order_by('-count')
+
+    # Statistiques par utilisateur (top 10)
+    user_stats = ActionLog.objects.values('user_name', 'user_role').annotate(
+        count=Count('id')).order_by('-count')[:10]
+
+    # Activité par jour (derniers 30 jours)
+    thirty_days_ago = timezone.now().date() - timedelta(days=30)
+    daily_activity = ActionLog.objects.filter(
+        date_only__gte=thirty_days_ago
+    ).values('date_only').annotate(count=Count('id')).order_by('date_only')
+
+    # Convertir les statistiques d'actions en format lisible
+    action_stats_readable = []
+    for stat in action_stats:
+        readable_name = dict(ActionLog.ACTION_TYPES).get(
+            stat['action_type'], stat['action_type'])
+        action_stats_readable.append({
+            'name': readable_name,
+            'count': stat['count']
+        })
+
+    # Convertir les statistiques d'objets en format lisible
+    object_stats_readable = []
+    for stat in object_stats:
+        readable_name = dict(ActionLog.OBJECT_TYPES).get(
+            stat['object_type'], stat['object_type'])
+        object_stats_readable.append({
+            'name': readable_name,
+            'count': stat['count']
+        })
+
+    context = {
+        'action_stats': action_stats_readable,
+        'object_stats': object_stats_readable,
+        'user_stats': user_stats,
+        'daily_activity': daily_activity,
+        'total_actions': ActionLog.objects.count(),
+    }
+
+    return render(request, 'listings/history_stats.html', context)
+
+
+@login_required
+@user_passes_test(is_admin, login_url='access_denied')
+def export_history_csv(request):
+    """Exporte l'historique en CSV - ACCÈS RÉSERVÉ AUX ADMINISTRATEURS"""
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="historique_actions.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow([
+        'Date et Heure',
+        'Date',
+        'Heure',
+        'Utilisateur',
+        'Rôle Utilisateur',
+        'Action',
+        'Type d\'objet',
+        'Objet',
+        'Description',
+        'Anciennes valeurs',
+        'Nouvelles valeurs'
+    ])
+
+    # Appliquer les mêmes filtres que la vue principale
+    actions = ActionLog.objects.all()
+
+    # Filtres de la requête
+    action_type = request.GET.get('action_type', '')
+    object_type = request.GET.get('object_type', '')
+    user_filter = request.GET.get('user_filter', '')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    search = request.GET.get('search', '')
+
+    if action_type:
+        actions = actions.filter(action_type=action_type)
+    if object_type:
+        actions = actions.filter(object_type=object_type)
+    if user_filter:
+        actions = actions.filter(user_name__icontains=user_filter)
+    if date_from:
+        try:
+            date_from_parsed = datetime.strptime(date_from, '%Y-%m-%d').date()
+            actions = actions.filter(date_only__gte=date_from_parsed)
+        except ValueError:
+            pass
+    if date_to:
+        try:
+            date_to_parsed = datetime.strptime(date_to, '%Y-%m-%d').date()
+            actions = actions.filter(date_only__lte=date_to_parsed)
+        except ValueError:
+            pass
+    if search:
+        actions = actions.filter(
+            Q(description__icontains=search) |
+            Q(object_name__icontains=search) |
+            Q(user_name__icontains=search)
+        )
+
+    for action in actions:
+        old_values_str = ""
+        new_values_str = ""
+
+        if action.old_values:
+            try:
+                old_dict = action.get_old_values_dict()
+                old_values_str = " | ".join(
+                    [f"{k}: {v}" for k, v in old_dict.items()])
+            except:
+                old_values_str = action.old_values
+
+        if action.new_values:
+            try:
+                new_dict = action.get_new_values_dict()
+                new_values_str = " | ".join(
+                    [f"{k}: {v}" for k, v in new_dict.items()])
+            except:
+                new_values_str = action.new_values
+
+        writer.writerow([
+            action.timestamp.strftime('%d/%m/%Y %H:%M:%S'),
+            action.timestamp.strftime('%d/%m/%Y'),
+            action.timestamp.strftime('%H:%M:%S'),
+            action.user_name,
+            action.user_role,
+            action.get_action_type_display(),
+            action.get_object_type_display(),
+            action.object_name,
+            action.description,
+            old_values_str,
+            new_values_str
+        ])
+
+    return response
+
+
+@login_required
+@user_passes_test(is_admin, login_url='access_denied')
+def history_api_search(request):
+    """API pour la recherche en temps réel dans l'historique"""
+    query = request.GET.get('q', '')
+    if len(query) < 2:
+        return JsonResponse({'results': []})
+
+    actions = ActionLog.objects.filter(
+        Q(description__icontains=query) |
+        Q(object_name__icontains=query) |
+        Q(user_name__icontains=query)
+    )[:20]
+
+    results = []
+    for action in actions:
+        results.append({
+            'id': action.id,
+            'timestamp': action.timestamp.strftime('%d/%m/%Y %H:%M:%S'),
+            'user_name': action.user_name,
+            'action_type': action.get_action_type_display(),
+            'object_name': action.object_name,
+            'description': action.description
+        })
+
+    return JsonResponse({'results': results})
