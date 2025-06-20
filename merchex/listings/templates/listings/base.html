@@ -263,6 +263,11 @@
                         <i class="fas fa-chart-bar me-2"></i> Statistiques d'usage
                     </a>
                 </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'synthesis_table' %}">
+                        <i class="fas fa-chart-bar me-2"></i>Vue d'ensemble
+                    </a>
+                </li>
                 {% endif %}
                 
                 <li><hr class="dropdown-divider"></li>
@@ -271,6 +276,7 @@
                         <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
                     </a>
                 </li>
+                
             </ul>
         </div>
         {% endif %}

@@ -110,4 +110,13 @@ urlpatterns = [
          export_history_csv, name='export_history_csv'),
     path('management/history/api/search/',
          history_api_search, name='history_api_search'),
+
+    # Nouvelle vue tableau de synthèse
+    path('synthesis-table/', views.synthesis_table_view, name='synthesis_table'),
+
+    # Export des données
+    path('synthesis-export/', views.synthesis_export, name='synthesis_export'),
+
+
+
 ]

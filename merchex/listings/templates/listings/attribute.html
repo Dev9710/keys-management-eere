@@ -4,6 +4,7 @@
 {% block title %}Gestion d'attribution des clés{% endblock %}
 
 {% block extra_css %}
+<style>
 /* Style personnalisé pour la page d'attribution des clés */
 .action-btn {
     display: flex;
@@ -114,6 +115,7 @@
     color: var(--primary-color);
     font-weight: 600;
 }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -208,14 +210,14 @@
         </tbody>
     </table>
     <!-- Boutons d'export -->
-<div class="export-buttons" style="display: flex; justify-content: center; gap: 20px; margin: 40px 0; padding-bottom: 40px;">
-    <button id="generate-pdf-btn" class="btn btn-danger" style="min-width: 140px;">
-        <i class="fas fa-file-pdf"></i> Générer PDF
-    </button>
-    <button id="generate-xlsx-btn" class="btn btn-success" style="min-width: 140px;">
-        <i class="fas fa-file-excel"></i> Générer XLSX
-    </button>
-</div>
+    <div class="export-buttons" style="display: flex; justify-content: center; gap: 20px; margin: 40px 0; padding-bottom: 40px;">
+        <button id="generate-pdf-btn" class="btn btn-danger" style="min-width: 140px;" disabled>
+            <i class="fas fa-file-pdf"></i> Générer PDF
+        </button>
+        <button id="generate-xlsx-btn" class="btn btn-success" style="min-width: 140px;" disabled>
+            <i class="fas fa-file-excel"></i> Générer XLSX
+        </button>
+    </div>
 </div>
 <!-- Modal pour attribuer des clés -->
 <div class="modal fade bd-example-modal-lg" id="keyModal" role="dialog" tabindex="-1" aria-labelledby="assignKeyModalLabel" aria-hidden="true">
@@ -263,6 +265,10 @@
 <!-- Bibliothèques pour générer des PDF -->
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Bibliothèque pour générer des fichiers XLSX -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
 <script>
    function loadAssignedKeys(user_id) {
         // Si un utilisateur est sélectionné
@@ -301,8 +307,9 @@
                         `;
                     }
                     
-                    // Mettre à jour l'état du bouton PDF
+                    // Mettre à jour l'état des boutons
                     updatePdfButtonState();
+                    updateXlsxButtonState();
                 })
                 .catch(error => {
                     console.error('Error fetching assigned keys:', error);
@@ -318,8 +325,9 @@
                 </tr>
             `;
             
-            // Désactiver le bouton PDF
+            // Désactiver les boutons
             updatePdfButtonState();
+            updateXlsxButtonState();
         }
     }
     
@@ -340,6 +348,7 @@
         // Initialiser l'état des boutons
         updateButtonState();
         updatePdfButtonState();
+        updateXlsxButtonState();
     });
 </script>
 
@@ -714,14 +723,12 @@
     function updateButtonState() {
         const userDropdown = document.getElementById('user-dropdown');
         const assignKeyBtn = document.getElementById('assign-key-btn');
-        const generatePdfBtn = document.getElementById('generate-pdf-btn');
         
         const userId = userDropdown.value;
         if (userId && userId !== '') {
             assignKeyBtn.removeAttribute('disabled');
         } else {
             assignKeyBtn.setAttribute('disabled', 'disabled');
-            generatePdfBtn.setAttribute('disabled', 'disabled');
         }
     }
     
@@ -741,7 +748,26 @@
         }
     }
     
+    function updateXlsxButtonState() {
+        const userDropdown = document.getElementById('user-dropdown');
+        const generateXlsxBtn = document.getElementById('generate-xlsx-btn');
+        const assignedKeysTable = document.getElementById('assigned-keys-table');
+        
+        const userId = userDropdown.value;
+        const rows = assignedKeysTable.querySelectorAll('tbody tr');
+        const hasKeys = rows.length > 0 && 
+                       !rows[0].textContent.includes('Aucune clé attribuée') && 
+                       !rows[0].textContent.includes('Veuillez sélectionner');
+        
+        if (userId && hasKeys) {
+            generateXlsxBtn.removeAttribute('disabled');
+        } else {
+            generateXlsxBtn.setAttribute('disabled', 'disabled');
+        }
+    }
+    
     document.addEventListener('DOMContentLoaded', function() {
+        // Gestion du bouton PDF
         const generatePdfBtn = document.getElementById('generate-pdf-btn');
         
         generatePdfBtn.addEventListener('click', function() {
@@ -807,8 +833,101 @@
             });
         });
         
-        // Mise à jour initiale de l'état du bouton
+        // Gestion du bouton XLSX
+        const generateXlsxBtn = document.getElementById('generate-xlsx-btn');
+        
+        generateXlsxBtn.addEventListener('click', function() {
+            // Récupérer les informations de l'utilisateur et de l'équipe
+            const userDropdown = document.getElementById('user-dropdown');
+            const teamDropdown = document.getElementById('team-dropdown');
+            const userName = userDropdown.options[userDropdown.selectedIndex].text;
+            const teamName = teamDropdown.options[teamDropdown.selectedIndex].text || 'Toutes les Équipes';
+            const today = new Date().toLocaleDateString('fr-FR');
+            
+            // Créer un nouveau workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Préparer les données pour le fichier Excel
+            const data = [];
+            
+            // Ajouter les informations d'en-tête
+            data.push(['RÉCAPITULATIF DES CLÉS ATTRIBUÉES']);
+            data.push([]); // Ligne vide
+            data.push(['Équipe:', teamName]);
+            data.push(['Utilisateur:', userName]);
+            data.push(['Date:', today]);
+            data.push([]); // Ligne vide
+            
+            // Ajouter les en-têtes de colonnes
+            const headers = ['N°', 'Nom de la Clé', 'Emplacement', 'Location', "Date d'attribution", 'Commentaires'];
+            data.push(headers);
+            
+            // Récupérer les données du tableau
+            const table = document.getElementById('assigned-keys-table');
+            const rows = table.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length === 6) { // S'assurer que c'est une ligne de données valide
+                    const rowData = [];
+                    cells.forEach(cell => {
+                        rowData.push(cell.textContent.trim());
+                    });
+                    data.push(rowData);
+                }
+            });
+            
+            // Ajouter un espace et des informations supplémentaires
+            data.push([]); // Ligne vide
+            data.push([]); // Ligne vide
+            data.push(['Commentaires:']);
+            data.push(['']);
+            data.push(['']);
+            data.push(['']);
+            data.push([]); // Ligne vide
+            data.push(['', '', '', '', 'Signature:', '_______________________']);
+            data.push([]); // Ligne vide
+            data.push(['Document généré le ' + today]);
+            data.push(['Église Évangélique Rencontre Espérance']);
+            
+            // Créer une feuille de calcul à partir des données
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            
+            // Définir les largeurs de colonnes
+            const colWidths = [
+                { wch: 8 },   // N°
+                { wch: 30 },  // Nom de la Clé
+                { wch: 25 },  // Emplacement
+                { wch: 15 },  // Location
+                { wch: 18 },  // Date d'attribution
+                { wch: 30 }   // Commentaires
+            ];
+            ws['!cols'] = colWidths;
+            
+            // Fusionner la cellule du titre
+            ws['!merges'] = [
+                { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } } // Fusionner A1:F1 pour le titre
+            ];
+            
+            // Ajouter la feuille au workbook
+            XLSX.utils.book_append_sheet(wb, ws, "Clés attribuées");
+            
+            // Générer le nom du fichier
+            const fileName = `Cles_${userName.replace(/\s+/g, '_')}_${today.replace(/\//g, '-')}.xlsx`;
+            
+            // Écrire le fichier
+            XLSX.writeFile(wb, fileName);
+        });
+        
+        // Mettre à jour l'état des boutons quand l'utilisateur change
+        document.getElementById('user-dropdown').addEventListener('change', function() {
+            updatePdfButtonState();
+            updateXlsxButtonState();
+        });
+        
+        // Mise à jour initiale de l'état des boutons
         updatePdfButtonState();
+        updateXlsxButtonState();
     });
 </script>
 {% endblock %}

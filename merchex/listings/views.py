@@ -46,6 +46,10 @@ from datetime import datetime
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.db.models import Count, Q, Prefetch
+from django.utils import timezone
+from datetime import timedelta
+from django.contrib.auth.decorators import user_passes_test
 
 
 class CustomPasswordResetView(PasswordResetView):
@@ -1613,3 +1617,287 @@ def history_api_search(request):
         })
 
     return JsonResponse({'results': results})
+
+
+def is_manager_or_admin(user):
+    """Vérifier si l'utilisateur a le droit de voir la synthèse"""
+    return user.is_authenticated and (
+        user.role in ['admin', 'editor'] or
+        user.is_superuser
+    )
+
+
+@login_required
+def synthesis_table_view(request):
+    """
+    Vue de synthèse sous forme de tableau - Contrôle visuel optimisé
+    """
+    # Filtres
+    selected_team_id = request.GET.get('team', '')
+    show_only_with_keys = request.GET.get('with_keys') == 'true'
+    search_query = request.GET.get('search', '').strip()
+
+    # Récupérer toutes les équipes pour le filtre
+    all_teams = Team.objects.all().order_by('name')
+
+    # Base query pour les utilisateurs
+    users_query = User.objects.select_related('team').prefetch_related(
+        Prefetch(
+            'key_assignments',
+            queryset=KeyAssignment.objects.filter(is_active=True).select_related(
+                'key_instance__key_type'
+            ).order_by('key_instance__key_type__number'),
+            to_attr='active_assignments'
+        )
+    )
+
+    # Appliquer les filtres
+    if selected_team_id:
+        users_query = users_query.filter(team_id=selected_team_id)
+
+    if search_query:
+        users_query = users_query.filter(
+            Q(firstname__icontains=search_query) |
+            Q(name__icontains=search_query) |
+            Q(team__name__icontains=search_query)
+        )
+
+    # Récupérer tous les utilisateurs
+    all_users = list(users_query.order_by('team__name', 'name', 'firstname'))
+
+    # Préparer les données du tableau
+    table_data = []
+    stats = {
+        'total_users': 0,
+        'users_with_keys': 0,
+        'total_keys_assigned': 0,
+        'teams_represented': set()
+    }
+
+    for user in all_users:
+        # Préparer les informations sur les clés
+        user_keys = []
+        keys_summary = []
+
+        for assignment in user.active_assignments:
+            key_info = {
+                'number': assignment.key_instance.key_type.number,
+                'name': assignment.key_instance.key_type.name,
+                'place': assignment.key_instance.key_type.place,
+                'assigned_date': assignment.assigned_date,
+                'comments': assignment.comments,
+                'condition': assignment.key_instance.condition,
+                'location': assignment.key_instance.location
+            }
+            user_keys.append(key_info)
+            keys_summary.append(f"#{assignment.key_instance.key_type.number}")
+
+        # Données de l'utilisateur
+        user_data = {
+            'id': user.id,
+            'firstname': user.firstname,
+            'name': user.name,
+            'full_name': f"{user.firstname} {user.name}",
+            'team': user.team.name if user.team else 'Aucune équipe',
+            'team_id': user.team.id if user.team else None,
+            'comment': user.comment,
+            'keys': user_keys,
+            'keys_count': len(user_keys),
+            'keys_summary': ', '.join(keys_summary) if keys_summary else 'Aucune clé',
+            'has_keys': len(user_keys) > 0,
+            'status': 'Actif' if len(user_keys) > 0 else 'Sans clé'
+        }
+
+        # Appliquer le filtre "avec clés seulement"
+        if show_only_with_keys and not user_data['has_keys']:
+            continue
+
+        table_data.append(user_data)
+
+        # Mise à jour des statistiques
+        stats['total_users'] += 1
+        if user_data['has_keys']:
+            stats['users_with_keys'] += 1
+            stats['total_keys_assigned'] += user_data['keys_count']
+        if user.team:
+            stats['teams_represented'].add(user.team.name)
+
+    # Finaliser les statistiques
+    stats['teams_count'] = len(stats['teams_represented'])
+
+    # Récupérer les statistiques par équipe
+    team_stats = []
+    if selected_team_id:
+        team = Team.objects.get(id=selected_team_id)
+        team_users = [u for u in table_data if u['team_id']
+                      == int(selected_team_id)]
+        team_stats = [{
+            'team_name': team.name,
+            'total_members': len(team_users),
+            'members_with_keys': len([u for u in team_users if u['has_keys']]),
+            'total_keys': sum(u['keys_count'] for u in team_users)
+        }]
+    else:
+        # Statistiques par équipe
+        teams_dict = {}
+        for user_data in table_data:
+            team_name = user_data['team']
+            if team_name not in teams_dict:
+                teams_dict[team_name] = {
+                    'team_name': team_name,
+                    'total_members': 0,
+                    'members_with_keys': 0,
+                    'total_keys': 0
+                }
+            teams_dict[team_name]['total_members'] += 1
+            if user_data['has_keys']:
+                teams_dict[team_name]['members_with_keys'] += 1
+                teams_dict[team_name]['total_keys'] += user_data['keys_count']
+
+        team_stats = list(teams_dict.values())
+        team_stats.sort(key=lambda x: x['total_keys'], reverse=True)
+
+    context = {
+        'table_data': table_data,
+        'all_teams': all_teams,
+        'team_stats': team_stats,
+        'stats': stats,
+        'filters': {
+            'selected_team_id': selected_team_id,
+            'show_only_with_keys': show_only_with_keys,
+            'search_query': search_query,
+        },
+        'current_date': timezone.now().date()
+    }
+
+    return render(request, 'listings/synthesis_table.html', context)
+
+
+@login_required
+def synthesis_export(request):
+    """
+    Export des données de synthèse en CSV
+    """
+    # Appliquer les mêmes filtres que la vue tableau
+    selected_team_id = request.GET.get('team', '')
+    show_only_with_keys = request.GET.get('with_keys') == 'true'
+    search_query = request.GET.get('search', '').strip()
+
+    # Base query pour les utilisateurs (même logique que synthesis_table_view)
+    users_query = User.objects.select_related('team').prefetch_related(
+        Prefetch(
+            'key_assignments',
+            queryset=KeyAssignment.objects.filter(is_active=True).select_related(
+                'key_instance__key_type'
+            ).order_by('key_instance__key_type__number'),
+            to_attr='active_assignments'
+        )
+    )
+
+    # Appliquer les filtres
+    if selected_team_id:
+        users_query = users_query.filter(team_id=selected_team_id)
+
+    if search_query:
+        users_query = users_query.filter(
+            Q(firstname__icontains=search_query) |
+            Q(name__icontains=search_query) |
+            Q(team__name__icontains=search_query)
+        )
+
+    # Récupérer tous les utilisateurs filtrés
+    all_users = list(users_query.order_by('team__name', 'name', 'firstname'))
+
+    # Préparer les données pour l'export (format simplifié avec équipe)
+    export_data = []
+
+    for user in all_users:
+        # Vérifier si l'utilisateur a des clés
+        has_keys = len(user.active_assignments) > 0
+
+        # Appliquer le filtre "avec clés seulement"
+        if show_only_with_keys and not has_keys:
+            continue
+
+        # Préparer la liste des clés détenues (sans #)
+        keys_list = []
+        if user.active_assignments:
+            for assignment in user.active_assignments:
+                keys_list.append(str(assignment.key_instance.key_type.number))
+
+        # Créer une seule ligne par utilisateur
+        row_data = {
+            'Équipe': user.team.name if user.team else 'Aucune équipe',
+            'Nom Complet': f"{user.firstname} {user.name}",
+            'Statut': 'Actif' if has_keys else 'Sans clé',
+            'Nombre de Clés': len(user.active_assignments),
+            'Clés Détenues': ', '.join(keys_list) if keys_list else 'Aucune clé'
+        }
+
+        export_data.append(row_data)
+
+    # Créer la réponse CSV
+    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    current_date = timezone.now()
+    filename = f"synthese_cles_{current_date.strftime('%Y%m%d_%H%M')}.csv"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    # Ajouter le BOM pour une meilleure compatibilité avec Excel
+    response.write('\ufeff')
+
+    # Déterminer le nom de l'équipe pour l'en-tête
+    team_name_header = "Toutes les équipes"
+    if selected_team_id:
+        try:
+            selected_team = Team.objects.get(id=selected_team_id)
+            team_name_header = selected_team.name
+        except Team.DoesNotExist:
+            team_name_header = "Équipe inconnue"
+
+    if export_data:
+        # Définir l'ordre des colonnes
+        fieldnames = ['Équipe', 'Nom Complet',
+                      'Statut', 'Nombre de Clés', 'Clés Détenues']
+
+        writer = csv.DictWriter(response, fieldnames=fieldnames, delimiter=';')
+
+        # En-tête avec le nom de l'équipe
+        response.write(f"# Synthèse des clés - {team_name_header}\n")
+        response.write(f"# Église Évangélique Rencontre Espérance\n")
+        response.write(f"#\n")
+
+        # Date juste avant le tableau
+        response.write(
+            f"# Rapport généré le {current_date.strftime('%d/%m/%Y à %H:%M')}\n")
+        response.write(f"# Nombre total d'utilisateurs: {len(export_data)}\n")
+        response.write(f"#\n")
+
+        writer.writeheader()
+        writer.writerows(export_data)
+    else:
+        # Si aucune donnée, créer un CSV avec juste les en-têtes
+        fieldnames = ['Équipe', 'Nom Complet',
+                      'Statut', 'Nombre de Clés', 'Clés Détenues']
+        writer = csv.DictWriter(response, fieldnames=fieldnames)
+
+        # En-tête avec le nom de l'équipe (même si pas de données)
+        response.write(f"# Synthèse des clés - {team_name_header}\n")
+        response.write(f"# Église Évangélique Rencontre Espérance\n")
+        response.write(f"#\n")
+
+        # Date juste avant le tableau
+        response.write(
+            f"# Rapport généré le {current_date.strftime('%d/%m/%Y à %H:%M')}\n")
+        response.write(f"# Aucune donnée trouvée avec les filtres appliqués\n")
+        response.write(f"#\n")
+
+        writer.writeheader()
+        writer.writerow({
+            'Équipe': '',
+            'Nom Complet': '',
+            'Statut': '',
+            'Nombre de Clés': '',
+            'Clés Détenues': 'Aucune donnée trouvée avec les filtres appliqués'
+        })
+
+    return response
