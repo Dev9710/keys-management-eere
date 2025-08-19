@@ -223,30 +223,33 @@ class KeyType(models.Model):
         if not self.pk:
             return super().save(*args, **kwargs)
 
-        # Pour une mise à jour, vérifier si nous utilisons update_fields
+        # ✅ SOLUTION: Vérifier si nous sommes dans un contexte de mise à jour de formulaire
+        # Si update_fields est spécifié ET contient nos champs, les respecter
         if 'update_fields' in kwargs and kwargs['update_fields']:
-            # Si oui, continuer normalement
             return super().save(*args, **kwargs)
 
-        # Pour une mise à jour complète, s'assurer que les compteurs ne sont pas altérés
-        # sauf si explicitement demandé
+        # ✅ SOLUTION: Détecter si les valeurs ont été explicitement modifiées
         try:
             # Obtenir l'instance existante
             old_instance = KeyType.objects.get(pk=self.pk)
 
-            # Si update_fields n'est pas spécifié, préserver certains champs
-            # qui pourraient être mis à jour par d'autres processus
-            explicitly_updating_cabinet = 'in_cabinet' in kwargs.get(
-                'update_fields', [])
-            explicitly_updating_safe = 'in_safe' in kwargs.get(
-                'update_fields', [])
+            # Vérifier si les valeurs ont réellement changé (modification intentionnelle)
+            cabinet_changed = self.in_cabinet != old_instance.in_cabinet
+            safe_changed = self.in_safe != old_instance.in_safe
 
-            # Ne pas écraser les valeurs de compteurs si elles ne sont pas
-            # explicitement mises à jour
-            if not explicitly_updating_cabinet:
-                self.in_cabinet = old_instance.in_cabinet
-            if not explicitly_updating_safe:
-                self.in_safe = old_instance.in_safe
+            # ✅ NOUVELLE LOGIQUE: Ne préserver les anciennes valeurs QUE si elles n'ont pas changé
+            # ET si nous ne sommes pas dans un contexte de mise à jour de formulaire
+
+            # Ajouter un flag pour identifier les mises à jour de formulaire
+            is_form_update = kwargs.pop('form_update', False)
+
+            if not is_form_update:
+                # Logique de préservation uniquement pour les autres types de sauvegarde
+                if not cabinet_changed:
+                    self.in_cabinet = old_instance.in_cabinet
+                if not safe_changed:
+                    self.in_safe = old_instance.in_safe
+            # Sinon, respecter les nouvelles valeurs (mise à jour de formulaire)
 
         except (KeyType.DoesNotExist, Exception):
             # Si l'instance n'existe pas ou une autre erreur, continuer normalement

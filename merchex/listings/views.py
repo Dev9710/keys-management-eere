@@ -279,73 +279,33 @@ def key_update(request):
         # Récupérer l'objet KeyType existant
         key_type = get_object_or_404(KeyType, id=key_id)
 
-        # Sauvegarder les valeurs originales avant la mise à jour
-        old_total_quantity = key_type.total_quantity
-        old_in_cabinet = key_type.in_cabinet
-        old_in_safe = key_type.in_safe
-
-        # Debug prints
-        print(
-            f"Avant validation - total: {old_total_quantity}, in_cabinet: {old_in_cabinet}, in_safe: {old_in_safe}")
-        print(f"POST data: {request.POST}")
-
         # Appliquer les modifications du formulaire à l'objet
         form = KeyForm(request.POST, instance=key_type)
 
         if form.is_valid():
             try:
-                # Récupérer les données du formulaire avant de sauvegarder
+                # Sauvegarder avec le flag form_update pour indiquer à la méthode save()
+                # que c'est une mise à jour de formulaire et qu'il faut respecter les nouvelles valeurs
                 key_type = form.save(commit=False)
 
-                # Nouvelles valeurs après mise à jour du formulaire
-                new_total_quantity = key_type.total_quantity
-                new_in_cabinet = key_type.in_cabinet
-                new_in_safe = key_type.in_safe
-
-                # Vérifier si le nombre total d'exemplaires a augmenté
-                if new_total_quantity > old_total_quantity:
-                    # Calculer l'augmentation du nombre total d'exemplaires
-                    quantity_increase = new_total_quantity - old_total_quantity
-
-                    # Ajouter automatiquement cette augmentation au nombre de clés dans l'armoire
-                    key_type.in_cabinet = old_in_cabinet + quantity_increase
-
-                    # Informer l'utilisateur de l'ajustement automatique
-                    messages.info(
-                        request,
-                        f"Le nombre de clés dans l'armoire a été automatiquement augmenté de {quantity_increase} "
-                        f"pour correspondre à l'augmentation du nombre total d'exemplaires."
-                    )
-
-                    # Mettre à jour la variable pour le calcul de cohérence ci-dessous
-                    new_in_cabinet = key_type.in_cabinet
-
-                # Print for debugging
-                print(
-                    f"Après validation - total: {new_total_quantity}, in_cabinet: {new_in_cabinet}, in_safe: {new_in_safe}")
-
-                # Obtenir le nombre d'instances attribuées (qui ne doivent pas être supprimées)
+                # Validation simple
                 assigned_count = KeyInstance.objects.filter(
                     key_type=key_type, is_available=False).count()
 
-                # S'assurer que les quantités sont cohérentes
-                storage_total = new_in_cabinet + new_in_safe
+                min_required_total = assigned_count + key_type.in_cabinet + key_type.in_safe
+                if key_type.total_quantity < min_required_total:
+                    messages.error(request,
+                                   f"Le total ({key_type.total_quantity}) est insuffisant. "
+                                   f"Minimum requis: {min_required_total}")
+                    return redirect('key_list')
 
-                # Vérifier si le nouveau total est suffisant pour couvrir les attributions existantes
-                if storage_total + assigned_count != new_total_quantity:
-                    # Ajuster le total pour qu'il soit cohérent
-                    key_type.total_quantity = storage_total + assigned_count
-                    messages.warning(request,
-                                     f"Le total a été ajusté pour être cohérent avec la somme des exemplaires "
-                                     f"(armoire: {new_in_cabinet}, coffre: {new_in_safe}, attribués: {assigned_count}).")
-
-                # Enregistrer les modifications
-                key_type.save()
+                # ✅ SOLUTION: Utiliser le flag form_update
+                key_type.save(form_update=True)
 
                 # Supprimer les instances non attribuées existantes
-                # Important: Ne supprimez que les instances disponibles (is_available=True)
-                KeyInstance.objects.filter(
-                    key_type=key_type, is_available=True).delete()
+                instances_to_delete = KeyInstance.objects.filter(
+                    key_type=key_type, is_available=True)
+                instances_to_delete.delete()
 
                 # Créer les nouvelles instances dans l'armoire
                 cabinet_instances = []
@@ -371,7 +331,7 @@ def key_update(request):
                         )
                     )
 
-                # Création en masse pour plus d'efficacité
+                # Création en masse
                 if cabinet_instances:
                     KeyInstance.objects.bulk_create(cabinet_instances)
 
@@ -380,13 +340,11 @@ def key_update(request):
 
                 messages.success(request, 'Clé mise à jour avec succès.')
                 return redirect('key_list')
+
             except Exception as e:
-                print(f"Erreur lors de la mise à jour: {str(e)}")
                 messages.error(
                     request, f'Erreur lors de la modification: {str(e)}')
         else:
-            # Print errors for debugging
-            print(f"Erreurs de formulaire: {form.errors}")
             messages.error(
                 request, 'Erreur lors de la modification de la clé.')
 

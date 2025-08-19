@@ -52,6 +52,99 @@ button i {
     gap: 20px;
     margin: 30px 0;
 }
+
+/* === CSS POUR LA VALIDATION === */
+
+/* Animation de secousse pour attirer l'attention sur les champs invalides */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Styles pour les champs valides */
+.form-control.is-valid {
+    border-color: #198754 !important;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='m2.3 6.73.94-.94 1.88 1.88L7.7 5.09l.94.94L5.04 9.63z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+/* Styles pour les champs invalides */
+.form-control.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 4.6 2.4 2.4m0-2.4L5.8 7'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+/* Styles pour les select valides */
+.form-select.is-valid {
+    border-color: #198754 !important;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e"), url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='m2.3 6.73.94-.94 1.88 1.88L7.7 5.09l.94.94L5.04 9.63z'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center, center right 2.25rem;
+    background-size: 16px 12px, calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+/* Styles pour les select invalides */
+.form-select.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e"), url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 4.6 2.4 2.4m0-2.4L5.8 7'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center, center right 2.25rem;
+    background-size: 16px 12px, calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+/* Style pour les messages d'erreur */
+.invalid-feedback {
+    display: block !important;
+    font-size: 0.875rem;
+    color: #dc3545;
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+.valid-feedback {
+    display: block !important;
+    font-size: 0.875rem;
+    color: #198754;
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+/* Style pour l'alerte de validation */
+.validation-alert {
+    animation: slideInRight 0.3s ease-out;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid #dc3545;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Animation de pulsation pour les champs en erreur */
+@keyframes pulse-error {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
+.form-control.pulse-error {
+    animation: pulse-error 1s;
+}
 {% endblock %}
 
 {% block content %}
@@ -65,184 +158,190 @@ button i {
             </div>
         {% endfor %}
     {% endif %}
+    
     <!-- Success message for deletion -->
-      {% if delete_success %}
-      <div class="alert alert-{{ message.tags }}  alert-dismissible fade show" role="alert">
-          Clé supprimée avec succès !
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-  {% endif %}
-<h1 class="mb-4">Gestion des clés</h1>
-<!-- Bouton Ajouter une Nouvelle Clé -->
-<div class="d-flex flex-row bd-highlight mb-3 gap-3">
+    {% if delete_success %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            Clé supprimée avec succès !
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endif %}
+
+    <h1 class="mb-4">Gestion des clés</h1>
+    
     <!-- Bouton Ajouter une Nouvelle Clé -->
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addKeyModal">
-        <i class="fas fa-plus"></i> Ajouter une Nouvelle Clé
-    </button>
-    
-    <!-- Champ de Recherche -->
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Rechercher une clé..." class="form-control w-100">
+    <div class="d-flex flex-row bd-highlight mb-3 gap-3">
+        <!-- Bouton Ajouter une Nouvelle Clé -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addKeyModal">
+            <i class="fas fa-plus"></i> Ajouter une Nouvelle Clé
+        </button>
+        
+        <!-- Champ de Recherche -->
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Rechercher une clé..." class="form-control w-100">
+        </div>
+        
+        <!-- Total des clés aligné à droite -->
+        <div class="mb-3 ms-auto text-end">
+            <span class="fw-bold">Total des clés :</span>
+            <span>{{ keys_count }}</span>
+        </div>
     </div>
+
+    <table class="table table-striped table-hover table-responsive" id="keyTable">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col">N°</th>
+                <th scope="col">Noms des clés</th>
+                <th scope="col">Emplacements</th>
+                <th scope="col">Nombre total de clés</th>
+                <th scope="col">Clés attribuées</th>
+                <th scope="col">Stock armoire</th>
+                <th scope="col">Stock coffre</th>
+                <th scope="col">Commentaires</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for key_data in keys %}
+            <tr {% if not key_data.is_consistent %}class="table-warning"{% endif %}>
+                <td>{{ key_data.key_type.number }}</td>
+                <td>{{ key_data.key_type.name }}</td>
+                <td>{{ key_data.key_type.place }}</td>
+                <td>{{ key_data.key_type.total_quantity }}</td>
+                <td>{{ key_data.assigned_count }}</td>
+                <td>{{ key_data.key_type.in_cabinet }}</td>
+                <td>{{ key_data.key_type.in_safe }}</td>
+                <td>{{ key_data.key_type.comments }}</td>
+                <!-- Actions -->
+                <td>
+                    <div class="d-flex gap-2">
+                        <!-- Bouton Modifier -->
+                        <button type="button" class="btn btn-warning btn-sm edit-btn flex-fill action-btn" data-bs-toggle="modal" data-bs-target="#editKeyModal" 
+                                data-id="{{ key_data.key_type.id }}"
+                                data-number="{{ key_data.key_type.number }}"
+                                data-name="{{ key_data.key_type.name }}"
+                                data-place="{{ key_data.key_type.place }}"
+                                data-total-quantity="{{ key_data.key_type.total_quantity }}"
+                                data-in-cabinet="{{ key_data.key_type.in_cabinet }}"
+                                data-in-safe="{{ key_data.key_type.in_safe }}"
+                                data-comments="{{ key_data.key_type.comments }}"
+                                style="width: 80px;">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                
+                        <!-- Bouton Retirer -->
+                        <form method="post" action="{% url 'key_delete' key_data.key_type.id %}" style="width: 80px;">
+                            {% csrf_token %}
+                            <button type="button" class="btn btn-danger btn-sm" 
+                                    data-bs-toggle="modal" data-bs-target="#deleteKeyModal" 
+                                    data-delete-url="{% url 'key_delete' key_data.key_type.id %}" 
+                                    data-key-number="{{ key_data.key_type.number }}">
+                                <i class="fas fa-trash"></i> Retirer
+                            </button>
+                        </form>
+                        
+                        <!-- Bouton Attributions avec popover et badge de détenteurs -->
+                        <button type="button" class="btn btn-info btn-sm action-btn" 
+                                data-bs-toggle="popover" 
+                                data-bs-trigger="focus"
+                                data-bs-html="true"
+                                data-bs-title="Attributions pour clé n°{{ key_data.key_type.number }}"
+                                data-bs-content="{% if key_data.assigned_count > 0 %}
+                                                    <p><strong>{{ key_data.assigned_count }} exemplaire(s) attribué(s)</strong></p>
+                                                    <hr class='my-2'>
+                                                    <ul class='list-unstyled mb-0'>
+                                                        {% for holder in key_data.key_holders %}
+                                                            <li><strong>{{ holder.name }}</strong> (depuis le {{ holder.assignment_date }})</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% else %}
+                                                    Aucune attribution
+                                                {% endif %}">
+                            <i class="fas fa-key"></i> 
+                            <span class="badge bg-secondary">{{ key_data.assigned_count }}</span>
+                        </button>
+                        
+                        {% if not key_data.is_consistent %}
+                        <span class="badge bg-warning text-dark" title="{{ key_data.consistency_message }}">
+                            <i class="fas fa-exclamation-triangle"></i> Incohérence
+                        </span>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     
-    <!-- Total des clés aligné à droite -->
-    <div class="mb-3 ms-auto text-end">
-        <span class="fw-bold">Total des clés :</span>
-        <span>{{ keys_count }}</span>
+    <!-- Boutons d'export ajoutés ici -->
+    <div class="export-buttons">
+        <button type="button" class="btn btn-danger" id="generatePdfBtn">
+            <i class="fas fa-file-pdf"></i> Générer PDF
+        </button>
+        <button type="button" class="btn btn-success" id="generateXlsxBtn">
+            <i class="fas fa-file-excel"></i> Générer XLSX
+        </button>
     </div>
 </div>
 
-<table class="table table-striped table-hover table-responsive" id="keyTable">
-    <thead class="table-dark">
-        <tr>
-            <th scope="col">N°</th>
-            <th scope="col">Noms des clés</th>
-            <th scope="col">Emplacements</th>
-            <th scope="col">Nombre total de clés</th>
-            <th scope="col">Clés attribuées</th>
-            <!-- Supprimez cette ligne:
-            <th scope="col">Exemplaires disponibles</th> -->
-            <th scope="col">Stock armoire</th>
-            <th scope="col">Stock coffre</th>
-            <th scope="col">Commentaires</th>
-            <th scope="col">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for key_data in keys %}
-        <tr {% if not key_data.is_consistent %}class="table-warning"{% endif %}>
-            <td>{{ key_data.key_type.number }}</td>
-            <td>{{ key_data.key_type.name }}</td>
-            <td>{{ key_data.key_type.place }}</td>
-            <td>{{ key_data.key_type.total_quantity }}</td>
-            <td>{{ key_data.assigned_count }}</td>
-            <!-- Supprimez cette ligne:
-            <td>{{ key_data.available_count }}</td> -->
-            <td>{{ key_data.key_type.in_cabinet }}</td>
-            <td>{{ key_data.key_type.in_safe }}</td>
-            <td>{{ key_data.key_type.comments }}</td>
-            <!-- Actions -->
-            <td>
-                <div class="d-flex gap-2">
-                    <!-- Bouton Modifier -->
-                    <button type="button" class="btn btn-warning btn-sm edit-btn flex-fill action-btn" data-bs-toggle="modal" data-bs-target="#editKeyModal" 
-                            data-id="{{ key_data.key_type.id }}"
-                            data-number="{{ key_data.key_type.number }}"
-                            data-name="{{ key_data.key_type.name }}"
-                            data-place="{{ key_data.key_type.place }}"
-                            data-total-quantity="{{ key_data.key_type.total_quantity }}"
-                            data-in-cabinet="{{ key_data.key_type.in_cabinet }}"
-                            data-in-safe="{{ key_data.key_type.in_safe }}"
-                            data-comments="{{ key_data.key_type.comments }}"
-                            style="width: 80px;">
-                        <i class="fas fa-edit"></i> Modifier
-                    </button>
-            
-                    <!-- Bouton Retirer -->
-                    <form method="post" action="{% url 'key_delete' key_data.key_type.id %}" style="width: 80px;">
-                        {% csrf_token %}
-                        <button type="button" class="btn btn-danger btn-sm" 
-                                data-bs-toggle="modal" data-bs-target="#deleteKeyModal" 
-                                data-delete-url="{% url 'key_delete' key_data.key_type.id %}" 
-                                data-key-number="{{ key_data.key_type.number }}">
-                            <i class="fas fa-trash"></i> Retirer
-                        </button>
-                    </form>
-                    <!-- Bouton Attributions avec popover et badge de détenteurs -->
-                    <button type="button" class="btn btn-info btn-sm action-btn" 
-        data-bs-toggle="popover" 
-        data-bs-trigger="focus"
-        data-bs-html="true"
-        data-bs-title="Attributions pour clé n°{{ key_data.key_type.number }}"
-        data-bs-content="{% if key_data.assigned_count > 0 %}
-                            <p><strong>{{ key_data.assigned_count }} exemplaire(s) attribué(s)</strong></p>
-                            <hr class='my-2'>
-                            <ul class='list-unstyled mb-0'>
-                                {% for holder in key_data.key_holders %}
-                                    <li><strong>{{ holder.name }}</strong> (depuis le {{ holder.assignment_date }})</li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            Aucune attribution
-                        {% endif %}">
-    <i class="fas fa-key"></i> 
-    <span class="badge bg-secondary">{{ key_data.assigned_count }}</span>
-</button>
-                    {% if not key_data.is_consistent %}
-                    <span class="badge bg-warning text-dark" title="{{ key_data.consistency_message }}">
-                        <i class="fas fa-exclamation-triangle"></i> Incohérence
-                    </span>
-                    {% endif %}
-                </div>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<!-- Boutons d'export ajoutés ici -->
-<div class="export-buttons">
-    <button type="button" class="btn btn-danger" id="generatePdfBtn">
-        <i class="fas fa-file-pdf"></i> Générer PDF
-    </button>
-    <button type="button" class="btn btn-success" id="generateXlsxBtn">
-        <i class="fas fa-file-excel"></i> Générer XLSX
-    </button>
-</div>
-</div>
 <!-- Modal for adding a new key -->
 <div class="modal fade" id="addKeyModal" tabindex="-1" aria-labelledby="addKeyModalLabel" aria-hidden="true">
-<div class="modal-dialog">
-    <div class="modal-content">
-        <form method="post" action="{% url 'key_create' %}">
-            {% csrf_token %}
-            <div class="modal-header">
-                <h5 class="modal-title" id="addKeyModalLabel">Ajouter une Nouvelle Clé</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Champ Numéro de clé (select) -->
-                <div class="mb-3">
-                    <label for="id_number" class="form-label fw-bold">Numéro de clé</label>
-                    <select name="number" id="id_number" class="form-select">
-                        <option value="" selected disabled>Choisissez un numéro disponible</option>
-                        {% for number in available_numbers %}
-                            <option value="{{ number }}">{{ number }}</option>
-                        {% endfor %}
-                    </select>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'key_create' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addKeyModalLabel">Ajouter une Nouvelle Clé</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="mb-3">
-                    <label for="id_name" class="form-label fw-bold">Nom de la clé</label>
-                    <input type="text" name="name" id="id_name" class="form-control" placeholder="Entrez le nom de la clé">
+                <div class="modal-body">
+                    <!-- Champ Numéro de clé (select) -->
+                    <div class="mb-3">
+                        <label for="id_number" class="form-label fw-bold">Numéro de clé *</label>
+                        <select name="number" id="id_number" class="form-select" required>
+                            <option value="" selected disabled>Choisissez un numéro disponible</option>
+                            {% for number in available_numbers %}
+                                <option value="{{ number }}">{{ number }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_name" class="form-label fw-bold">Nom de la clé *</label>
+                        <input type="text" name="name" id="id_name" class="form-control" placeholder="Entrez le nom de la clé" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_place" class="form-label fw-bold">Emplacement *</label>
+                        <input type="text" name="place" id="id_place" class="form-control" placeholder="Emplacement de la clé" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_total_quantity" class="form-label fw-bold">Nombre total d'exemplaire *</label>
+                        <input type="number" name="total_quantity" id="id_total_quantity" class="form-control" placeholder="Nombre total d'exemplaires à disposition" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_in_cabinet" class="form-label fw-bold">Stock armoire *</label>
+                        <input type="number" name="in_cabinet" id="id_in_cabinet" class="form-control" placeholder="Nombre de clés stocké dans l'armoire" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_in_safe" class="form-label fw-bold">Stock coffre *</label>
+                        <input type="number" name="in_safe" id="id_in_safe" class="form-control" placeholder="Nombre de clé stocké dans le coffre" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_comments" class="form-label fw-bold">Commentaires</label>
+                        <textarea name="comments" id="id_comments" class="form-control" rows="3" placeholder="Ajoutez des commentaires..."></textarea>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="id_place" class="form-label fw-bold">Emplacement</label>
-                    <input type="text" name="place" id="id_place" class="form-control" placeholder="Emplacement de la clé">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Ajouter la clé
+                    </button>
                 </div>
-                <div class="mb-3">
-                    <label for="id_total_quantity" class="form-label fw-bold">Nombre total d'exemplaire</label>
-                    <input type="number" name="total_quantity" id="id_total_quantity" class="form-control" placeholder="Nombre total d'exemplaires à disposition">
-                </div>
-                <div class="mb-3">
-                    <label for="id_in_cabinet" class="form-label fw-bold">Stock armoire</label>
-                    <input type="number" name="in_cabinet" id="id_in_cabinet" class="form-control" placeholder="Nombre de clés stocké dans l'armoire">
-                </div>
-                <div class="mb-3">
-                    <label for="id_in_safe" class="form-label fw-bold">Stock coffre</label>
-                    <input type="number" name="in_safe" id="id_in_safe" class="form-control" placeholder="Nombre de clé sotcké dans le coffre">
-                </div>
-                <div class="mb-3">
-                    <label for="id_comments" class="form-label fw-bold">Commentaires</label>
-                    <textarea name="comments" id="id_comments" class="form-control" rows="3" placeholder="Ajoutez des commentaires..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                <button type="submit" class="btn btn-primary">Valider les modifications</button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
-</div>
+
 <!-- Modal for Editing a Key -->
 <div class="modal fade" id="editKeyModal" tabindex="-1" aria-labelledby="editKeyModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -256,38 +355,38 @@ button i {
                 <div class="modal-body">
                     <!-- Hidden fields to store original values -->
                     <input type="hidden" name="key_id" id="editKeyId">
-                    <input type="hidden" id="original_total_quantity">
-                    <input type="hidden" id="original_in_cabinet">
+                    <input type="hidden" name="original_total_quantity" id="original_total_quantity">
+                    <input type="hidden" name="original_in_cabinet" id="original_in_cabinet">
                     
                     <!-- Styled Form Fields for Editing -->
                     <div class="mb-3 d-flex align-items-center">
                         <!-- Champ Numéro de la clé -->
                         <div style="width: 100px;">
-                            <label for="edit_id_number" class="form-label fw-bold">N°</label>
-                            <input type="number" name="number" id="edit_id_number" class="form-control" placeholder="000" readonly>
+                            <label for="edit_id_number" class="form-label fw-bold">N° *</label>
+                            <input type="number" name="number" id="edit_id_number" class="form-control" placeholder="000" readonly required>
                         </div>
                         <!-- Champ Nom de la clé -->
                         <div class="flex-grow-1 me-3">
-                            <label for="edit_id_name" class="form-label fw-bold">Nom de la clé</label>
-                            <input type="text" name="name" id="edit_id_name" class="form-control" placeholder="Entrez le nom de la clé">
+                            <label for="edit_id_name" class="form-label fw-bold">Nom de la clé *</label>
+                            <input type="text" name="name" id="edit_id_name" class="form-control" placeholder="Entrez le nom de la clé" required>
                         </div>                        
                     </div>
                     <div class="mb-3">
-                        <label for="edit_id_place" class="form-label fw-bold">Emplacement</label>
-                        <input type="text" name="place" id="edit_id_place" class="form-control" placeholder="Emplacement de la clé">
+                        <label for="edit_id_place" class="form-label fw-bold">Emplacement *</label>
+                        <input type="text" name="place" id="edit_id_place" class="form-control" placeholder="Emplacement de la clé" required>
                     </div>
                     <div class="mb-3">
-                        <label for="edit_id_total_quantity" class="form-label fw-bold">Nombre total d'exemplaires</label>
-                        <input type="number" name="total_quantity" id="edit_id_total_quantity" class="form-control" placeholder="Nombre total d'exemplaires">
+                        <label for="edit_id_total_quantity" class="form-label fw-bold">Nombre total d'exemplaires *</label>
+                        <input type="number" name="total_quantity" id="edit_id_total_quantity" class="form-control" placeholder="Nombre total d'exemplaires" min="0" required>
                         <small class="form-text text-muted">Augmenter ce nombre ajoutera automatiquement des clés dans l'armoire.</small>
                     </div>
                     <div class="mb-3">
-                        <label for="edit_id_in_cabinet" class="form-label fw-bold">Stock armoire</label>
-                        <input type="number" name="in_cabinet" id="edit_id_in_cabinet" class="form-control" placeholder="Nombre de clés stocké dans l'armoire">
+                        <label for="edit_id_in_cabinet" class="form-label fw-bold">Stock armoire *</label>
+                        <input type="number" name="in_cabinet" id="edit_id_in_cabinet" class="form-control" placeholder="Nombre de clés stocké dans l'armoire" min="0" required>
                     </div>
                     <div class="mb-3">
-                        <label for="edit_id_in_safe" class="form-label fw-bold">Stock coffre</label>
-                        <input type="number" name="in_safe" id="edit_id_in_safe" class="form-control" placeholder="Nombre de clé sotcké dans le coffre">
+                        <label for="edit_id_in_safe" class="form-label fw-bold">Stock coffre *</label>
+                        <input type="number" name="in_safe" id="edit_id_in_safe" class="form-control" placeholder="Nombre de clé stocké dans le coffre" min="0" required>
                     </div>
                     <div class="mb-3">
                         <label for="edit_id_comments" class="form-label fw-bold">Commentaires</label>
@@ -296,34 +395,35 @@ button i {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                    <button type="submit" class="btn btn-primary">Enregistrer les Modifications</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Enregistrer les Modifications
+                    </button>
                 </div>
             </form>
         </div>
     </div>
-    </div>
+</div>
+
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteKeyModal" tabindex="-1" aria-labelledby="deleteKeyModalLabel" aria-hidden="true">
-<div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title" id="deleteKeyModalLabel">Supprimer la clé</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <!-- Dynamically show the key number -->
-            Voulez-vous vraiment supprimer la clé numéro <strong id="keyNumberToDelete"></strong> et tous ses exemplaires ? Cette action ne peut pas être annulée. Cependant le numéro de clé sera de nouveau disponible pour une nouvelle clé.
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-            <!-- This form will submit the delete action -->
-            <form id="deleteKeyForm" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Supprimer</button>
-            </form>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteKeyModalLabel">Retirer la clé</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Voulez-vous vraiment supprimer la clé numéro <strong id="keyNumberToDelete"></strong> et tous ses exemplaires ? Cette action ne peut pas être annulée. Cependant le numéro de clé sera de nouveau disponible pour une nouvelle clé.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form id="deleteKeyForm" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 </div>
 {% endblock %}
 
@@ -334,6 +434,394 @@ button i {
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.18.5/package/dist/xlsx.full.min.js"></script>
 
+<!-- === SCRIPT DE VALIDATION DES FORMULAIRES === -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('🔧 Initialisation de la validation des formulaires...');
+    
+    // ========== FONCTIONS UTILITAIRES ==========
+    
+    // Fonction pour valider un champ individuel
+    function validateField(field, fieldName) {
+        const value = field.value.trim();
+        const isValid = value !== '' && value !== null;
+        
+        // Supprimer les classes existantes
+        field.classList.remove('is-valid', 'is-invalid', 'pulse-error');
+        
+        // Supprimer le message d'erreur existant
+        const existingError = field.parentNode.querySelector('.invalid-feedback');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        if (!isValid) {
+            // Ajouter la classe d'erreur
+            field.classList.add('is-invalid');
+            
+            // Créer et ajouter le message d'erreur
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'invalid-feedback';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>Le champ "${fieldName}" est obligatoire.`;
+            field.parentNode.appendChild(errorDiv);
+            
+            // Animation de secousse et pulsation
+            field.style.animation = 'shake 0.5s';
+            setTimeout(() => {
+                field.style.animation = '';
+                field.classList.add('pulse-error');
+            }, 500);
+            
+            return false;
+        } else {
+            // Ajouter la classe de succès
+            field.classList.add('is-valid');
+            
+            // Ajouter un message de succès (optionnel)
+            const successDiv = document.createElement('div');
+            successDiv.className = 'valid-feedback';
+            successDiv.innerHTML = `<i class="fas fa-check-circle me-1"></i>Champ valide`;
+            field.parentNode.appendChild(successDiv);
+            
+            return true;
+        }
+    }
+    
+    // Fonction pour valider un champ numérique
+    function validateNumericField(field, fieldName) {
+        const value = field.value.trim();
+        const numValue = parseInt(value);
+        
+        // Supprimer les classes existantes
+        field.classList.remove('is-valid', 'is-invalid', 'pulse-error');
+        
+        // Supprimer les messages existants
+        const existingError = field.parentNode.querySelector('.invalid-feedback');
+        const existingSuccess = field.parentNode.querySelector('.valid-feedback');
+        if (existingError) existingError.remove();
+        if (existingSuccess) existingSuccess.remove();
+        
+        // Vérifier si le champ est vide
+        if (value === '') {
+            field.classList.add('is-invalid');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'invalid-feedback';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>Le champ "${fieldName}" est obligatoire.`;
+            field.parentNode.appendChild(errorDiv);
+            return false;
+        }
+        
+        // Vérifier si c'est un nombre valide et positif
+        if (isNaN(numValue) || numValue < 0) {
+            field.classList.add('is-invalid');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'invalid-feedback';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>Veuillez entrer un nombre valide (≥ 0).`;
+            field.parentNode.appendChild(errorDiv);
+            return false;
+        }
+        
+        // Champ valide
+        field.classList.add('is-valid');
+        const successDiv = document.createElement('div');
+        successDiv.className = 'valid-feedback';
+        successDiv.innerHTML = `<i class="fas fa-check-circle me-1"></i>Valeur valide`;
+        field.parentNode.appendChild(successDiv);
+        return true;
+    }
+    
+    // Fonction pour valider tous les champs obligatoires d'un formulaire
+    function validateForm(form, requiredFields) {
+        let isFormValid = true;
+        let firstInvalidField = null;
+        
+        console.log('🔍 Validation du formulaire...');
+        
+        requiredFields.forEach(({ selector, name, type }) => {
+            const field = form.querySelector(selector);
+            if (field) {
+                let isFieldValid;
+                
+                if (type === 'numeric') {
+                    isFieldValid = validateNumericField(field, name);
+                } else {
+                    isFieldValid = validateField(field, name);
+                }
+                
+                if (!isFieldValid) {
+                    isFormValid = false;
+                    if (!firstInvalidField) {
+                        firstInvalidField = field;
+                    }
+                    console.log(`❌ Champ invalide: ${name}`);
+                } else {
+                    console.log(`✅ Champ valide: ${name}`);
+                }
+            }
+        });
+        
+        // Faire défiler vers le premier champ invalide et le focuser
+        if (firstInvalidField) {
+            firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+                firstInvalidField.focus();
+                firstInvalidField.select();
+            }, 300);
+        }
+        
+        return isFormValid;
+    }
+    
+    // Fonction pour afficher une alerte de validation
+    function showValidationAlert(message, type = 'danger') {
+        // Supprimer l'alerte existante
+        const existingAlert = document.querySelector('.validation-alert');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+        
+        // Créer la nouvelle alerte
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show validation-alert`;
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.style.maxWidth = '400px';
+        
+        const icon = type === 'danger' ? 'exclamation-triangle' : 'check-circle';
+        
+        alertDiv.innerHTML = `
+            <i class="fas fa-${icon} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        // Auto-supprimer après 5 secondes
+        setTimeout(() => {
+            if (alertDiv && alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+    
+    // ========== CONFIGURATION DES CHAMPS OBLIGATOIRES ==========
+    
+    // Champs obligatoires pour le formulaire d'ajout
+    const addFormRequiredFields = [
+        { selector: '#id_number', name: 'Numéro de clé', type: 'text' },
+        { selector: '#id_name', name: 'Nom de la clé', type: 'text' },
+        { selector: '#id_place', name: 'Emplacement', type: 'text' },
+        { selector: '#id_total_quantity', name: 'Nombre total d\'exemplaires', type: 'numeric' },
+        { selector: '#id_in_cabinet', name: 'Stock armoire', type: 'numeric' },
+        { selector: '#id_in_safe', name: 'Stock coffre', type: 'numeric' }
+    ];
+    
+    // Champs obligatoires pour le formulaire de modification
+    const editFormRequiredFields = [
+        { selector: '#edit_id_number', name: 'Numéro de clé', type: 'text' },
+        { selector: '#edit_id_name', name: 'Nom de la clé', type: 'text' },
+        { selector: '#edit_id_place', name: 'Emplacement', type: 'text' },
+        { selector: '#edit_id_total_quantity', name: 'Nombre total d\'exemplaires', type: 'numeric' },
+        { selector: '#edit_id_in_cabinet', name: 'Stock armoire', type: 'numeric' },
+        { selector: '#edit_id_in_safe', name: 'Stock coffre', type: 'numeric' }
+    ];
+    
+    // ========== VALIDATION EN TEMPS RÉEL ==========
+    
+    function setupRealTimeValidation(requiredFields) {
+        requiredFields.forEach(({ selector, name, type }) => {
+            const field = document.querySelector(selector);
+            if (field) {
+                console.log(`🔗 Configuration validation temps réel pour: ${selector}`);
+                
+                // Validation à la perte de focus
+                field.addEventListener('blur', function() {
+                    if (this.value.trim() !== '') {
+                        if (type === 'numeric') {
+                            validateNumericField(this, name);
+                        } else {
+                            validateField(this, name);
+                        }
+                    }
+                });
+                
+                // Supprimer les erreurs dès que l'utilisateur commence à taper
+                field.addEventListener('input', function() {
+                    if (this.classList.contains('is-invalid') && this.value.trim() !== '') {
+                        this.classList.remove('is-invalid', 'pulse-error');
+                        const errorMsg = this.parentNode.querySelector('.invalid-feedback');
+                        if (errorMsg) {
+                            errorMsg.remove();
+                        }
+                        
+                        // Revalider en temps réel pour les champs numériques
+                        if (type === 'numeric') {
+                            const numValue = parseInt(this.value);
+                            if (!isNaN(numValue) && numValue >= 0) {
+                                this.classList.add('is-valid');
+                                const successDiv = document.createElement('div');
+                                successDiv.className = 'valid-feedback';
+                                successDiv.innerHTML = `<i class="fas fa-check-circle me-1"></i>Valeur valide`;
+                                this.parentNode.appendChild(successDiv);
+                            }
+                        } else {
+                            this.classList.add('is-valid');
+                            const successDiv = document.createElement('div');
+                            successDiv.className = 'valid-feedback';
+                            successDiv.innerHTML = `<i class="fas fa-check-circle me-1"></i>Champ valide`;
+                            this.parentNode.appendChild(successDiv);
+                        }
+                    }
+                });
+                
+                // Validation spéciale pour les champs numériques
+                if (type === 'numeric') {
+                    field.addEventListener('input', function() {
+                        // Empêcher la saisie de caractères non numériques
+                        this.value = this.value.replace(/[^0-9]/g, '');
+                    });
+                }
+            }
+        });
+    }
+    
+    // Configurer la validation en temps réel
+    setupRealTimeValidation([...addFormRequiredFields, ...editFormRequiredFields]);
+    
+    // ========== VALIDATION DU FORMULAIRE D'AJOUT ==========
+    
+    const addKeyForm = document.querySelector('#addKeyModal form');
+    if (addKeyForm) {
+        console.log('📝 Configuration validation formulaire d\'ajout');
+        
+        addKeyForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Empêcher la soumission par défaut
+            
+            console.log('🔍 Validation formulaire d\'ajout déclenchée...');
+            
+            const isValid = validateForm(this, addFormRequiredFields);
+            
+            if (isValid) {
+                console.log('✅ Formulaire d\'ajout valide - Soumission autorisée');
+                
+                // Afficher feedback de chargement
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Ajout en cours...';
+                submitBtn.disabled = true;
+                
+                // Afficher alerte de succès
+                showValidationAlert('Formulaire valide. Ajout de la clé en cours...', 'success');
+                
+                // Soumettre le formulaire
+                setTimeout(() => {
+                    this.submit();
+                }, 500);
+            } else {
+                console.log('❌ Formulaire d\'ajout invalide');
+                showValidationAlert('Veuillez corriger les erreurs avant de continuer.');
+            }
+        });
+    }
+    
+    // ========== VALIDATION DU FORMULAIRE DE MODIFICATION ==========
+    
+    const editKeyForm = document.querySelector('#editKeyModal form');
+    if (editKeyForm) {
+        console.log('📝 Configuration validation formulaire de modification');
+        
+        editKeyForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Empêcher la soumission par défaut
+            
+            console.log('🔍 Validation formulaire de modification déclenchée...');
+            
+            const isValid = validateForm(this, editFormRequiredFields);
+            
+            if (isValid) {
+                console.log('✅ Formulaire de modification valide');
+                
+                // Demander confirmation
+                const confirmation = confirm("Êtes-vous sûr de vouloir modifier cette clé ?");
+                if (confirmation) {
+                    console.log('✅ Confirmation reçue - Soumission autorisée');
+                    
+                    // Afficher feedback de chargement
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Modification en cours...';
+                    submitBtn.disabled = true;
+                    
+                    // Afficher alerte de succès
+                    showValidationAlert('Formulaire valide. Modification en cours...', 'success');
+                    
+                    // Soumettre le formulaire
+                    setTimeout(() => {
+                        this.submit();
+                    }, 500);
+                } else {
+                    console.log('❌ Confirmation annulée par l\'utilisateur');
+                }
+            } else {
+                console.log('❌ Formulaire de modification invalide');
+                showValidationAlert('Veuillez corriger les erreurs avant de continuer.');
+            }
+        });
+    }
+    
+    // ========== RÉINITIALISATION DES FORMULAIRES ==========
+    
+    // Fonction pour réinitialiser la validation d'un formulaire
+    function resetFormValidation(form) {
+        if (form) {
+            // Supprimer toutes les classes de validation
+            const fields = form.querySelectorAll('.form-control, .form-select');
+            fields.forEach(field => {
+                field.classList.remove('is-valid', 'is-invalid', 'pulse-error');
+            });
+            
+            // Supprimer tous les messages de feedback
+            const feedbacks = form.querySelectorAll('.invalid-feedback, .valid-feedback');
+            feedbacks.forEach(feedback => feedback.remove());
+            
+            // Réactiver le bouton de soumission
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                const originalIcon = submitBtn.innerHTML.includes('Ajouter') ? 'save' : 'save';
+                const originalText = submitBtn.innerHTML.includes('Ajouter') ? 'Ajouter la clé' : 'Enregistrer les Modifications';
+                submitBtn.innerHTML = `<i class="fas fa-${originalIcon} me-2"></i>${originalText}`;
+            }
+        }
+    }
+    
+    // Réinitialiser la validation quand les modals s'ouvrent
+    const addModal = document.getElementById('addKeyModal');
+    const editModal = document.getElementById('editKeyModal');
+    
+    if (addModal) {
+        addModal.addEventListener('show.bs.modal', function() {
+            console.log('🔄 Réinitialisation formulaire d\'ajout');
+            const form = this.querySelector('form');
+            resetFormValidation(form);
+        });
+    }
+    
+    if (editModal) {
+        editModal.addEventListener('show.bs.modal', function() {
+            console.log('🔄 Réinitialisation formulaire de modification');
+            const form = this.querySelector('form');
+            resetFormValidation(form);
+        });
+    }
+    
+    console.log('✅ Validation des formulaires initialisée avec succès!');
+});
+</script>
+
+<!-- VOS SCRIPTS EXISTANTS CONTINUENT ICI -->
 <script>
 // Add event listener to delete buttons
 document.addEventListener('DOMContentLoaded', function () {
@@ -469,24 +957,9 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Obtenir le formulaire de modification
-    var editKeyForm = document.getElementById('editKeyForm');
-    if (editKeyForm) {
-        editKeyForm.addEventListener('submit', function (e) {
-            var confirmation = confirm("Êtes-vous sûr de vouloir modifier cette clé ?");
-            if (!confirmation) {
-                e.preventDefault(); // Empêcher la soumission du formulaire
-            }
-        });
-    }
-});
-</script>
-
 <!-- JavaScript to Populate Edit Modal -->
 <script>
-   document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
     // Get all edit buttons
     var editButtons = document.querySelectorAll('.edit-btn');
     
@@ -521,42 +994,64 @@ document.addEventListener('DOMContentLoaded', function () {
     const totalQuantityInput = document.getElementById('edit_id_total_quantity');
     const inCabinetInput = document.getElementById('edit_id_in_cabinet');
     
-    totalQuantityInput.addEventListener('input', function() {
-        // Get original values
-        const originalTotal = parseInt(document.getElementById('original_total_quantity').value) || 0;
-        const originalCabinet = parseInt(document.getElementById('original_in_cabinet').value) || 0;
-        const newTotal = parseInt(this.value) || 0;
-        
-        // Calculate the difference from original
-        const difference = newTotal - originalTotal;
-        
-        // If total has increased from original, add the difference to the original cabinet value
-        if (difference > 0) {
-            inCabinetInput.value = originalCabinet + difference;
+    if (totalQuantityInput && inCabinetInput) {
+        totalQuantityInput.addEventListener('input', function() {
+            // Get original values
+            const originalTotal = parseInt(document.getElementById('original_total_quantity').value) || 0;
+            const originalCabinet = parseInt(document.getElementById('original_in_cabinet').value) || 0;
+            const newTotal = parseInt(this.value) || 0;
             
-            // Visual feedback (optional)
-            inCabinetInput.classList.add('is-valid');
-            setTimeout(() => {
-                inCabinetInput.classList.remove('is-valid');
-            }, 1000);
-        } else {
-            // If total is less than or equal to original, reset to original cabinet value
-            inCabinetInput.value = originalCabinet;
-        }
-    });
+            // Calculate the difference from original
+            const difference = newTotal - originalTotal;
+            
+            // If total has increased from original, add the difference to the original cabinet value
+            if (difference > 0) {
+                inCabinetInput.value = originalCabinet + difference;
+                
+                // Visual feedback (optional)
+                inCabinetInput.classList.add('is-valid');
+                setTimeout(() => {
+                    inCabinetInput.classList.remove('is-valid');
+                }, 1000);
+            } else {
+                // If total is less than or equal to original, reset to original cabinet value
+                inCabinetInput.value = originalCabinet;
+            }
+        });
+    }
 });
 </script>
+
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Initialisation des popovers
-        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
-        [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl, {
-            html: true,
-            trigger: 'focus',
-            container: 'body'
-        }));
-        
-        console.log('Nombre de popovers initialisés:', popoverTriggerList.length);
-    });
-    </script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Initialisation des popovers
+    const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+    [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl, {
+        html: true,
+        trigger: 'focus',
+        container: 'body'
+    }));
+    
+    console.log('Nombre de popovers initialisés:', popoverTriggerList.length);
+});
+</script>
+
+<!-- Script de recherche dans le tableau -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Gestion de la recherche
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function () {
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#keyTable tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        });
+    }
+});
+</script>
 {% endblock %}

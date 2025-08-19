@@ -5,36 +5,51 @@
 
 {% block extra_css %}
 <style>
-/* Style pour les boutons d'export */
-.export-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin: 30px 0;
+
+/* Style pour les boutons d'export - Version améliorée */
+ .export-buttons {
+            display: flex;
+            justify-content: center; /* Centre les boutons horizontalement */
+            gap: 20px; /* Augmentation de l'espacement entre les boutons */
+            margin: 40px 0; /* Plus d'espace en haut et en bas */
+            padding-bottom: 40px; /* Espace supplémentaire vers le footer */
+        }
+
+/* Optionnel : Ajouter un conteneur wrapper pour un centrage parfait */
+.export-section {
+    text-align: center;
+    margin: 40px 0;
+    padding: 20px;
 }
 
-/* Styles pour les actions */
-.action-btn {
+/* Style pour les boutons d'export individuels */
+.export-buttons .btn {
+    min-width: 150px; /* Assure une largeur minimale pour l'alignement */
+    padding: 12px 20px;
+    font-weight: 500;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 120px !important; /* Largeur fixe pour tous les boutons d'action */
+    gap: 8px;
 }
 
-.action-btn i {
-    margin-right: 5px;
+/* Style pour les icônes dans les boutons */
+.export-buttons .btn i {
+    font-size: 16px;
 }
 
-/* S'assurer que les boutons ont la même taille */
-.btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-}
-
-/* Style pour le conteneur de recherche */
-.search-container {
-    flex: 1;
-    max-width: 400px;
+/* Responsive : ajustement pour les petits écrans */
+@media (max-width: 768px) {
+    .export-buttons {
+        flex-direction: column;
+        gap: 15px;
+        margin: 30px auto;
+    }
+    
+    .export-buttons .btn {
+        width: 100%;
+        max-width: 200px;
+    }
 }
 </style>
 {% endblock %}
@@ -189,14 +204,14 @@
     </div>
     
     <!-- Boutons d'export -->
-    <div class="export-buttons">
-        <button type="button" class="btn btn-danger" id="generatePdfBtn">
-            <i class="fas fa-file-pdf"></i> Générer PDF
-        </button>
-        <button type="button" class="btn btn-success" id="generateXlsxBtn">
-            <i class="fas fa-file-excel"></i> Générer XLSX
-        </button>
-    </div>
+   <div class="export-buttons" style="display: flex; justify-content: center; gap: 20px; margin: 40px 0; padding-bottom: 40px;">
+    <button id="generate-pdf-btn" class="btn btn-danger" style="min-width: 140px;">
+        <i class="fas fa-file-pdf"></i> Générer PDF
+    </button>
+    <button id="generate-xlsx-btn" class="btn btn-success" style="min-width: 140px;">
+        <i class="fas fa-file-excel"></i> Générer XLSX
+    </button>
+</div>
 </div>
 {% endblock %}
 
