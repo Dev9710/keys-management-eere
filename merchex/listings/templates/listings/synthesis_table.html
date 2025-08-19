@@ -390,15 +390,15 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number">{{ stats.total_users }}</div>
-                <div class="stat-label">Utilisateurs Total</div>
+                <div class="stat-label">Membres</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number">{{ stats.users_with_keys }}</div>
-                <div class="stat-label">Avec Clés</div>
+                <div class="stat-label">Membres ont des clés</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number">{{ stats.total_keys_assigned }}</div>
-                <div class="stat-label">Clés Assignées</div>
+                <div class="stat-label">Clés Assignées au total dans l'équipe</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number">{{ stats.teams_count }}</div>
@@ -450,10 +450,10 @@
                         <tr>
                             <th scope="col">Équipe</th>
                             <th scope="col">Nom Complet</th>
-                            <th scope="col">Statut</th>
-                            <th scope="col">Nb Clés</th>
-                            <th scope="col">Clés Détenues</th>
-                            <th scope="col">Commentaire</th>
+                           <!--  <th scope="col">Statut</th>-->
+                            <th scope="col">Nombre de clés</th>
+                            <th scope="col">Liste des clés attribués</th>
+                            <th scope="col">Commentaires</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -461,11 +461,11 @@
                         <tr>
                             <td><strong>{{ user.team }}</strong></td>
                             <td>{{ user.full_name }}</td>
-                            <td>
+                           <!--  <td>
                                 <span class="badge status-badge {% if user.has_keys %}status-active{% else %}status-inactive{% endif %}">
                                     {{ user.status }}
                                 </span>
-                            </td>
+                            </td>-->
                             <td style="text-align: center;">
                                 <strong>{{ user.keys_count }}</strong>
                             </td>
@@ -509,11 +509,11 @@
                         </div>
                         <div class="team-metric">
                             <div class="team-metric-number">{{ team.members_with_keys }}</div>
-                            <div class="team-metric-label">Avec Clés</div>
+                            <div class="team-metric-label">Membres ont des clés</div>
                         </div>
                         <div class="team-metric">
                             <div class="team-metric-number">{{ team.total_keys }}</div>
-                            <div class="team-metric-label">Total Clés</div>
+                            <div class="team-metric-label">Total des clés de l'équipe</div>
                         </div>
                     </div>
                 </div>

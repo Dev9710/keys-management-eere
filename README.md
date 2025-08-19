@@ -13,3 +13,12 @@ C. Importer les données(inserer les données des fichiers excel dans la base de
   c. user : python manage.py import_team_members repertoire_perso_local\keys-management-eere\merchex\listings\data\userbyteams.xlsx
 
 NB :  repertoire_perso_local\keys-management-eere\merchex\listings\data\userbyteams.xlsx correspond au chemin ou se trouve le fichier excel dans le projet.Il faut donc le modofier en fonction du repertoire du  projet de chacun.
+
+
+Administrateur créé avec succès: admin
+Informations de connexion:
+Username: admin
+Password: àèèvi
+
+Email: admin@eere.org
+Gmail Apps name : Django EERE App

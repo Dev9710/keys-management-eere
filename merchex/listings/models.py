@@ -47,7 +47,6 @@ class ActionLog(models.Model):
         max_length=255, verbose_name="Nom de l'objet")
 
     # Informations sur l'utilisateur qui a effectué l'action
-    # MODIFIÉ : Référence directe au modèle Owner au lieu d'utiliser get_user_model()
     user = models.ForeignKey('Owner', on_delete=models.SET_NULL,
                              null=True, blank=True, verbose_name="Utilisateur")
     user_name = models.CharField(
@@ -120,8 +119,8 @@ class Team(models.Model):
 
 
 class User(models.Model):
-    firstname = models.CharField(max_length=15)
-    name = models.CharField(max_length=15)
+    firstname = models.CharField(max_length=25)
+    name = models.CharField(max_length=25)
     team = models.ForeignKey(
         Team, on_delete=models.CASCADE, related_name='members', null=True, blank=True)
     comment = models.CharField(max_length=200, default='', blank=True)
@@ -304,8 +303,8 @@ class KeyInstance(models.Model):
     is_available = models.BooleanField(default=True)
     condition = models.CharField(max_length=50, default='Bon',
                                  choices=[('Neuf', 'Neuf'), ('Bon', 'Bon'), ('Moyen', 'Moyen'), ('Mauvais', 'Mauvais')])
-    location = models.CharField(max_length=50, default='Cabinet',
-                                choices=[('Cabinet', 'Cabinet'), ('Coffre', 'Coffre'), ('Utilisateur', 'Utilisateur')])
+    location = models.CharField(max_length=50, default='Armoire',
+                                choices=[('Armoire', 'Armoire'), ('Coffre', 'Coffre'), ('Utilisateur', 'Utilisateur')])
     original_location = models.CharField(max_length=50, default='', blank=True,
                                          help_text="Localisation d'origine, pour restaurer après retour")
     comments = models.CharField(max_length=200, default='', blank=True)
@@ -341,7 +340,7 @@ class KeyInstance(models.Model):
 
                             # Décrémenter le compteur approprié selon la localisation d'origine
                             key_type = self.key_type
-                            if old_instance.location == 'Cabinet':
+                            if old_instance.location == 'Armoire':
                                 key_type.in_cabinet = max(
                                     0, key_type.in_cabinet - 1)
                                 key_type.save(update_fields=['in_cabinet'])
@@ -355,12 +354,12 @@ class KeyInstance(models.Model):
                         # Cas 2: La clé passe de non disponible à disponible (retour manuel)
                         elif not old_instance.is_available and self.is_available:
                             # Restaurer la localisation d'origine
-                            original_loc = self.original_location or 'Cabinet'
+                            original_loc = self.original_location or 'Armoire'
                             self.location = original_loc
 
                             # Incrémenter le compteur approprié
                             key_type = self.key_type
-                            if original_loc == 'Cabinet':
+                            if original_loc == 'Armoire':
                                 key_type.in_cabinet += 1
                                 key_type.save(update_fields=['in_cabinet'])
                             elif original_loc == 'Coffre':
@@ -377,7 +376,7 @@ class KeyInstance(models.Model):
                 self.location = self.original_location
             else:
                 # Sinon utiliser Cabinet par défaut
-                self.location = 'Cabinet'
+                self.location = 'Armoire'
         elif not self.is_available:
             # Si l'instance n'est pas disponible, sa localisation est Utilisateur
             self.location = 'Utilisateur'
@@ -432,7 +431,7 @@ class KeyAssignment(models.Model):
 
                 # Décrémenter le compteur approprié
                 key_type = key_instance.key_type
-                if key_instance.location == 'Cabinet':
+                if key_instance.location == 'Armoire':
                     key_type.in_cabinet = max(0, key_type.in_cabinet - 1)
                     key_type.save(update_fields=['in_cabinet'])
                 elif key_instance.location == 'Coffre':
@@ -451,12 +450,12 @@ class KeyAssignment(models.Model):
             # Ne modifier la clé que si son état change
             if not key_instance.is_available:
                 # Restaurer la localisation d'origine
-                original_loc = key_instance.original_location or 'Cabinet'
+                original_loc = key_instance.original_location or 'Armoire'
                 key_instance.location = original_loc
 
                 # Incrémenter le compteur approprié
                 key_type = key_instance.key_type
-                if original_loc == 'Cabinet':
+                if original_loc == 'Armoire':
                     key_type.in_cabinet += 1
                     key_type.save(update_fields=['in_cabinet'])
                 elif original_loc == 'Coffre':

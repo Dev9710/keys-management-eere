@@ -205,7 +205,7 @@ def key_create(request):
 
                 # Debug prints
                 print(
-                    f"Création - in_cabinet: {key_type.in_cabinet}, in_safe: {key_type.in_safe}")
+                    f"Création - Armoire: {key_type.in_cabinet}, Coffre: {key_type.in_safe}")
 
                 # S'assurer que les quantités sont cohérentes
                 total_quantity = key_type.total_quantity
@@ -233,8 +233,8 @@ def key_create(request):
                             key_type=key_type,
                             is_available=True,
                             condition='Bon',
-                            location='Cabinet',
-                            original_location='Cabinet'  # Ajouter l'emplacement d'origine
+                            location='Armoire',
+                            original_location='Armoire'  # Ajouter l'emplacement d'origine
                         )
                     )
 
@@ -315,7 +315,7 @@ def key_update(request):
                             key_type=key_type,
                             is_available=True,
                             condition='Bon',
-                            location='Cabinet'
+                            location='Armoire'
                         )
                     )
 
