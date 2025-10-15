@@ -297,39 +297,62 @@
 
 .features {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
+    justify-content: center;  /* Centre les cartes */
+    align-items: stretch;      /* Même hauteur */
+    gap: 40px;                 /* Espacement entre les cartes */
+    flex-wrap: nowrap;         /* Empêche de passer à la ligne */
+    max-width: 100%;
+    overflow-x: auto;          /* Permet le scroll horizontal si l’écran est trop petit */
+    padding-bottom: 20px;
 }
 
 .feature {
     background: white;
-    padding: 30px;
     border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 200px;
+    /* Suppression de la border simple */
+    position: relative;
+    /* Ajout du padding pour simuler l'épaisseur de la bordure */
+    padding: 4px;
+    /* Background avec le dégradé */
+    background: linear-gradient(135deg, #000000, #3a9f87);
+    box-shadow: 
+        0 4px 8px rgba(0, 0, 0, 0.08),
+        0 0 0 1px rgba(0, 0, 0, 0.03);
+    width: 330px;
+    aspect-ratio: 1 / 1;
     text-align: center;
     transition: all 0.3s ease;
     cursor: pointer;
-    position: relative;
     overflow: hidden;
     opacity: 0;
     transform: translateY(30px);
     animation: featureAppear 0.6s ease-out forwards;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
-.feature:nth-child(1) { animation-delay: 0.2s; }
-.feature:nth-child(2) { animation-delay: 0.4s; }
-.feature:nth-child(3) { animation-delay: 0.6s; }
-.feature:nth-child(4) { animation-delay: 0.8s; }
-
-.feature:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 10px 30px rgba(58,159,135,0.2);
+/* Nouveau pseudo-élément pour créer le fond blanc intérieur */
+.feature::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
+    background: white;
+    border-radius: 11px; /* 15px - 4px de "border" */
+    z-index: 0;
 }
 
+/* IMPORTANT: Ajustement pour que le contenu soit au-dessus du fond blanc */
+.feature > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Modification du ::before existant pour qu'il fonctionne avec le nouveau design */
 .feature::before {
     content: '';
     position: absolute;
@@ -341,6 +364,21 @@
     transform: rotate(45deg);
     transition: all 0.5s;
     opacity: 0;
+    z-index: 1; /* Au-dessus du fond blanc mais sous le contenu */
+}
+
+/* ====================== */
+/* TOUT LE RESTE DE VOTRE CODE RESTE IDENTIQUE */
+/* ====================== */
+
+.feature:nth-child(1) { animation-delay: 0.2s; }
+.feature:nth-child(2) { animation-delay: 0.4s; }
+.feature:nth-child(3) { animation-delay: 0.6s; }
+.feature:nth-child(4) { animation-delay: 0.8s; }
+
+.feature:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 30px rgba(58,159,135,0.2);
 }
 
 .feature:hover::before {

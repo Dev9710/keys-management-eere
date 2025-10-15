@@ -229,14 +229,14 @@
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <a class="dropdown-item" href="{% url 'profile' %}">
-                        <i class="fas fa-user-circle me-2"></i> Mon profil
+                        <i class="fas fa-user-circle me-2"></i> Gérer mon profile
                     </a>
                 </li>
-                <li>
+              <!--   <li>
                     <a class="dropdown-item" href="{% url 'profile' %}?tab=security">
                         <i class="fas fa-shield-alt me-2"></i> Sécurité
                     </a>
-                </li>
+                </li>-->
                 
                 <!-- Options d'administration -->
                 {% if request.user.role == 'admin' %}
@@ -260,12 +260,12 @@
                 </li>
                 <li>
                     <a class="dropdown-item" href="{% url 'history_stats' %}">
-                        <i class="fas fa-chart-bar me-2"></i> Statistiques d'usage
+                        <i class="fas fa-chart-bar me-2"></i> Statistiques
                     </a>
                 </li>
                 <li>
                     <a class="dropdown-item" href="{% url 'synthesis_table' %}">
-                        <i class="fas fa-chart-bar me-2"></i>Vue d'ensemble
+                        <i class="fas fa-chart-bar me-2"></i> Synthèse global
                     </a>
                 </li>
                 {% endif %}
