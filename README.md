@@ -18,7 +18,12 @@ NB :  repertoire_perso_local\keys-management-eere\merchex\listings\data\userbyte
 Administrateur créé avec succès: admin
 Informations de connexion:
 Username: admin
-Password: àèèvi
+Password: àèèviz
 
 Email: admin@eere.org
 Gmail Apps name : Django EERE App
+
+admin django
+
+superadmin
+superadmin
