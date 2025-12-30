@@ -29,8 +29,14 @@ from listings.views import (
     export_history_csv,
     history_api_search
 )
+from django.http import HttpResponse
+
+def robots_txt(request):
+    return HttpResponse("User-agent: *\nDisallow: /\n", content_type="text/plain")
+
 
 urlpatterns = [
+    path("robots.txt", robots_txt),
     path('admin/', admin.site.urls),
     path('hello/', views.hello),
     path('about-us/', views.about),  # ajoutez cette ligne
@@ -117,6 +123,7 @@ urlpatterns = [
     # Export des données
     path('synthesis-export/', views.synthesis_export, name='synthesis_export'),
 
+     
 
 
 ]

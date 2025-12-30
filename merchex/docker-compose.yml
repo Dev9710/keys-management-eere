@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: merchex-app
+    ports:
+      - "8002:8000"
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=merchex.settings
+    restart: unless-stopped
+
+  db:
+    image: mysql:8
+    container_name: merchex-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: merchex
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3308:3306"
+
+volumes:
+  mysql_data:

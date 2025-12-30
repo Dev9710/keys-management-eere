@@ -27,6 +27,7 @@ class LoginRequiredMiddleware:
             '/static/',
             '/media/',  # Pour les fichiers média
             '/favicon.ico',  # Pour l'icône du site
+            '/robots.txt',
 
             # Ajouter les URLs de réinitialisation de mot de passe
             '/password-reset/',
@@ -83,4 +84,13 @@ class HistoryMiddleware:
         # Nettoyer le thread local après la requête
         set_current_user(None)
 
+        return response
+
+class NoIndexMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        response["X-Robots-Tag"] = "noindex, nofollow, noarchive"
         return response
