@@ -33,7 +33,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'listings.apps.ListingsConfig',
+    'merchex.listings.apps.ListingsConfig',
+
 ]
 
 MIDDLEWARE = [
@@ -44,10 +45,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-     'listings.middleware.LoginRequiredMiddleware',
-    'listings.middleware.HistoryMiddleware',
-    'listings.middleware.NoIndexMiddleware',
+
+    'merchex.listings.middleware.LoginRequiredMiddleware',
+    'merchex.listings.middleware.HistoryMiddleware',
+    'merchex.listings.middleware.NoIndexMiddleware',
 ]
+
 
 ROOT_URLCONF = 'merchex.urls'
 
