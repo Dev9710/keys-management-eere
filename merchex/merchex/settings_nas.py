@@ -53,7 +53,7 @@ MIDDLEWARE = [
 ]
 
 
-ROOT_URLCONF = 'merchex.merchex.urls'
+ROOT_URLCONF = 'merchex.urls'
 
 TEMPLATES = [
     {
@@ -71,7 +71,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "merchex.merchex.wsgi.application"
+WSGI_APPLICATION = "merchex.wsgi.application"
 
 # -----------------------------
 # DATABASE
