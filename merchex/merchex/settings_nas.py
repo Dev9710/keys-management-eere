@@ -47,9 +47,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-    'merchex.listings.middleware.LoginRequiredMiddleware',
-    'merchex.listings.middleware.HistoryMiddleware',
-    'merchex.listings.middleware.NoIndexMiddleware',
+    'listings.middleware.LoginRequiredMiddleware',
+    'listings.middleware.HistoryMiddleware',
+    'listings.middleware.NoIndexMiddleware',
 ]
 
 
