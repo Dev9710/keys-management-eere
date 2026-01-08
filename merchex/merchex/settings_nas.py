@@ -71,7 +71,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'merchex.wsgi.application'
+WSGI_APPLICATION = "merchex.merchex.wsgi.application"
 
 # -----------------------------
 # DATABASE
