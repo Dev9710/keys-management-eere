@@ -1,5 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import redirect
+from listings.threadlocals import set_current_user
+
 
 # ================================
 # 3. MIDDLEWARE POUR CAPTURER L'UTILISATEUR COURANT

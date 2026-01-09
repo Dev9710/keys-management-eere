@@ -53,7 +53,7 @@ MIDDLEWARE = [
 ]
 
 
-ROOT_URLCONF = 'merchex.urls'
+ROOT_URLCONF = 'merchex.merchex.urls'
 
 TEMPLATES = [
     {
