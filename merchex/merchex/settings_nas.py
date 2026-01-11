@@ -163,3 +163,49 @@ SESSION_COOKIE_SECURE = True
 
 ROBOTS_META_TAG = "noindex, nofollow, noarchive"
 
+# ======================
+# LOGGING (NAS / DOCKER)
+# ======================
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+
+    "loggers": {
+        # Erreurs HTTP 500, exceptions, etc.
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+
+        # Logs serveur Django
+        "django.server": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+
+        # Logs base de données (désactive si trop verbeux)
+        # "django.db.backends": {
+        #     "handlers": ["console"],
+        #     "level": "ERROR",
+        # },
+
+        # Logs uWSGI / WSGI
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+        },
+    },
+}
