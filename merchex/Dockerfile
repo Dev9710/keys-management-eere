@@ -1,22 +1,16 @@
-FROM python:3.11-slim
-
+FROM python:3.12-slim
 WORKDIR /app
 
-# Installer dépendances système MySQL
-RUN apt-get update && apt-get install -y \
-    default-libmysqlclient-dev build-essential && \
-    apt-get clean
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential default-libmysqlclient-dev pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY . /app/
 
-ENV DJANGO_SETTINGS_MODULE=merchex.settings
-ENV PYTHONUNBUFFERED=1
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Collecte des fichiers statiques
-RUN python manage.py collectstatic --noinput
-
-# Démarrer Gunicorn
-CMD ["gunicorn", "merchex.wsgi:application", "-b", "0.0.0.0:8000"]
+CMD ["/entrypoint.sh"]
