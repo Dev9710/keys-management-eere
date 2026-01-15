@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: listings
+      MYSQL_DATABASE: merchex
       MYSQL_USER: merchex
       MYSQL_PASSWORD: password
     command: --default-authentication-plugin=mysql_native_password
@@ -36,7 +36,7 @@ services:
       DJANGO_SETTINGS_MODULE: merchex.settings_nas
       MYSQL_HOST: db
       MYSQL_PORT: 3306
-      MYSQL_DATABASE: listings
+      MYSQL_DATABASE: merchex
       MYSQL_USER: merchex
       MYSQL_PASSWORD: password
 
@@ -46,6 +46,7 @@ services:
     networks:
       - merchex_net
 
+  # Optionnel: phpMyAdmin dédié à CETTE DB
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: merchex-phpmyadmin
