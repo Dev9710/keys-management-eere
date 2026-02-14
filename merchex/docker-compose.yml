@@ -11,7 +11,7 @@ services:
       MYSQL_USER: merchex
       MYSQL_PASSWORD: password
     volumes:
-      - django_keyapp_mysql_data:/var/lib/mysql
+      - merchex_mysql_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-ppassword"]
       interval: 5s
@@ -59,7 +59,7 @@ services:
 
 
 volumes:
-  django_keyapp_mysql_data:
+  merchex_mysql_data:
      external: true
 
 networks:
