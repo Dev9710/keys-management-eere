@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   db:
-    image: mysql:8
+    image: mysql:8.0.36
     container_name: merchex-db
     restart: unless-stopped
     environment:
@@ -10,7 +10,6 @@ services:
       MYSQL_DATABASE: merchex
       MYSQL_USER: merchex
       MYSQL_PASSWORD: password
-    command: --default-authentication-plugin=mysql_native_password
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
