@@ -47,7 +47,7 @@ services:
 
   # Optionnel: phpMyAdmin dédié à CETTE DB
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin:5.2.1-apache
+    image: phpmyadmin/phpmyadmin:5.2
     container_name: merchex-phpmyadmin
     restart: unless-stopped
     depends_on:
