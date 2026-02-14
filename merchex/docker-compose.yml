@@ -47,7 +47,7 @@ services:
 
   # Optionnel: phpMyAdmin dédié à CETTE DB
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
+    image: phpmyadmin/phpmyadmin:5.2.1-apache
     container_name: merchex-phpmyadmin
     restart: unless-stopped
     depends_on:
@@ -58,6 +58,8 @@ services:
       PMA_PASSWORD: password
     ports:
       - "8082:80"
+    volumes:
+      - /dev/urandom:/dev/urandom:ro
     networks:
       - merchex_net
 
