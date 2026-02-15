@@ -45,7 +45,6 @@ services:
     networks:
       - merchex_net
 
-  # Optionnel: phpMyAdmin dédié à CETTE DB
   adminer:
     image: adminer:4
     container_name: merchex-adminer
@@ -57,10 +56,11 @@ services:
     networks:
       - merchex_net
 
-
 volumes:
   merchex_mysql_data:
-     external: true
+    external: true
 
 networks:
   merchex_net:
+    name: merchex_net
+    driver: bridge
