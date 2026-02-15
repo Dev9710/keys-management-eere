@@ -19,7 +19,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # -----------------------------
-# DATABASE (MySQL Docker)
+# DATABASE (MySQL via port NAS)
 # -----------------------------
 DATABASES = {
     "default": {
@@ -27,8 +27,9 @@ DATABASES = {
         "NAME": os.environ.get("MYSQL_DATABASE", "merchex"),
         "USER": os.environ.get("MYSQL_USER", "merchex"),
         "PASSWORD": os.environ.get("MYSQL_PASSWORD", "password"),
-        "HOST": os.environ.get("MYSQL_HOST", "db"),
-        "PORT": int(os.environ.get("MYSQL_PORT", "3306")),
+        # Web Station => passe par le NAS (port exposé)
+        "HOST": os.environ.get("MYSQL_HOST", "127.0.0.1"),
+        "PORT": int(os.environ.get("MYSQL_PORT", "3307")),
         "OPTIONS": {
             "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
             "charset": "utf8mb4",
@@ -42,37 +43,27 @@ DATABASES = {
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 
-# Si tu testes en HTTP direct (http://IP:8002), mettre False temporairement
+# Si tu testes en HTTP direct, laisse False
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
 
 # -----------------------------
-# LOGGING (Docker stdout)
+# Static
+# -----------------------------
+# Assure-toi que collectstatic écrit bien ici, et que Web Station sert ce dossier
+STATIC_ROOT = os.environ.get("STATIC_ROOT", "/home/python/src/staticfiles")
+
+# -----------------------------
+# LOGGING (stdout)
 # -----------------------------
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {
-        "console": {"class": "logging.StreamHandler"},
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "INFO",
-    },
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": "INFO"},
     "loggers": {
-        "django.request": {
-            "handlers": ["console"],
-            "level": "ERROR",
-            "propagate": False,
-        },
-        "django.server": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "django": {
-            "handlers": ["console"],
-            "level": "INFO",
-        },
+        "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
+        "django.server": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "django": {"handlers": ["console"], "level": "INFO"},
     },
 }
