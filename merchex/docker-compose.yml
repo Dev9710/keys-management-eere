@@ -26,7 +26,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "8002:8000"
+      - "8003:8000"
     volumes:
       - .:/app
     environment:
@@ -51,7 +51,7 @@ services:
     depends_on:
       - db
     ports:
-      - "8082:8080"
+      - "8083:8080"
     networks:
       - merchex_net
 
