@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+# Force settings module (prod on NAS)
+export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-merchex.settings_nas}"
+echo "DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE"
+
 echo "Waiting for DB..."
 python - <<'PY'
 import os, time, socket
@@ -20,14 +24,18 @@ PY
 echo "Migrate..."
 python manage.py migrate --noinput
 
-# ✅ Import initial des données (une seule fois)
-if [ -f "/app/data.json" ] && [ ! -f "/app/.data_loaded" ]; then
-  echo "Loading initial data from /app/data.json..."
-  python manage.py loaddata /app/data.json
-  touch /app/.data_loaded
-  echo "Data import done."
+# Import initial des données (une seule fois) - possibilité de bypass
+if [ "${SKIP_LOADDATA:-0}" = "1" ]; then
+  echo "SKIP_LOADDATA=1 -> skipping loaddata"
 else
-  echo "No data.json to import or already imported."
+  if [ -f "/app/data.json" ] && [ ! -f "/app/.data_loaded" ]; then
+    echo "Loading initial data from /app/data.json..."
+    python manage.py loaddata /app/data.json
+    touch /app/.data_loaded
+    echo "Data import done."
+  else
+    echo "No data.json to import or already imported."
+  fi
 fi
 
 echo "Collectstatic..."
