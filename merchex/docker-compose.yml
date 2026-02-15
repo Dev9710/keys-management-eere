@@ -3,7 +3,6 @@ version: "3.8"
 services:
   db:
     image: mysql:8.4.8
-    container_name: merchex-db
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: password
@@ -22,7 +21,6 @@ services:
 
   web:
     build: .
-    container_name: merchex-app
     restart: unless-stopped
     depends_on:
       db:
@@ -49,7 +47,6 @@ services:
 
   adminer:
     image: adminer:4
-    container_name: merchex-adminer
     restart: unless-stopped
     depends_on:
       - db
