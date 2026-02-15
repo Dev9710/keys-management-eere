@@ -38,7 +38,7 @@ services:
       MYSQL_DATABASE: merchex
       MYSQL_USER: merchex
       MYSQL_PASSWORD: password
-      SKIP_LOADDATA: "1"
+      
 
       DJANGO_SUPERUSER_USERNAME: admin
       DJANGO_SUPERUSER_EMAIL: admin@egliseevangeliqueparis12.org
