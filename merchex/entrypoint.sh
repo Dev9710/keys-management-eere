@@ -1,7 +1,6 @@
 #!/bin/sh
 set -e
 
-# Force settings module (prod on NAS)
 export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-merchex.settings_nas}"
 echo "DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE"
 
@@ -24,15 +23,19 @@ PY
 echo "Migrate..."
 python manage.py migrate --noinput
 
-# Import initial des données (une seule fois) - possibilité de bypass
 if [ "${SKIP_LOADDATA:-0}" = "1" ]; then
   echo "SKIP_LOADDATA=1 -> skipping loaddata"
 else
   if [ -f "/app/data.json" ] && [ ! -f "/app/.data_loaded" ]; then
     echo "Loading initial data from /app/data.json..."
-    python manage.py loaddata /app/data.json
     touch /app/.data_loaded
-    echo "Data import done."
+    if python manage.py loaddata /app/data.json; then
+      echo "Data import done."
+    else
+      echo "loaddata FAILED -> removing flag"
+      rm -f /app/.data_loaded
+      exit 1
+    fi
   else
     echo "No data.json to import or already imported."
   fi
@@ -41,7 +44,6 @@ fi
 echo "Collectstatic..."
 python manage.py collectstatic --noinput || true
 
-# (optionnel) créer un superuser automatiquement si variables définies
 if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ] && [ -n "$DJANGO_SUPERUSER_EMAIL" ]; then
   echo "Ensuring superuser exists..."
   python manage.py shell -c "
@@ -59,4 +61,4 @@ else:
 fi
 
 echo "Start uWSGI..."
-uwsgi --ini /app/uwsgi.ini
+exec uwsgi --ini /app/uwsgi.ini
