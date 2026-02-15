@@ -1,65 +1,32 @@
 version: "3.8"
 
 services:
-  db:
-    image: mysql:8.4.8
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: merchex
-      MYSQL_USER: merchex
-      MYSQL_PASSWORD: password
-    volumes:
-      - merchex_mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-ppassword"]
-      interval: 5s
-      timeout: 3s
-      retries: 30
-    networks:
-      - merchex_net
-
   web:
     build: .
     restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
     ports:
       - "8003:8000"
     volumes:
       - .:/app
     environment:
       DJANGO_SETTINGS_MODULE: merchex.settings_nas
-      MYSQL_HOST: db
+
+      MYSQL_HOST: merchex-db
       MYSQL_PORT: 3306
       MYSQL_DATABASE: merchex
       MYSQL_USER: merchex
       MYSQL_PASSWORD: password
-      SKIP_LOADDATA: "0"
-      
+
+      # Comme la DB existe déjà, évite de recharger data.json
+      SKIP_LOADDATA: "1"
 
       DJANGO_SUPERUSER_USERNAME: admin
       DJANGO_SUPERUSER_EMAIL: admin@egliseevangeliqueparis12.org
-      DJANGO_SUPERUSER_PASSWORD: "CHANGE_ME_STRONG_PASSWORD"
+      DJANGO_SUPERUSER_PASSWORD: "password"
     networks:
       - merchex_net
-
-  adminer:
-    image: adminer:4
-    restart: unless-stopped
-    depends_on:
-      - db
-    ports:
-      - "8083:8080"
-    networks:
-      - merchex_net
-
-volumes:
-  merchex_mysql_data:
-    external: true
 
 networks:
   merchex_net:
+    external: true
     name: merchex_net
-    driver: bridge
