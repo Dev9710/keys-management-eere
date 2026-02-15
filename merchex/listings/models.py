@@ -120,7 +120,7 @@ class Team(models.Model):
 
 class User(models.Model):
     firstname = models.CharField(max_length=25)
-    name = models.CharField(max_length=25)
+    name = models.CharField(max_length=100)
     team = models.ForeignKey(
         Team, on_delete=models.CASCADE, related_name='members', null=True, blank=True)
     comment = models.CharField(max_length=200, default='', blank=True)
