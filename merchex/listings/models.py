@@ -202,7 +202,7 @@ class Owner(AbstractUser):
 class KeyType(models.Model):
     """Représente un type/modèle spécifique de clé"""
     number = models.IntegerField(unique=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=255)
     place = models.CharField(max_length=100, default='')
     total_quantity = models.IntegerField(
         default=1, help_text="Nombre total d'exemplaires de cette clé")
