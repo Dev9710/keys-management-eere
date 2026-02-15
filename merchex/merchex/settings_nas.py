@@ -28,7 +28,7 @@ DATABASES = {
         "USER": os.environ.get("MYSQL_USER", "merchex"),
         "PASSWORD": os.environ.get("MYSQL_PASSWORD", "password"),
         # Web Station => passe par le NAS (port exposé)
-        "HOST": os.environ.get("MYSQL_HOST", "127.0.0.1"),
+        "HOST": os.environ.get("MYSQL_HOST", "192.168.1.38"),
         "PORT": int(os.environ.get("MYSQL_PORT", "3307")),
         "OPTIONS": {
             "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
