@@ -96,3 +96,16 @@ class NoIndexMiddleware:
         response = self.get_response(request)
         response["X-Robots-Tag"] = "noindex, nofollow, noarchive"
         return response
+
+class ForceUTF8Middleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        
+        # Forcer l'encodage UTF-8 pour toutes les réponses HTML
+        if response.get('Content-Type', '').startswith('text/html'):
+            response['Content-Type'] = 'text/html; charset=utf-8'
+        
+        return response
