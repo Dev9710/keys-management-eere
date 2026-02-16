@@ -67,10 +67,3 @@ LOGGING = {
         "django": {"handlers": ["console"], "level": "INFO"},
     },
 }
-# Forcer UTF-8 partout
-DEFAULT_CHARSET = 'utf-8'
-FILE_CHARSET = 'utf-8'
-
-# S'assurer que Django renvoie le bon Content-Type
-USE_I18N = True
-USE_L10N = True

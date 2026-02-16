@@ -31,9 +31,6 @@ MIDDLEWARE = [
     'listings.middleware.LoginRequiredMiddleware',
     'listings.middleware.HistoryMiddleware',
     'listings.middleware.NoIndexMiddleware',
-    
-    'django.middleware.locale.LocaleMiddleware',
-    'listings.middleware.ForceUTF8Middleware',  # Si vous créez aussi ce middleware
 ]
 
 ROOT_URLCONF = 'merchex.urls'
