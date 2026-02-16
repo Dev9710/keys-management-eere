@@ -116,58 +116,77 @@ def key_list(request):
     all_key_holders = []
 
     for key_type in key_types:
-        # Calcul du nombre d'exemplaires attribués
-        key_instances = KeyInstance.objects.filter(
+        # ✅ CORRECTION 1: Récupérer TOUTES les instances de ce type de clé qui sont attribuées
+        assigned_instances = KeyInstance.objects.filter(
             key_type=key_type,
             is_available=False
-        )
-        assigned_count = key_instances.count()
+        ).select_related('key_type')
+        
+        assigned_count = assigned_instances.count()
 
-        # Récupérer les détenteurs de cette clé
+        # ✅ CORRECTION 2: Pour chaque instance attribuée, récupérer son assignment actif
         key_holders = []
-        # Requête pour obtenir les utilisateurs qui détiennent des exemplaires de cette clé
-        assignments = KeyAssignment.objects.filter(
-            key_instance__key_type=key_type,
-            is_active=True
-        ).select_related('user')
+        
+        for instance in assigned_instances:
+            try:
+                # Récupérer l'assignment actif pour cette instance spécifique
+                assignment = KeyAssignment.objects.get(
+                    key_instance=instance,
+                    is_active=True
+                )
+                
+                user = assignment.user
+                holder_name = f"{user.firstname} {user.name}"
+                
+                key_holders.append({
+                    'id': user.id,
+                    'name': holder_name,
+                    'assignment_date': assignment.assigned_date.strftime('%d/%m/%Y') if assignment.assigned_date else "Date inconnue",
+                    'instance_id': instance.id  # Ajouter l'ID de l'instance pour debug
+                })
 
-        # Construire la liste des détenteurs
-        for assignment in assignments:
-            user = assignment.user
-            holder_name = f"{user.firstname} {user.name}"
-            key_holders.append({
-                'id': user.id,
-                'name': holder_name,
-                'assignment_date': assignment.assigned_date.strftime('%d/%m/%Y') if assignment.assigned_date else "Date inconnue"
-            })
+                # Ajouter ou incrémenter le compteur pour ce détenteur
+                if holder_name in holders_count:
+                    holders_count[holder_name] += 1
+                else:
+                    holders_count[holder_name] = 1
 
-            # Ajouter ou incrémenter le compteur pour ce détenteur
-            if holder_name in holders_count:
-                holders_count[holder_name] += 1
-            else:
-                holders_count[holder_name] = 1
+                # Ajouter à la liste complète
+                all_key_holders.append({
+                    'id': user.id,
+                    'name': holder_name,
+                    'key_number': key_type.number,
+                    'key_name': key_type.name,
+                    'assignment_date': assignment.assigned_date.strftime('%d/%m/%Y') if assignment.assigned_date else "Date inconnue"
+                })
+                
+            except KeyAssignment.DoesNotExist:
+                # ⚠️ PROBLÈME DÉTECTÉ : Une instance est marquée comme non disponible 
+                # mais n'a pas d'assignment actif - incohérence de données
+                print(f"⚠️ INCOHÉRENCE: Instance {instance.id} du type {key_type.number} "
+                      f"est marquée comme non disponible mais n'a pas d'assignment actif")
+                
+                # Corriger automatiquement l'incohérence
+                instance.is_available = True
+                instance.location = instance.original_location or 'Armoire'
+                instance.save()
+                
+                # Recalculer le count
+                assigned_count -= 1
 
-            # Ajouter à la liste complète
-            all_key_holders.append({
-                'id': user.id,
-                'name': holder_name,
-                'key_number': key_type.number,
-                'key_name': key_type.name,
-                'assignment_date': assignment.assigned_date.strftime('%d/%m/%Y') if assignment.assigned_date else "Date inconnue"
-            })
-
-        # Vérification de la cohérence des données
-        is_consistent = (assigned_count + key_type.in_cabinet +
-                         key_type.in_safe) == key_type.total_quantity
+        # ✅ CORRECTION 3: Vérification de cohérence améliorée
+        total_should_be = assigned_count + key_type.in_cabinet + key_type.in_safe
+        is_consistent = total_should_be == key_type.total_quantity
 
         consistency_message = ""
         if not is_consistent:
-            calculated_total = assigned_count + key_type.in_cabinet + key_type.in_safe
             consistency_message = (
-                f"Incohérence: total déclaré {key_type.total_quantity} != "
-                f"somme des exemplaires (attribués: {assigned_count} + "
-                f"armoire: {key_type.in_cabinet} + "
-                f"coffre: {key_type.in_safe} = {calculated_total})"
+                f"Incohérence détectée: "
+                f"Attribuées: {assigned_count}, "
+                f"Armoire: {key_type.in_cabinet}, "
+                f"Coffre: {key_type.in_safe}, "
+                f"Total calculé: {total_should_be}, "
+                f"Total déclaré: {key_type.total_quantity}"
             )
 
         key_types_with_data.append({
@@ -175,7 +194,7 @@ def key_list(request):
             'assigned_count': assigned_count,
             'is_consistent': is_consistent,
             'consistency_message': consistency_message,
-            'key_holders': key_holders  # Ajouter la liste des détenteurs
+            'key_holders': key_holders  # ✅ Liste correcte des détenteurs
         })
 
     # Convertir le dictionnaire des détenteurs en liste pour l'affichage
@@ -189,8 +208,8 @@ def key_list(request):
         'keys_count': keys_count,
         'form': form,
         'available_numbers': available_numbers,
-        'holders_count': holders_list,  # Ajouter les compteurs de détenteurs
-        'all_key_holders': all_key_holders,  # Ajouter la liste complète des détenteurs
+        'holders_count': holders_list,
+        'all_key_holders': all_key_holders,
     }
     return render(request, 'listings/keys.html', context)
 

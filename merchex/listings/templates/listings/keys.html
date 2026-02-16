@@ -145,6 +145,159 @@ button i {
 .form-control.pulse-error {
     animation: pulse-error 1s;
 }
+/* Styles pour les popover d'attribution */
+.holders-scroll-container {
+    max-height: 200px; /* Hauteur équivalente à environ 7 lignes */
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 8px;
+    background-color: #f8f9fa;
+}
+
+.holder-item {
+    padding: 4px 0;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 0.9rem;
+}
+
+.holder-item:last-child {
+    border-bottom: none;
+}
+
+/* Personnalisation de la scrollbar */
+.holders-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.holders-scroll-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.holders-scroll-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.holders-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Style pour le compteur total */
+.text-muted {
+    font-style: italic;
+}
+
+/* Amélioration de l'apparence du popover */
+.popover {
+    max-width: 350px !important; /* Augmenter la largeur du popover */
+}
+
+.popover-body {
+    padding: 12px;
+}
+
+/* Animation de survol pour les items */
+.holder-item:hover {
+    background-color: #e9ecef;
+    padding-left: 8px;
+    transition: all 0.2s ease;
+}
+/* Styles pour la popup d'incohérence */
+.inconsistency-popup {
+    font-size: 13px;
+    line-height: 1.4;
+    max-width: 320px;
+}
+
+.problem-summary {
+    background: #fff3cd;
+    padding: 8px;
+    border-radius: 4px;
+    border-left: 4px solid #ffc107;
+    color: #856404;
+}
+
+.calculation-breakdown {
+    font-family: 'Courier New', monospace;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.calc-line {
+    display: flex;
+    justify-content: space-between;
+    margin: 3px 0;
+    align-items: center;
+}
+
+.calc-label {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.calc-value {
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: #e9ecef;
+    min-width: 30px;
+    text-align: center;
+}
+
+.calc-value.declared {
+    background: #d4edda;
+    color: #155724;
+}
+
+.calc-value.calculated {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.calc-separator {
+    text-align: center;
+    color: #6c757d;
+    margin: 5px 0;
+    font-weight: bold;
+}
+
+.total-calc {
+    border-top: 2px solid #dee2e6;
+    padding-top: 5px;
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+.action-suggestion {
+    background: #d1ecf1;
+    padding: 8px;
+    border-radius: 4px;
+    border-left: 4px solid #17a2b8;
+    color: #0c5460;
+    font-size: 12px;
+}
+
+/* Style du bouton d'incohérence */
+.btn-warning.btn-sm {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+/* Amélioration du popover */
+.popover {
+    font-size: 13px;
+}
+
+.popover-header {
+    background: #fff3cd;
+    border-bottom: 1px solid #ffc107;
+    color: #856404;
+    font-weight: bold;
+}
 {% endblock %}
 
 {% block content %}
@@ -240,8 +393,7 @@ button i {
                                 <i class="fas fa-trash"></i> Retirer
                             </button>
                         </form>
-                        
-                        <!-- Bouton Attributions avec popover et badge de détenteurs -->
+                        <!-- Bouton Attributions avec popover amélioré -->
                         <button type="button" class="btn btn-info btn-sm action-btn" 
                                 data-bs-toggle="popover" 
                                 data-bs-trigger="focus"
@@ -250,11 +402,26 @@ button i {
                                 data-bs-content="{% if key_data.assigned_count > 0 %}
                                                     <p><strong>{{ key_data.assigned_count }} exemplaire(s) attribué(s)</strong></p>
                                                     <hr class='my-2'>
-                                                    <ul class='list-unstyled mb-0'>
-                                                        {% for holder in key_data.key_holders %}
-                                                            <li><strong>{{ holder.name }}</strong> (depuis le {{ holder.assignment_date }})</li>
-                                                        {% endfor %}
-                                                    </ul>
+                                                    {% if key_data.key_holders|length <= 7 %}
+                                                        <!-- Liste courte : affichage normal -->
+                                                        <ul class='list-unstyled mb-0'>
+                                                            {% for holder in key_data.key_holders %}
+                                                                <li class='holder-item'><strong>{{ holder.name }}</strong> (depuis le {{ holder.assignment_date }})</li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    {% else %}
+                                                        <!-- Liste longue : scroll après 7 éléments -->
+                                                        <div class='holders-scroll-container'>
+                                                            <ul class='list-unstyled mb-0'>
+                                                                {% for holder in key_data.key_holders %}
+                                                                    <li class='holder-item'><strong>{{ holder.name }}</strong> (depuis le {{ holder.assignment_date }})</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </div>
+                                                        <div class='text-center mt-2'>
+                                                            <small class='text-muted'>{{ key_data.key_holders|length }} détenteurs au total</small>
+                                                        </div>
+                                                    {% endif %}
                                                 {% else %}
                                                     Aucune attribution
                                                 {% endif %}">
@@ -263,9 +430,51 @@ button i {
                         </button>
                         
                         {% if not key_data.is_consistent %}
-                        <span class="badge bg-warning text-dark" title="{{ key_data.consistency_message }}">
-                            <i class="fas fa-exclamation-triangle"></i> Incohérence
-                        </span>
+                        <button type="button" class="btn btn-warning btn-sm" 
+                                data-bs-toggle="popover" 
+                                data-bs-trigger="hover focus"
+                                data-bs-html="true"
+                                data-bs-title="⚠️ Problème de comptage détecté"
+                                data-bs-content="<div class='inconsistency-popup'>
+                                                    <div class='problem-summary'>
+                                                        <strong>🔍 Ce qui ne va pas :</strong>
+                                                        <br>Les chiffres ne correspondent pas !
+                                                    </div>
+                                                    <hr class='my-2'>
+                                                    <div class='calculation-breakdown'>
+                                                        <div class='calc-line'>
+                                                            <span class='calc-label'>📋 Total clé déclaré:</span>
+                                                            <span class='calc-value declared'>{{ key_data.key_type.total_quantity }}</span>
+                                                        </div>
+                                                        <div class='calc-separator'>➖</div>
+                                                        <div class='calc-line'>
+                                                            <span class='calc-label'>➕ Nbr de clé Attribuées </span>
+                                                            <span class='calc-value'>{{ key_data.assigned_count }}</span>
+                                                        </div>
+                                                        <div class='calc-line'>
+                                                            <span class='calc-label'>➕ Nbr de clé dans l'armoire </span>
+                                                            <span class='calc-value'>{{ key_data.key_type.in_cabinet }}</span>
+                                                        </div>
+                                                        <div class='calc-line'>
+                                                            <span class='calc-label'>➕ Nbr de clé au coffre</span>
+                                                            <span class='calc-value'>{{ key_data.key_type.in_safe }}</span>
+                                                        </div>
+                                                        
+                                                        <div class='calc-line total-calc'>
+                                                            <span class='calc-label'>🧮 Total des clés calculés </span>
+                                                            <span class='calc-value calculated'>{{ key_data.assigned_count|add:key_data.key_type.in_cabinet|add:key_data.key_type.in_safe }}</span>
+                                                        </div>
+                                                    </div>
+                                                    <hr class='my-2'>
+                                                    <div class='action-suggestion'>
+                                                        <strong>💡 Solution :</strong>
+                                                        <br>• Cliquez sur <em>'Modifier'</em> pour corriger les chiffres
+                                                        <br>• Vérifiez le stock physique réel
+                                                    </div>
+                                                </div>">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span class="small">Incohérence</span>
+                        </button>
                         {% endif %}
                     </div>
                 </td>
