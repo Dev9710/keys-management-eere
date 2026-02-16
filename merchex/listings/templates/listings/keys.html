@@ -14,29 +14,107 @@ th, td {
     padding: 8px;
 }
 th {
-    background-color: #f2f2f2;
+    background-color: #3a9f87;
+    color: white;
+    text-align: center;
+    font-weight: 600;
+    vertical-align: middle;
 }
-/* Assurez-vous que les boutons sont alignés sur la même ligne */
-.d-flex {
-    display: flex;
-    gap: 10px; /* Espacement entre les boutons */
+
+/* Centrage des titres et adaptation des largeurs de colonnes */
+.table-responsive thead th:nth-child(1) { width: 5%; }   /* N° */
+.table-responsive thead th:nth-child(2) { width: 18%; }  /* Noms des clés */
+.table-responsive thead th:nth-child(3) { width: 15%; }  /* Emplacements */
+.table-responsive thead th:nth-child(4) { width: 10%; }  /* Nombre total */
+.table-responsive thead th:nth-child(5) { width: 10%; }  /* Clés attribuées */
+.table-responsive thead th:nth-child(6) { width: 9%; }   /* Stock armoire */
+.table-responsive thead th:nth-child(7) { width: 9%; }   /* Stock coffre */
+.table-responsive thead th:nth-child(8) { width: 8%; }   /* Commentaires */
+.table-responsive thead th:nth-child(9) { width: 16%; }  /* Actions */
+
+/* ===== ALTERNANCE BLANC / VERT CLAIR ===== */
+
+/* Ligne impaire (1ère, 3ème, 5ème...) = BLANCHE */
+#keyTable tbody tr:nth-child(odd):not(.table-warning) {
+    background-color: #ffffff !important;
 }
-.action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 80px; /* Largeur fixe pour tous les boutons */
-    text-align: center; /* Centrer le texte et l'icône */
+
+/* Ligne paire (2ème, 4ème, 6ème...) = VERTE CLAIRE */
+#keyTable tbody tr:nth-child(even):not(.table-warning) {
+    background-color: #d4f1e8 !important; /* Vert très clair */
 }
-button {
+
+/* Effet de survol pour les lignes normales */
+#keyTable tbody tr:hover:not(.table-warning) {
+    background-color: #b8e6d5 !important; /* Vert moyen au survol */
+    transition: background-color 0.2s ease;
+}
+
+/* Ligne d'incohérence mise en évidence (jaune par défaut) */
+#keyTable tbody tr.table-warning {
+    background-color: #fff3cd !important;
+}
+
+/* Au survol, les lignes d'incohérence deviennent VERTES */
+#keyTable tbody tr.table-warning:hover {
+    background-color: #b8e6d5 !important; /* MÊME vert que les autres lignes au survol */
+    transition: background-color 0.2s ease;
+}
+
+/* Surcharger les styles Bootstrap pour les lignes du tableau */
+.table-striped tbody tr:nth-of-type(odd):not(.table-warning) {
+    background-color: #ffffff !important;
+}
+
+.table-striped tbody tr:nth-of-type(even):not(.table-warning) {
+    background-color: #d4f1e8 !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #b8e6d5 !important;
+}
+
+/* Forcer les couleurs des cellules */
+#keyTable tbody tr td {
+    background-color: transparent !important;
+}
+
+/* Centrage dans la cellule Actions */
+#keyTable tbody td:last-child {
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+
+/* Container des boutons d'action */
+#keyTable tbody td .d-flex {
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 6px;
+}
+
+/* Largeur uniforme pour les boutons Modifier, Retirer, Attributions */
+#keyTable tbody td:last-child .btn:not(.btn-warning-icon) {
+    min-width: 95px;
+    max-width: 95px;
+    padding: 5px 8px;
+    font-size: 0.85rem;
+    white-space: nowrap;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 5px 10px; /* Ajouter un peu de padding pour l'espacement */
 }
-/* Optionnel : Ajustement des icônes dans les boutons */
-button i {
-    margin-right: 5px; /* Ajouter un petit espace entre l'icône et le texte */
+
+/* Icônes dans les boutons */
+#keyTable tbody td:last-child .btn:not(.btn-warning-icon) i {
+    margin-right: 5px;
+}
+
+/* S'assurer que le form ne casse pas l'alignement */
+#keyTable tbody td form {
+    display: inline-block;
+    margin: 0;
 }
 .table-responsive thead th {
     position: sticky; /* Rend les en-têtes "collants" */
@@ -145,6 +223,7 @@ button i {
 .form-control.pulse-error {
     animation: pulse-error 1s;
 }
+
 /* Styles pour les popover d'attribution */
 .holders-scroll-container {
     max-height: 200px; /* Hauteur équivalente à environ 7 lignes */
@@ -204,7 +283,9 @@ button i {
     padding-left: 8px;
     transition: all 0.2s ease;
 }
-/* Styles pour la popup d'incohérence */
+
+/* Styles pour la popup d'incohérence - VERSION AMÉLIORÉE */
+/* Styles pour la popup d'incohérence - VERSION AMÉLIORÉE AVEC FOND BLANC */
 .inconsistency-popup {
     font-size: 13px;
     line-height: 1.4;
@@ -212,18 +293,19 @@ button i {
 }
 
 .problem-summary {
-    background: #fff3cd;
+    background: #ffffff; /* Fond blanc */
     padding: 8px;
     border-radius: 4px;
-    border-left: 4px solid #ffc107;
-    color: #856404;
+    border-left: 4px solid #ffc107; /* Bordure jaune warning */
+    color: #856404; /* Texte jaune foncé */
 }
 
 .calculation-breakdown {
     font-family: 'Courier New', monospace;
-    background: #f8f9fa;
+    background: #ffffff; /* Fond blanc */
     padding: 10px;
     border-radius: 4px;
+    border: 1px solid #dee2e6; /* Bordure grise légère */
 }
 
 .calc-line {
@@ -235,26 +317,29 @@ button i {
 
 .calc-label {
     font-size: 12px;
-    color: #6c757d;
+    color: #495057; /* Gris foncé pour les labels */
 }
 
 .calc-value {
     font-weight: bold;
     padding: 2px 6px;
     border-radius: 3px;
-    background: #e9ecef;
+    background: #f8f9fa; /* Gris très clair */
     min-width: 30px;
     text-align: center;
+    color: #212529;
 }
 
 .calc-value.declared {
-    background: #d4edda;
-    color: #155724;
+    background: #d1ecf1; /* Bleu clair */
+    color: #0c5460;
+    border: 1px solid #bee5eb;
 }
 
 .calc-value.calculated {
-    background: #f8d7da;
+    background: #f8d7da; /* Rouge clair pour l'erreur */
     color: #721c24;
+    border: 1px solid #f5c6cb;
 }
 
 .calc-separator {
@@ -272,24 +357,48 @@ button i {
 }
 
 .action-suggestion {
-    background: #d1ecf1;
+    background: #fff3cd; /* Jaune clair */
     padding: 8px;
     border-radius: 4px;
-    border-left: 4px solid #17a2b8;
-    color: #0c5460;
+    border-left: 4px solid #ffc107; /* Bordure jaune */
+    color: #856404;
     font-size: 12px;
 }
 
-/* Style du bouton d'incohérence */
-.btn-warning.btn-sm {
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 4px;
+/* Style du bouton d'incohérence - icône seule sans fond */
+.btn-warning-icon {
+    background: none !important;
+    border: none !important;
+    padding: 4px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer;
+    color: #e6a200;
+    font-size: 1.3rem;
+    min-width: auto !important;
+    max-width: none !important;
+    width: auto !important;
 }
 
-/* Amélioration du popover */
+.btn-warning-icon:hover,
+.btn-warning-icon:focus {
+    color: #d4890a;
+    transform: scale(1.2);
+    transition: all 0.2s ease;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.btn-warning-icon i {
+    margin: 0 !important;
+}
+
+/* Amélioration du popover d'incohérence */
 .popover {
     font-size: 13px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .popover-header {
@@ -341,7 +450,7 @@ button i {
         </div>
     </div>
 
-    <table class="table table-striped table-hover table-responsive" id="keyTable">
+    <table class="table table-hover table-responsive" id="keyTable">
         <thead class="table-dark">
             <tr>
                 <th scope="col">N°</th>
@@ -368,9 +477,9 @@ button i {
                 <td>{{ key_data.key_type.comments }}</td>
                 <!-- Actions -->
                 <td>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex">
                         <!-- Bouton Modifier -->
-                        <button type="button" class="btn btn-warning btn-sm edit-btn flex-fill action-btn" data-bs-toggle="modal" data-bs-target="#editKeyModal" 
+                        <button type="button" class="btn btn-warning btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#editKeyModal"
                                 data-id="{{ key_data.key_type.id }}"
                                 data-number="{{ key_data.key_type.number }}"
                                 data-name="{{ key_data.key_type.name }}"
@@ -378,13 +487,12 @@ button i {
                                 data-total-quantity="{{ key_data.key_type.total_quantity }}"
                                 data-in-cabinet="{{ key_data.key_type.in_cabinet }}"
                                 data-in-safe="{{ key_data.key_type.in_safe }}"
-                                data-comments="{{ key_data.key_type.comments }}"
-                                style="width: 80px;">
+                                data-comments="{{ key_data.key_type.comments }}">
                             <i class="fas fa-edit"></i> Modifier
                         </button>
-                
+
                         <!-- Bouton Retirer -->
-                        <form method="post" action="{% url 'key_delete' key_data.key_type.id %}" style="width: 80px;">
+                        <form method="post" action="{% url 'key_delete' key_data.key_type.id %}">
                             {% csrf_token %}
                             <button type="button" class="btn btn-danger btn-sm" 
                                     data-bs-toggle="modal" data-bs-target="#deleteKeyModal" 
@@ -394,7 +502,7 @@ button i {
                             </button>
                         </form>
                         <!-- Bouton Attributions avec popover amélioré -->
-                        <button type="button" class="btn btn-info btn-sm action-btn" 
+                        <button type="button" class="btn btn-info btn-sm"
                                 data-bs-toggle="popover" 
                                 data-bs-trigger="focus"
                                 data-bs-html="true"
@@ -430,8 +538,8 @@ button i {
                         </button>
                         
                         {% if not key_data.is_consistent %}
-                        <button type="button" class="btn btn-warning btn-sm" 
-                                data-bs-toggle="popover" 
+                        <button type="button" class="btn btn-warning-icon"
+                                data-bs-toggle="popover"
                                 data-bs-trigger="hover focus"
                                 data-bs-html="true"
                                 data-bs-title="⚠️ Problème de comptage détecté"
@@ -472,8 +580,7 @@ button i {
                                                         <br>• Vérifiez le stock physique réel
                                                     </div>
                                                 </div>">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <span class="small">Incohérence</span>
+                            <i class="fas fa-exclamation-triangle" style="font-size: 1.2rem;"></i>
                         </button>
                         {% endif %}
                     </div>
