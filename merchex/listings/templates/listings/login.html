@@ -1,145 +1,507 @@
-{% extends "listings/base.html" %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <title>Connexion | EERE - Gestion des Clés</title>
 
-{% block title %}Connexion | Gestion des Clés{% endblock %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 
-{% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow-sm border-0 rounded-lg">
-                <!-- En-tête de la carte avec logo -->
-                <div class="card-header bg-white text-center p-4 border-0">
-                    <!-- Logo de l'application (à remplacer par votre logo) -->
-                    <div class="mb-3">
-                        <span class="logo text-primary fs-2">EERE</span>
-                    </div>
-                    <h3 class="fw-light">Connexion</h3>
-                    <p class="text-muted small mb-0">Accédez à l'application de gestion des clés</p>
-                </div>
+    <style>
+        :root {
+            --primary:       #3a9f87;
+            --primary-dark:  #2a7562;
+            --primary-deep:  #0d3028;
+            --accent:        #FFA500;
+            --bg:            #f8f9fa;
+            --text:          #0f172a;
+            --muted:         #64748b;
+            --border:        #e2e8f0;
+            --white:         #ffffff;
+            --error:         #dc2626;
+        }
 
-                <!-- Corps de la carte contenant le formulaire -->
-                <div class="card-body p-4">
-                    <!-- Messages d'alerte -->
-                    {% if messages %}
-                    {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
-                    </div>
-                    {% endfor %}
-                    {% endif %}
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-                    <!-- Formulaire de connexion -->
-                    <form method="post" action="{% url 'login' %}" class="needs-validation" novalidate>
-                        {% csrf_token %}
+        body {
+            font-family: 'DM Sans', sans-serif;
+            height: 100dvh;
+            overflow: hidden;
+            background: var(--bg);
+        }
 
-                        <!-- Champ caché pour stocker l'URL de redirection -->
-                        {% if request.GET.next %}
-                        <input type="hidden" name="next" value="{{ request.GET.next }}">
-                        {% endif %}
+        /* ─── Wrapper ─────────────────────────────────── */
+        .lw {
+            display: flex;
+            height: 100dvh;
+            opacity: 0;
+            animation: fadeIn .5s ease .05s forwards;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
 
-                        <!-- Champ Email (corrigé) -->
-                        <div class="mb-3">
-                            <label for="id_username" class="form-label">Nom d'utilisateur</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                {{ form.username }}
-                                <div class="invalid-feedback">
-                                    Veuillez saisir votre nom d'utilisateur.
-                                </div>
-                            </div>
-                            {% if form.username.errors %}
-                            <div class="text-danger">
-                                {{ form.username.errors }}
-                            </div>
-                            {% endif %}
-                        </div>
+        /* ─── Brand Panel (left) ──────────────────────── */
+        .lw-brand {
+            width: 44%;
+            background: linear-gradient(150deg, #0d3028 0%, #1a5040 45%, #2a7562 75%, #3a9f87 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem 2.5rem;
+            position: relative;
+            overflow: hidden;
+            transform: translateX(-24px);
+            opacity: 0;
+            animation: slideRight .65s cubic-bezier(.16,1,.3,1) .15s forwards;
+        }
+        @keyframes slideRight { to { transform: translateX(0); opacity: 1; } }
 
-                        <!-- Champ Mot de passe -->
-                        <div class="mb-3">
-                            <label for="id_password" class="form-label">Mot de passe</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                {{ form.password }}
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword"
-                                    aria-label="Afficher/masquer le mot de passe">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <div class="invalid-feedback">
-                                    Veuillez saisir votre mot de passe.
-                                </div>
-                            </div>
-                            {% if form.password.errors %}
-                            <div class="text-danger">
-                                {{ form.password.errors }}
-                            </div>
-                            {% endif %}
-                        </div>
-                        <div class="mb-3 text-end">
-                            <a href="{% url 'password_reset' %}" class="small">Mot de passe oublié ?</a>
-                        </div>
-                        <!-- Option "Se souvenir de moi" -->
-                        <div class="mb-3 form-check">
-                            {{ form.remember }}
-                            <label class="form-check-label" for="id_remember">Se souvenir de moi</label>
-                        </div>
+        /* decorative circles */
+        .lw-brand::before {
+            content: '';
+            position: absolute;
+            top: -90px; right: -90px;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            background: rgba(255,165,0,.07);
+            pointer-events: none;
+        }
+        .lw-brand::after {
+            content: '';
+            position: absolute;
+            bottom: -70px; left: -70px;
+            width: 260px; height: 260px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.04);
+            pointer-events: none;
+        }
 
-                        <!-- Bouton de connexion -->
-                        <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-sign-in-alt me-2"></i> Se connecter
-                            </button>
-                        </div>
+        .brand-bar {
+            position: absolute;
+            top: 2rem; left: 2rem;
+            width: 56px; height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        .brand-bar::after {
+            content: '';
+            position: absolute;
+            top: 9px; left: 0;
+            width: 28px; height: 4px;
+            background: rgba(255,165,0,.4);
+            border-radius: 2px;
+        }
 
-                        <!-- Lien vers la page d'inscription 
-                        <div class="text-center">
-                            <p class="mb-0">Vous n'avez pas de compte ? <a href="{% url 'register' %}"
-                                    class="fw-semibold">Créer un compte</a></p>
-                        </div>-->
-                    </form>
-                </div>
+        .brand-body { text-align: center; position: relative; z-index: 1; }
 
-                <!-- Pied de la carte avec informations de sécurité -->
-                <div class="card-footer bg-white p-3 text-center border-0">
-                    <div class="small text-muted">
-                        <i class="fas fa-shield-alt me-1"></i> Connexion sécurisée
-                    </div>
-                </div>
+        .brand-key {
+            width: 88px; height: 88px;
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.18);
+            border-radius: 22px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.8rem;
+            backdrop-filter: blur(8px);
+        }
+        .brand-key svg { width: 42px; height: 42px; }
+
+        .brand-name {
+            font-family: 'DM Serif Display', serif;
+            font-size: 4.2rem;
+            color: var(--white);
+            line-height: 1;
+            letter-spacing: -1px;
+            margin-bottom: .35rem;
+        }
+
+        .brand-tag {
+            font-size: .78rem;
+            letter-spacing: .28em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.5);
+            font-weight: 400;
+            margin-bottom: 2rem;
+        }
+
+        .brand-rule {
+            width: 36px; height: 2px;
+            background: var(--accent);
+            margin: 0 auto 1.8rem;
+        }
+
+        .brand-desc {
+            font-size: .95rem;
+            color: rgba(255,255,255,.75);
+            max-width: 240px;
+            line-height: 1.75;
+            font-weight: 300;
+        }
+
+        .brand-dots {
+            position: absolute;
+            bottom: 2.2rem;
+            display: flex; gap: 7px;
+        }
+        .brand-dots span {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.25);
+        }
+        .brand-dots span:first-child {
+            width: 20px; border-radius: 3px;
+            background: var(--accent);
+        }
+
+        /* ─── Form Panel (right) ──────────────────────── */
+        .lw-form {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            background: var(--white);
+            overflow-y: auto;
+            transform: translateY(16px);
+            opacity: 0;
+            animation: riseUp .65s cubic-bezier(.16,1,.3,1) .3s forwards;
+        }
+        @keyframes riseUp { to { transform: translateY(0); opacity: 1; } }
+
+        .fc { width: 100%; max-width: 390px; }
+
+        .fc-head { margin-bottom: 1.75rem; }
+        .fc-head h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.85rem;
+            color: var(--text);
+            margin-bottom: .3rem;
+        }
+        .fc-head p { color: var(--muted); font-size: .875rem; font-weight: 300; }
+
+        /* fields */
+        .f-group { margin-bottom: 1.1rem; }
+
+        .f-group > label {
+            display: block;
+            font-size: .8rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: .35rem;
+            letter-spacing: .025em;
+        }
+
+        .f-wrap { position: relative; }
+
+        .f-ico {
+            position: absolute;
+            left: 13px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: .8rem;
+            pointer-events: none;
+        }
+
+        /* Django renders the input — we style via JS class injection */
+        .f-input {
+            width: 100%;
+            padding: .72rem 1rem .72rem 2.4rem;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .88rem;
+            color: var(--text);
+            background: var(--bg);
+            transition: border-color .2s, box-shadow .2s, background .2s;
+            outline: none;
+        }
+        .f-input:focus {
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(58,159,135,.12);
+        }
+        .f-input.err {
+            border-color: var(--error);
+            box-shadow: 0 0 0 3px rgba(220,38,38,.1);
+        }
+        .f-input-pw { padding-right: 2.6rem; }
+
+        .btn-eye {
+            position: absolute;
+            right: 11px; top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 4px;
+            font-size: .82rem;
+            transition: color .2s;
+            line-height: 1;
+        }
+        .btn-eye:hover { color: var(--primary); }
+
+        .f-err {
+            font-size: .76rem;
+            color: var(--error);
+            margin-top: .3rem;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .f-err ul { list-style: none; padding: 0; margin: 0; }
+
+        /* extras row */
+        .f-extras {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.4rem;
+            font-size: .84rem;
+        }
+        .f-remember { display: flex; align-items: center; gap: 7px; }
+        .f-remember input { width: 15px; height: 15px; accent-color: var(--primary); cursor: pointer; }
+        .f-remember label { color: var(--muted); cursor: pointer; user-select: none; }
+
+        .f-forgot {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color .2s;
+        }
+        .f-forgot:hover { color: var(--primary-dark); text-decoration: underline; }
+
+        /* submit */
+        .btn-submit {
+            width: 100%;
+            padding: .82rem;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 9px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .92rem;
+            font-weight: 500;
+            letter-spacing: .02em;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background .2s, box-shadow .2s, transform .1s;
+        }
+        .btn-submit:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 4px 16px rgba(58,159,135,.32);
+        }
+        .btn-submit:active { transform: scale(.98); }
+
+        /* alerts */
+        .msg-block {
+            padding: .65rem .9rem;
+            border-radius: 8px;
+            font-size: .84rem;
+            margin-bottom: 1.1rem;
+            display: flex; align-items: flex-start; gap: 7px;
+        }
+        .msg-block.alert-danger  { background:#fef2f2; border:1px solid #fecaca; color:#dc2626; }
+        .msg-block.alert-success { background:#f0fdf4; border:1px solid #bbf7d0; color:#16a34a; }
+        .msg-block.alert-warning { background:#fffbeb; border:1px solid #fde68a; color:#d97706; }
+        .msg-block.alert-info    { background:#eff6ff; border:1px solid #bfdbfe; color:#2563eb; }
+
+        /* footer */
+        .fc-foot {
+            margin-top: 1.4rem;
+            text-align: center;
+            font-size: .76rem;
+            color: var(--muted);
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .fc-foot i { color: var(--primary); }
+
+        /* ─── Responsive ──────────────────────────────── */
+        @media (max-width: 768px) {
+            body { overflow: auto; }
+            .lw { flex-direction: column; height: auto; min-height: 100dvh; }
+            .lw-brand {
+                width: 100%; padding: 2.5rem 1.5rem 2rem;
+                min-height: auto;
+            }
+            .brand-name { font-size: 3rem; }
+            .brand-rule, .brand-desc, .brand-dots { display: none; }
+            .brand-tag { margin-bottom: 0; }
+            .brand-key { width: 62px; height: 62px; border-radius: 16px; margin-bottom: 1rem; }
+            .brand-key svg { width: 30px; height: 30px; }
+            .lw-form { padding: 2rem 1.25rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .lw, .lw-brand, .lw-form { animation: none; opacity: 1; transform: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lw">
+
+    <!-- ── Brand Panel ── -->
+    <div class="lw-brand">
+        <div class="brand-bar"></div>
+
+        <div class="brand-body">
+            <div class="brand-key">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#FFA500" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                </svg>
             </div>
+            <h1 class="brand-name">EERE</h1>
+            <p class="brand-tag">Gestion des Clés</p>
+            <div class="brand-rule"></div>
+            <p class="brand-desc">Gérez l'accès à vos espaces en toute simplicité et sécurité.</p>
+        </div>
+
+        <div class="brand-dots">
+            <span></span><span></span><span></span>
         </div>
     </div>
+
+    <!-- ── Form Panel ── -->
+    <div class="lw-form">
+        <div class="fc">
+
+            <div class="fc-head">
+                <h2>Connexion</h2>
+                <p>Accédez à votre espace de gestion</p>
+            </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="msg-block alert-{{ message.tags }}" role="alert">
+                <i class="fas fa-{% if 'error' in message.tags %}exclamation-circle{% elif 'success' in message.tags %}check-circle{% elif 'warning' in message.tags %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" action="{% url 'login' %}" id="loginForm" novalidate>
+                {% csrf_token %}
+
+                {% if request.GET.next %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+                {% endif %}
+
+                <!-- Username -->
+                <div class="f-group">
+                    <label for="id_username">Nom d'utilisateur</label>
+                    <div class="f-wrap">
+                        <i class="fas fa-user f-ico" aria-hidden="true"></i>
+                        {{ form.username }}
+                    </div>
+                    {% if form.username.errors %}
+                    <div class="f-err" role="alert">
+                        <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                        {{ form.username.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Password -->
+                <div class="f-group">
+                    <label for="id_password">Mot de passe</label>
+                    <div class="f-wrap">
+                        <i class="fas fa-lock f-ico" aria-hidden="true"></i>
+                        {{ form.password }}
+                        <button type="button" class="btn-eye" id="togglePassword"
+                                aria-label="Afficher ou masquer le mot de passe">
+                            <i class="fas fa-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                    {% if form.password.errors %}
+                    <div class="f-err" role="alert">
+                        <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                        {{ form.password.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Remember + Forgot -->
+                <div class="f-extras">
+                    <div class="f-remember">
+                        {{ form.remember }}
+                        <label for="id_remember">Se souvenir de moi</label>
+                    </div>
+                    <a href="{% url 'password_reset' %}" class="f-forgot">Mot de passe oublié ?</a>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+                    Se connecter
+                </button>
+            </form>
+
+            <div class="fc-foot">
+                <i class="fas fa-shield-alt"></i>
+                Connexion sécurisée
+            </div>
+
+        </div>
+    </div>
+
 </div>
 
-<!-- Script pour basculer la visibilité du mot de passe -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Validation du formulaire côté client
-        const forms = document.querySelectorAll('.needs-validation');
-        Array.from(forms).forEach(form => {
-            form.addEventListener('submit', event => {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
+document.addEventListener('DOMContentLoaded', function () {
+    const uInput = document.getElementById('id_username');
+    const pInput = document.getElementById('id_password');
+
+    // Inject styles into Django-rendered inputs
+    function styleInput(el, extraClass) {
+        if (!el) return;
+        el.classList.add('f-input');
+        if (extraClass) el.classList.add(extraClass);
+        const group = el.closest('.f-group');
+        if (group && group.querySelector('.f-err')) el.classList.add('err');
+    }
+
+    styleInput(uInput);
+    if (uInput) uInput.setAttribute('placeholder', 'Votre identifiant');
+
+    styleInput(pInput, 'f-input-pw');
+    if (pInput) pInput.setAttribute('placeholder', '••••••••');
+
+    // Password toggle
+    const toggleBtn = document.getElementById('togglePassword');
+    const eyeIcon   = document.getElementById('eyeIcon');
+    if (toggleBtn && pInput) {
+        toggleBtn.addEventListener('click', function () {
+            const show = pInput.type === 'password';
+            pInput.type = show ? 'text' : 'password';
+            eyeIcon.className = show ? 'fas fa-eye-slash' : 'fas fa-eye';
+        });
+    }
+
+    // Client-side validation
+    const form = document.getElementById('loginForm');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            let ok = true;
+            [uInput, pInput].forEach(function (inp) {
+                if (inp && !inp.value.trim()) {
+                    inp.classList.add('err');
+                    ok = false;
                 }
-                form.classList.add('was-validated');
-            }, false);
+            });
+            if (!ok) e.preventDefault();
         });
 
-        // Afficher/masquer le mot de passe
-        const togglePassword = document.getElementById('togglePassword');
-        const passwordInput = document.getElementById('id_password');
-
-        if (togglePassword && passwordInput) {
-            togglePassword.addEventListener('click', function () {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-
-                // Changer l'icône
-                this.querySelector('i').classList.toggle('fa-eye');
-                this.querySelector('i').classList.toggle('fa-eye-slash');
+        [uInput, pInput].forEach(function (inp) {
+            if (inp) inp.addEventListener('input', function () {
+                if (this.value.trim()) this.classList.remove('err');
             });
-        }
-    });
+        });
+    }
+});
 </script>
-{% endblock %}
+</body>
+</html>
