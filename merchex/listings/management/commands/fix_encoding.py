@@ -8,7 +8,7 @@ def fix_mojibake(text):
     if not text:
         return text
     try:
-        return text.encode('latin-1').decode('utf-8')
+        return text.encode('cp437').decode('utf-8')
     except (UnicodeEncodeError, UnicodeDecodeError):
         return text
 
