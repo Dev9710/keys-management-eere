@@ -1,26 +1,25 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 
-{% block title %}Accueil - Gestion des Clés{% endblock %}
+{% block title %}Accueil | EERE - Gestion des Clés{% endblock %}
 
 {% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
-/* Reset et styles de base */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
 
-/* Section Hero avec animation d'étoiles */
+/* ═══════════════════════════════════════════
+   HERO — conservé intégralement + amélioré
+═══════════════════════════════════════════ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
 .hero-section {
-    background: linear-gradient(135deg,  #000000,  #3a9f87); /*#073228*/
+    background: linear-gradient(135deg, #000000, #3a9f87);
     padding: 80px 20px;
     text-align: center;
     color: white;
     position: relative;
     overflow: hidden;
-    min-height: 500px;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -29,30 +28,22 @@
     animation: heroAppear 1.2s ease-out 0.3s forwards;
 }
 
-/* Conteneur principal des étoiles */
 .stars-container {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     pointer-events: none;
     z-index: 1;
 }
 
-/* Couches d'étoiles statiques en background */
-.stars-layer-1,
-.stars-layer-2,
-.stars-layer-3 {
+.stars-layer-1, .stars-layer-2, .stars-layer-3 {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
+    width: 100%; height: 100%;
+    top: 0; left: 0;
 }
 
 .stars-layer-1 {
-    background-image: 
+    background-image:
         radial-gradient(2px 2px at 20% 30%, white, transparent),
         radial-gradient(2px 2px at 60% 70%, white, transparent),
         radial-gradient(1px 1px at 50% 50%, white, transparent),
@@ -65,7 +56,7 @@
 }
 
 .stars-layer-2 {
-    background-image: 
+    background-image:
         radial-gradient(1px 1px at 30% 40%, white, transparent),
         radial-gradient(1px 1px at 70% 80%, white, transparent),
         radial-gradient(1px 1px at 40% 20%, white, transparent);
@@ -76,7 +67,7 @@
 }
 
 .stars-layer-3 {
-    background-image: 
+    background-image:
         radial-gradient(1px 1px at 10% 20%, white, transparent),
         radial-gradient(1px 1px at 90% 90%, white, transparent);
     background-size: 400px 400px;
@@ -85,37 +76,28 @@
     opacity: 0.4;
 }
 
-/* Étoiles animées individuelles */
 .star {
     position: absolute;
     background: white;
     clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
     filter: blur(0.3px);
-    animation: 
-        twinkle var(--duration) infinite ease-in-out,
-        float var(--float-duration) infinite ease-in-out;
+    animation: twinkle var(--duration) infinite ease-in-out, float var(--float-duration) infinite ease-in-out;
     opacity: 0;
 }
 
-/* Petites étoiles rondes scintillantes */
 .star-dot {
     position: absolute;
-    width: 2px;
-    height: 2px;
+    width: 2px; height: 2px;
     background: white;
     border-radius: 50%;
     box-shadow: 0 0 2px white;
-    animation: 
-        pulse var(--duration) infinite ease-in-out,
-        drift var(--float-duration) infinite linear;
+    animation: pulse var(--duration) infinite ease-in-out, drift var(--float-duration) infinite linear;
     opacity: 0;
 }
 
-/* Étoiles filantes */
 .shooting-star {
     position: absolute;
-    width: 3px;
-    height: 3px;
+    width: 3px; height: 3px;
     background: white;
     border-radius: 50%;
     filter: drop-shadow(0 0 6px white);
@@ -126,42 +108,28 @@
 .shooting-star::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 0;
+    top: 50%; left: 0;
     transform: translateY(-50%);
-    width: 100px;
-    height: 1px;
+    width: 100px; height: 1px;
     background: linear-gradient(90deg, white, transparent);
     opacity: 0.6;
 }
 
-/* Particules brillantes */
 .sparkle {
     position: absolute;
-    width: 4px;
-    height: 4px;
+    width: 4px; height: 4px;
     background: white;
     animation: sparkle var(--duration) infinite ease-in-out;
 }
-
-.sparkle::before,
-.sparkle::after {
+.sparkle::before, .sparkle::after {
     content: '';
     position: absolute;
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     background: white;
 }
+.sparkle::before { transform: rotate(45deg); }
+.sparkle::after  { transform: rotate(-45deg); }
 
-.sparkle::before {
-    transform: rotate(45deg);
-}
-
-.sparkle::after {
-    transform: rotate(-45deg);
-}
-
-/* Contenu Hero */
 .hero-content {
     position: relative;
     z-index: 3;
@@ -170,36 +138,59 @@
     opacity: 0;
     transform: translateY(50px);
     animation: contentSlideUp 1s ease-out 0.8s forwards;
-    justify-content: center
+}
+
+/* Badge pill — nouveau */
+.hero-badge {
+    display: inline-block;
+    padding: .35rem 1.1rem;
+    background: rgba(255,165,0,.12);
+    border: 1px solid rgba(255,165,0,.35);
+    border-radius: 50px;
+    font-size: .7rem;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.85);
+    margin-bottom: 1.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    opacity: 0;
+    animation: descriptionAppear .8s ease-out 1s forwards;
 }
 
 .hero-title {
+    font-family: 'DM Serif Display', serif;
     font-size: 3.5em;
     margin-bottom: 20px;
-    text-shadow: 
+    text-shadow:
         0 0 20px rgba(255,255,255,0.5),
         0 0 40px rgba(58,159,135,0.3),
         2px 2px 4px rgba(0,0,0,0.3);
     opacity: 0;
     transform: translateY(30px);
     animation: titleAppear 0.8s ease-out 1.2s forwards;
-    justify-content: center
-    
 }
 
 .hero-description {
-    font-size: 1.5em;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.25em;
+    font-weight: 300;
     margin-bottom: 30px;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
     opacity: 0;
     transform: translateY(20px);
     animation: descriptionAppear 0.8s ease-out 1.6s forwards;
-    justify-content: center
+    max-width: 580px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.7;
 }
 
 .cta-button {
+    font-family: 'DM Sans', sans-serif;
     padding: 15px 40px;
-    font-size: 1.2em;
+    font-size: 1.1em;
+    font-weight: 500;
     background: rgba(255,255,255,0.1);
     color: white;
     border: 2px solid rgba(255,255,255,0.8);
@@ -212,570 +203,617 @@
     opacity: 0;
     transform: translateY(20px) scale(0.8);
     animation: buttonAppear 0.6s ease-out 2s forwards;
-    justify-content: center
 }
-
 .cta-button:hover {
     transform: translateY(-5px);
-    box-shadow: 
-        0 10px 30px rgba(58,159,135,0.4),
-        0 0 60px rgba(255,255,255,0.2);
+    box-shadow: 0 10px 30px rgba(58,159,135,0.4), 0 0 60px rgba(255,255,255,0.2);
     background: rgba(255,255,255,0.2);
     border-color: white;
 }
-
 .cta-button::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
     background: radial-gradient(circle, rgba(255,255,255,0.3), transparent);
     transition: all 0.5s ease;
     transform: translate(-50%, -50%);
     border-radius: 50%;
 }
+.cta-button:hover::before { width: 300px; height: 300px; }
+.cta-button span { position: relative; z-index: 1; }
 
-.cta-button:hover::before {
-    width: 300px;
-    height: 300px;
-}
-
-.cta-button span {
-    position: relative;
-    z-index: 1;
-}
-
-/* Wave en bas de la section */
 .wave {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100px;
+    bottom: 0; left: 0;
+    width: 100%; height: 100px;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
     background-size: cover;
     opacity: 0.3;
 }
 
-/* Section Separator */
-.section-separator {
-    height: 100px;
-    background-color: #f5f5f5;
-    position: relative;
-    overflow: hidden;
-    margin: -1px 0;
+/* ═══════════════════════════════════════════
+   WAVE TRANSITIONS
+═══════════════════════════════════════════ */
+.wave-transition {
+    display: block;
+    line-height: 0;
+    margin: -2px 0;
+    background: transparent;
 }
+.wave-transition svg { display: block; width: 100%; }
 
-.separator-wave {
-    position: absolute;
-    width: 100%;
-    height: 100px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' d='M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
-    background-size: cover;
-}
-
-/* Section Features */
+/* ═══════════════════════════════════════════
+   FEATURES SECTION — white / paper
+═══════════════════════════════════════════ */
 .features-section {
-    background-color: white;
-    padding: 80px 20px;
-    opacity: 0;
-    transform: translateY(50px);
-    animation: sectionAppear 1s ease-out 0.5s forwards;
-}
-
-.features-section h2 {
-    text-align: center;
-    color: #2c786c;
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 40px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-}
-
-.features {
-    display: flex;
-    justify-content: center;  /* Centre les cartes */
-    align-items: stretch;      /* Même hauteur */
-    gap: 40px;                 /* Espacement entre les cartes */
-    flex-wrap: nowrap;         /* Empêche de passer à la ligne */
-    max-width: 100%;
-    overflow-x: auto;          /* Permet le scroll horizontal si l’écran est trop petit */
-    padding-bottom: 20px;
-}
-
-.feature {
-    background: white;
-    border-radius: 15px;
-    /* Suppression de la border simple */
+    background: #ffffff;
+    padding: 96px 20px;
     position: relative;
-    /* Ajout du padding pour simuler l'épaisseur de la bordure */
-    padding: 4px;
-    /* Background avec le dégradé */
-    background: linear-gradient(135deg, #000000, #3a9f87);
-    box-shadow: 
-        0 4px 8px rgba(0, 0, 0, 0.08),
-        0 0 0 1px rgba(0, 0, 0, 0.03);
-    width: 330px;
-    aspect-ratio: 1 / 1;
+}
+
+.features-section-head {
     text-align: center;
-    transition: all 0.3s ease;
-    cursor: pointer;
+    margin-bottom: 56px;
+}
+
+.features-eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .72rem;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: #3a9f87;
+    font-weight: 600;
+    margin-bottom: .6rem;
+}
+
+.features-section-head h2 {
+    font-family: 'DM Serif Display', serif;
+    color: #0d3028;
+    font-size: 2.4rem;
+    font-weight: 400;
+    margin-bottom: .5rem;
+}
+
+.features-section-head p {
+    font-family: 'DM Sans', sans-serif;
+    color: #64748b;
+    font-size: .95rem;
+    font-weight: 300;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    perspective: 1200px;
+}
+
+/* ── Feature Card — dark glass on white section ── */
+.feature-card {
+    position: relative;
+    background: linear-gradient(145deg, #0f3525 0%, #163d2c 60%, #1a5040 100%);
+    border: 1px solid rgba(58,159,135,.2);
+    border-radius: 20px;
     overflow: hidden;
+    cursor: pointer;
     opacity: 0;
-    transform: translateY(30px);
-    animation: featureAppear 0.6s ease-out forwards;
+    transform: translateY(32px);
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    transform-style: preserve-3d;
+    transition: box-shadow .35s ease, border-color .35s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,.12);
+    will-change: transform;
 }
 
-/* Nouveau pseudo-élément pour créer le fond blanc intérieur */
-.feature::after {
+/* Shimmer sweep */
+.feature-card::after {
     content: '';
     position: absolute;
-    top: 4px;
-    left: 4px;
-    right: 4px;
-    bottom: 4px;
-    background: white;
-    border-radius: 11px; /* 15px - 4px de "border" */
-    z-index: 0;
+    top: 0;
+    left: -120%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(105deg, transparent, rgba(255,255,255,.07), transparent);
+    transform: skewX(-20deg);
+    transition: left .6s cubic-bezier(.16,1,.3,1);
+    pointer-events: none;
+    z-index: 2;
+}
+.feature-card:hover::after { left: 160%; }
+
+.feature-card:hover {
+    border-color: rgba(58,159,135,.55);
+    box-shadow:
+        0 20px 48px rgba(0,0,0,.25),
+        0 0 0 1px rgba(58,159,135,.4),
+        0 0 28px rgba(58,159,135,.15);
 }
 
-/* IMPORTANT: Ajustement pour que le contenu soit au-dessus du fond blanc */
-.feature > * {
+.feature-card:focus-visible {
+    outline: 2px solid #3a9f87;
+    outline-offset: 3px;
+}
+
+/* ── Card Visual Header ── */
+.card-visual {
+    height: 152px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cv-1 { background: linear-gradient(135deg, #071810 0%, #0d3028 55%, #163d2c 100%); }
+.cv-2 { background: linear-gradient(135deg, #0d2d1f 0%, #1a5040 55%, #2a7562 100%); }
+.cv-3 { background: linear-gradient(135deg, #0d3028 0%, #1e5c48 55%, #3a9f87 100%); }
+.cv-4 { background: linear-gradient(135deg, #0a1e14 0%, #163d2c 55%, #1a5040 100%); }
+
+/* Giant background icon */
+.cv-bg-icon {
+    position: absolute;
+    font-size: 130px;
+    color: rgba(255,255,255,.05);
+    right: -8px; bottom: -18px;
+    pointer-events: none;
+    transition: transform .5s cubic-bezier(.16,1,.3,1), color .4s;
+}
+.feature-card:hover .cv-bg-icon {
+    transform: scale(1.12) rotate(6deg);
+    color: rgba(255,255,255,.1);
+}
+
+/* Dot grid overlay */
+.cv-dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.08) 1px, transparent 1px);
+    background-size: 18px 18px;
+    pointer-events: none;
+}
+
+/* Decorative circle corner */
+.cv-circle {
+    position: absolute;
+    top: -28px; left: -28px;
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.04);
+    pointer-events: none;
+}
+.cv-circle-sm {
+    position: absolute;
+    bottom: -16px; right: 30px;
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.06);
+    pointer-events: none;
+}
+
+/* Central icon box — frosted glass */
+.cv-icon {
+    width: 64px; height: 64px;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: background .35s, border-color .35s, box-shadow .35s, transform .35s cubic-bezier(.16,1,.3,1);
+}
+.cv-icon i {
+    font-size: 26px;
+    color: rgba(255,255,255,.88);
+    transition: transform .35s, color .35s, text-shadow .35s;
+}
+.feature-card:hover .cv-icon {
+    background: rgba(58,159,135,.28);
+    border-color: rgba(77,191,163,.6);
+    box-shadow: 0 0 28px rgba(58,159,135,.4), 0 0 8px rgba(77,191,163,.3);
+    transform: scale(1.1) translateY(-2px);
+}
+.feature-card:hover .cv-icon i {
+    color: #a8edda;
+    text-shadow: 0 0 14px rgba(58,159,135,.9);
+    transform: scale(1.08);
+}
+
+/* Accent dot (card 4) */
+.cv-accent { position: absolute; top: 14px; right: 14px; width: 8px; height: 8px; border-radius: 50%; background: #FFA500; opacity: .65; }
+
+.feature-card.visible {
+    animation: featureCardIn .55s cubic-bezier(.16,1,.3,1) var(--delay, 0s) forwards;
+}
+@keyframes featureCardIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.feature-card-body {
+    padding: 1.75rem 1.5rem 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     position: relative;
     z-index: 1;
 }
 
-/* Modification du ::before existant pour qu'il fonctionne avec le nouveau design */
-.feature::before {
+
+.feature-card h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: rgba(255,255,255,.92);
+    margin-bottom: .5rem;
+    line-height: 1.3;
+    transition: color .2s;
+}
+.feature-card:hover h3 { color: #ffffff; }
+
+.feature-card p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .84rem;
+    color: rgba(255,255,255,.5);
+    line-height: 1.7;
+    flex: 1;
+    transition: color .2s;
+}
+.feature-card:hover p { color: rgba(255,255,255,.72); }
+
+.feature-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .8rem;
+    font-weight: 600;
+    color: #4dbfa3;
+    margin-top: 1.2rem;
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: opacity .25s, transform .25s;
+}
+.feature-card:hover .feature-arrow { opacity: 1; transform: translateX(0); }
+
+/* ═══════════════════════════════════════════
+   CTA FINAL SECTION
+═══════════════════════════════════════════ */
+.cta-final-section {
+    background: linear-gradient(160deg, #1a5040 0%, #0f3525 50%, #0d3028 100%);
+    padding: 96px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-final-section::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(45deg, transparent, rgba(58,159,135,0.1), transparent);
-    transform: rotate(45deg);
-    transition: all 0.5s;
-    opacity: 0;
-    z-index: 1; /* Au-dessus du fond blanc mais sous le contenu */
+    top: -80px; right: -80px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,165,0,.08) 0%, transparent 65%);
+    pointer-events: none;
 }
 
-/* ====================== */
-/* TOUT LE RESTE DE VOTRE CODE RESTE IDENTIQUE */
-/* ====================== */
-
-.feature:nth-child(1) { animation-delay: 0.2s; }
-.feature:nth-child(2) { animation-delay: 0.4s; }
-.feature:nth-child(3) { animation-delay: 0.6s; }
-.feature:nth-child(4) { animation-delay: 0.8s; }
-
-.feature:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 10px 30px rgba(58,159,135,0.2);
+.cta-final-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 560px;
+    margin: 0 auto;
 }
 
-.feature:hover::before {
-    animation: featureShine 0.5s ease-out;
+.cta-eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .72rem;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: #FFA500;
+    font-weight: 600;
+    margin-bottom: .75rem;
 }
 
-.feature i {
-    font-size: 40px;
-    color: #3a9f87;
-    margin-bottom: 20px;
-    transition: all 0.3s;
+.cta-final-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.2rem;
+    color: white;
+    font-weight: 400;
+    margin-bottom: .75rem;
+    line-height: 1.2;
 }
 
-.feature:hover i {
-    transform: scale(1.2);
-    color: #2a7562;
-}
-
-.feature h3 {
-    color: #333;
-    margin-bottom: 15px;
-}
-
-.feature p {
-    color: #666;
+.cta-final-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    color: rgba(255,255,255,.65);
+    font-weight: 300;
+    margin-bottom: 2rem;
     line-height: 1.6;
 }
 
-/* Section Get Started */
-.get-started-section {
-    background-color: #ffffff;
-    padding: 100px 20px;
-    text-align: center;
-    position: relative;
-    opacity: 0;
-    transform: translateY(30px);
-    animation: sectionAppear 1s ease-out 0.7s forwards;
+.cta-final-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: .85rem 2rem;
+    background: #e8920a;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .95rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .2s, box-shadow .2s, transform .1s;
+    text-shadow: 0 1px 2px rgba(0,0,0,.15);
 }
-
-.get-started-section::before {
-    content: '';
-    position: absolute;
-    top: -50px;
-    left: 0;
-    width: 100%;
-    height: 50px;
-    background: linear-gradient(to bottom right, transparent 49%, #f8f9fa 50%);
+.cta-final-btn:hover {
+    background: #d17e08;
+    box-shadow: 0 4px 18px rgba(232,146,10,.4);
+    color: white;
+    transform: translateY(-2px);
 }
+.cta-final-btn:active { transform: scale(.98); }
 
-.get-started-section h2 {
-    color: #2c786c;
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-}
-
-.get-started-section p {
-    color: #666;
-    font-size: 1.2rem;
-    margin-bottom: 30px;
-}
-
-/* Animations Keyframes */
+/* ═══════════════════════════════════════════
+   KEYFRAMES — hero (inchangés)
+═══════════════════════════════════════════ */
 @keyframes heroAppear {
-    0% { 
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    100% { 
-        opacity: 1;
-        transform: translateY(0);
-    }
+    0%   { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes contentSlideUp {
-    0% {
-        opacity: 0;
-        transform: translateY(50px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    0%   { opacity: 0; transform: translateY(50px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes titleAppear {
-    0% {
-        opacity: 0;
-        transform: translateY(30px) scale(0.9);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+    0%   { opacity: 0; transform: translateY(30px) scale(0.9); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
 }
-
 @keyframes descriptionAppear {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    0%   { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes buttonAppear {
-    0% {
-        opacity: 0;
-        transform: translateY(20px) scale(0.8);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+    0%   { opacity: 0; transform: translateY(20px) scale(0.8); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
 }
-
-@keyframes sectionAppear {
-    0% {
-        opacity: 0;
-        transform: translateY(50px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes featureAppear {
-    0% {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes featureShine {
-    0% {
-        opacity: 0;
-        transform: rotate(45deg) translateX(-100%);
-    }
-    50% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-        transform: rotate(45deg) translateX(100%);
-    }
-}
-
 @keyframes starsMove {
-    0% {
-        transform: translate(0, 0);
-    }
-    100% {
-        transform: translate(-200px, -200px);
-    }
+    0%   { transform: translate(0, 0); }
+    100% { transform: translate(-200px, -200px); }
 }
-
 @keyframes twinkle {
-    0%, 100% {
-        opacity: 0;
-        transform: scale(0.5);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1);
-    }
+    0%, 100% { opacity: 0; transform: scale(0.5); }
+    50%       { opacity: 1; transform: scale(1); }
 }
-
 @keyframes float {
-    0% {
-        transform: translate(0, 0) rotate(0deg);
-    }
-    33% {
-        transform: translate(30px, -30px) rotate(120deg);
-    }
-    66% {
-        transform: translate(-20px, 20px) rotate(240deg);
-    }
-    100% {
-        transform: translate(0, 0) rotate(360deg);
-    }
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    33%  { transform: translate(30px, -30px) rotate(120deg); }
+    66%  { transform: translate(-20px, 20px) rotate(240deg); }
+    100% { transform: translate(0, 0) rotate(360deg); }
 }
-
 @keyframes pulse {
-    0%, 100% {
-        opacity: 0.3;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1.5);
-    }
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50%       { opacity: 1;   transform: scale(1.5); }
 }
-
 @keyframes drift {
-    0% {
-        transform: translateX(0) translateY(0);
-    }
-    25% {
-        transform: translateX(50px) translateY(-30px);
-    }
-    50% {
-        transform: translateX(-30px) translateY(20px);
-    }
-    75% {
-        transform: translateX(40px) translateY(-10px);
-    }
-    100% {
-        transform: translateX(0) translateY(0);
-    }
+    0%   { transform: translateX(0) translateY(0); }
+    25%  { transform: translateX(50px) translateY(-30px); }
+    50%  { transform: translateX(-30px) translateY(20px); }
+    75%  { transform: translateX(40px) translateY(-10px); }
+    100% { transform: translateX(0) translateY(0); }
 }
-
 @keyframes shoot {
-    0% {
-        opacity: 0;
-        transform: translateX(-200px) translateY(0) rotate(45deg);
-    }
-    10% {
-        opacity: 1;
-    }
-    90% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-        transform: translateX(calc(100vw + 200px)) translateY(100px) rotate(45deg);
-    }
+    0%   { opacity: 0; transform: translateX(-200px) translateY(0) rotate(45deg); }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { opacity: 0; transform: translateX(calc(100vw + 200px)) translateY(100px) rotate(45deg); }
 }
-
 @keyframes sparkle {
-    0%, 100% {
-        opacity: 0;
-        transform: scale(0) rotate(0deg);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1) rotate(180deg);
-    }
+    0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+    50%       { opacity: 1; transform: scale(1) rotate(180deg); }
 }
 
-/* Responsive Design */
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 1024px) {
+    .features-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 768px) {
-    .hero-section {
-        padding: 60px 15px;
-        min-height: 450px;
-    }
-    
-    .hero-title {
-        font-size: 2.5em;
-    }
-    
-    .hero-description {
-        font-size: 1.2em;
-    }
-    
-    .feature {
-        width: 100%;
-        max-width: 350px;
-    }
-    
-    .features {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .features-section {
-        padding: 60px 15px;
-    }
-    
-    .get-started-section {
-        padding: 80px 15px;
-    }
-    
-    .cta-button {
-        padding: 12px 30px;
-        font-size: 1.1em;
-    }
+    .hero-section { padding: 60px 15px; min-height: 90dvh; }
+    .hero-title   { font-size: 2.5em; }
+    .hero-description { font-size: 1.1em; }
+    .features-section { padding: 60px 15px; }
+    .cta-final-section { padding: 72px 20px; }
+    .cta-final-title { font-size: 1.8rem; }
 }
 
 @media (max-width: 480px) {
-    .hero-title {
-        font-size: 2em;
-    }
-    
-    .hero-description {
-        font-size: 1.1em;
-    }
-    
-    .features-section h2 {
-        font-size: 1.5rem;
-    }
-    
-    .feature {
-        padding: 20px;
-    }
-    
-    .feature i {
-        font-size: 35px;
-    }
-    
-    .get-started-section h2 {
-        font-size: 2rem;
-    }
-    
-    .get-started-section p {
-        font-size: 1rem;
-    }
+    .hero-title { font-size: 2em; }
+    .hero-description { font-size: 1em; }
+    .features-grid { grid-template-columns: 1fr; }
+    .features-section-head h2 { font-size: 1.75rem; }
+    .cta-final-title { font-size: 1.6rem; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-section, .hero-content, .hero-title, .hero-description,
+    .cta-button, .hero-badge,
+    .stars-layer-1, .stars-layer-2, .stars-layer-3,
+    .star, .star-dot, .sparkle, .shooting-star {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+    .feature-card { animation: none !important; opacity: 1 !important; transform: none !important; }
+}
+
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Section Hero avec animation d'étoiles -->
+
+<!-- ══════════════════════════════════
+     HERO
+══════════════════════════════════ -->
 <section class="hero-section" id="home">
     <div class="wave"></div>
-    
-    <!-- Conteneur des étoiles animées -->
+
     <div class="stars-container" id="starsContainer">
-        <!-- Couches d'étoiles statiques en background -->
         <div class="stars-layer-1"></div>
         <div class="stars-layer-2"></div>
         <div class="stars-layer-3"></div>
     </div>
-    
+
     <div class="hero-content">
-        <h2 class="hero-title">Bienvenue</h2>
-        <p class="hero-description">Ce portail a pour but d'aider à la gestion des clés au sein de l'Église Évangélique Rencontre Espérance.</p>
+        <div class="hero-badge" aria-hidden="true">Portail de gestion</div>
+        <h1 class="hero-title">Bienvenue</h1>
+        <p class="hero-description">Ce portail facilite la gestion des clés de l'Église Évangélique Rencontre Espérance.</p>
         <button class="cta-button" onclick="window.location.href='{% url 'key_list' %}'">
             <span>On y va !</span>
         </button>
     </div>
 </section>
 
-<div class="section-separator">
-    <div class="separator-wave"></div>
+<!-- Wave hero → features (white) -->
+<div class="wave-transition" aria-hidden="true" style="background:transparent">
+    <svg viewBox="0 0 1440 64" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,32 C240,64 480,0 720,32 C960,64 1200,0 1440,32 L1440,64 L0,64 Z" fill="#ffffff"/>
+    </svg>
 </div>
 
-<!-- Section Features -->
+<!-- ══════════════════════════════════
+     FEATURES
+══════════════════════════════════ -->
 <section class="features-section" id="features">
-    <h2>Fonctionnalités</h2>
-    <div class="features">
-        <div class="feature" onclick="window.location.href='{% url 'key_list' %}'">
-            <i class="fas fa-key"></i>
-            <h3>Gestion des clés</h3>
-            <p>Ajouter, modifier et consulter la liste des clés.</p>
-        </div>
-        <div class="feature" onclick="window.location.href='{% url 'team_list' %}'">
-            <i class="fas fa-users"></i>
-            <h3>Gestion des équipes</h3>
-            <p>Ajouter, supprimer ou modifier le nom d'une équipe.</p>
-        </div>
-        <div class="feature" onclick="window.location.href='{% url 'user_list' %}'">
-            <i class="fas fa-user"></i>
-            <h3>Gestion des détenteurs de clés</h3>
-            <p>Administrer les détenteurs de clés par équipe.</p>
-        </div>
-        <div class="feature" onclick="window.location.href='{% url 'user_keys' %}'">
-            <i class="fas fa-id-badge"></i>
-            <h3>Gestion des clés attribuées</h3>
-            <p>Attribuer une ou plusieurs clés aux détenteurs de clés.</p>
-        </div>
+    <div class="features-section-head">
+        <p class="features-eyebrow">Navigation rapide</p>
+        <h2>Fonctionnalités</h2>
+        <p>Accédez directement aux modules de gestion</p>
+    </div>
+
+    <div class="features-grid">
+
+        <!-- Card 1 — Gestion des clés -->
+        <a class="feature-card" href="{% url 'key_list' %}" role="button"
+           aria-label="Gestion des clés" style="--delay:0.1s">
+            <div class="card-visual cv-1">
+                <i class="fas fa-key cv-bg-icon" aria-hidden="true"></i>
+                <div class="cv-dots"></div>
+                <div class="cv-circle"></div>
+                <div class="cv-circle-sm"></div>
+                <div class="cv-icon"><i class="fas fa-key" aria-hidden="true"></i></div>
+            </div>
+            <div class="feature-card-body">
+                <h3>Gestion des clés</h3>
+                <p>Ajouter, modifier et consulter la liste complète des clés disponibles.</p>
+                <span class="feature-arrow">Accéder <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+            </div>
+        </a>
+
+        <!-- Card 2 — Gestion des équipes -->
+        <a class="feature-card" href="{% url 'team_list' %}" role="button"
+           aria-label="Gestion des équipes" style="--delay:0.2s">
+            <div class="card-visual cv-2">
+                <i class="fas fa-users cv-bg-icon" aria-hidden="true"></i>
+                <div class="cv-dots"></div>
+                <div class="cv-circle"></div>
+                <div class="cv-circle-sm"></div>
+                <div class="cv-icon"><i class="fas fa-users" aria-hidden="true"></i></div>
+            </div>
+            <div class="feature-card-body">
+                <h3>Gestion des équipes</h3>
+                <p>Ajouter, supprimer ou modifier le nom d'une équipe.</p>
+                <span class="feature-arrow">Accéder <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+            </div>
+        </a>
+
+        <!-- Card 3 — Gestion des détenteurs -->
+        <a class="feature-card" href="{% url 'user_list' %}" role="button"
+           aria-label="Gestion des détenteurs de clés" style="--delay:0.3s">
+            <div class="card-visual cv-3">
+                <i class="fas fa-user cv-bg-icon" aria-hidden="true"></i>
+                <div class="cv-dots"></div>
+                <div class="cv-circle"></div>
+                <div class="cv-circle-sm"></div>
+                <div class="cv-icon"><i class="fas fa-user" aria-hidden="true"></i></div>
+            </div>
+            <div class="feature-card-body">
+                <h3>Gestion des détenteurs</h3>
+                <p>Administrer les détenteurs de clés par équipe.</p>
+                <span class="feature-arrow">Accéder <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+            </div>
+        </a>
+
+        <!-- Card 4 — Clés attribuées -->
+        <a class="feature-card" href="{% url 'user_keys' %}" role="button"
+           aria-label="Gestion des clés attribuées" style="--delay:0.4s">
+            <div class="card-visual cv-4">
+                <i class="fas fa-id-badge cv-bg-icon" aria-hidden="true"></i>
+                <div class="cv-dots"></div>
+                <div class="cv-circle"></div>
+                <div class="cv-circle-sm"></div>
+                <div class="cv-accent"></div>
+                <div class="cv-icon"><i class="fas fa-id-badge" aria-hidden="true"></i></div>
+            </div>
+            <div class="feature-card-body">
+                <h3>Clés attribuées</h3>
+                <p>Attribuer une ou plusieurs clés aux détenteurs de clés.</p>
+                <span class="feature-arrow">Accéder <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+            </div>
+        </a>
+
     </div>
 </section>
 
-<div class="section-separator">
-    <div class="separator-wave"></div>
+<!-- Wave features (white) → CTA (dark teal) -->
+<div class="wave-transition" aria-hidden="true" style="background:#ffffff">
+    <svg viewBox="0 0 1440 64" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,32 C240,0 480,64 720,32 C960,0 1200,64 1440,32 L1440,64 L0,64 Z" fill="#0d3028"/>
+    </svg>
 </div>
 
-<section class="get-started-section" id="about">
-    <h2>Commencez dès aujourd'hui</h2>
-    <p>Utilisez notre application pour faciliter la gestion des clés de l'église.</p>
-    <button class="cta-button" onclick="window.location.href='{% url 'key_list' %}'">
-        <span>Commencer</span>
-    </button>
+<!-- ══════════════════════════════════
+     CTA FINAL
+══════════════════════════════════ -->
+<section class="cta-final-section" id="about">
+    <div class="cta-final-inner">
+        <p class="cta-eyebrow">Prêt à commencer ?</p>
+        <h2 class="cta-final-title">Gérez vos clés simplement</h2>
+        <p class="cta-final-sub">Utilisez notre application pour faciliter la gestion des accès au sein de l'église.</p>
+        <a href="{% url 'key_list' %}" class="cta-final-btn">
+            Accéder aux clés
+            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </a>
+    </div>
 </section>
 
-<!-- Script pour générer les étoiles dynamiquement -->
+<!-- ══════════════════════════════════
+     SCRIPTS — étoiles (inchangé) + IntersectionObserver
+══════════════════════════════════ -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ── Stars JS (inchangé) ── */
     const container = document.getElementById('starsContainer');
-    
-    // Fonction pour créer des étoiles
+
     function createStar(className, count) {
         for (let i = 0; i < count; i++) {
             const star = document.createElement('div');
             star.className = className;
-            
-            // Position aléatoire
             star.style.left = Math.random() * 100 + '%';
-            star.style.top = Math.random() * 100 + '%';
-            
-            // Taille aléatoire pour les étoiles
+            star.style.top  = Math.random() * 100 + '%';
             if (className === 'star') {
                 const size = Math.random() * 8 + 4;
                 star.style.width = size + 'px';
@@ -785,22 +823,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 star.style.width = size + 'px';
                 star.style.height = size + 'px';
             }
-            
-            // Durées d'animation aléatoires
             star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
             star.style.setProperty('--float-duration', (Math.random() * 20 + 10) + 's');
             star.style.animationDelay = Math.random() * 5 + 's';
-            
             container.appendChild(star);
         }
     }
-    
-    // Créer différents types d'étoiles
+
     createStar('star', 30);
     createStar('star-dot', 50);
     createStar('sparkle', 15);
-    
-    // Fonction pour créer des étoiles filantes
+
     function createShootingStar() {
         const shooting = document.createElement('div');
         shooting.className = 'shooting-star';
@@ -808,70 +841,80 @@ document.addEventListener('DOMContentLoaded', function() {
         shooting.style.left = '-100px';
         shooting.style.animationDelay = '0s';
         shooting.style.animationDuration = (Math.random() * 2 + 2) + 's';
-        
         container.appendChild(shooting);
-        
-        // Supprimer l'étoile filante après l'animation
-        setTimeout(() => {
-            shooting.remove();
-        }, 4000);
+        setTimeout(() => shooting.remove(), 4000);
     }
-    
-    // Créer des étoiles filantes périodiquement
+
     setInterval(createShootingStar, 8000);
-    
-    // Créer quelques étoiles filantes au début
     setTimeout(() => createShootingStar(), 2000);
     setTimeout(() => createShootingStar(), 5000);
-    
-    // Effet parallaxe au mouvement de la souris
-    let mouseX = 0;
-    let mouseY = 0;
-    let currentX = 0;
-    let currentY = 0;
+
+    let mouseX = 0, mouseY = 0, currentX = 0, currentY = 0;
     const speed = 0.05;
-    
+
     document.addEventListener('mousemove', (e) => {
         mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
         mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
     });
-    
+
     function animate() {
         currentX += (mouseX - currentX) * speed;
         currentY += (mouseY - currentY) * speed;
-        
-        const stars = container.querySelectorAll('.star, .star-dot, .sparkle');
-        stars.forEach((star, index) => {
+        container.querySelectorAll('.star, .star-dot, .sparkle').forEach((star, index) => {
             const depth = (index % 3 + 1) * 0.5;
-            const translateX = currentX * depth * 20;
-            const translateY = currentY * depth * 20;
-            star.style.transform = `translate(${translateX}px, ${translateY}px)`;
+            star.style.transform = `translate(${currentX * depth * 20}px, ${currentY * depth * 20}px)`;
         });
-        
         requestAnimationFrame(animate);
     }
-    
     animate();
-    
-    // Ajouter un effet de lueur au survol du titre
+
     const heroTitle = document.querySelector('.hero-title');
     if (heroTitle) {
-        heroTitle.addEventListener('mouseenter', function() {
-            this.style.textShadow = `
-                0 0 30px rgba(255,255,255,0.8),
-                0 0 60px rgba(58,159,135,0.5),
-                2px 2px 4px rgba(0,0,0,0.3)
-            `;
+        heroTitle.addEventListener('mouseenter', function () {
+            this.style.textShadow = '0 0 30px rgba(255,255,255,0.8), 0 0 60px rgba(58,159,135,0.5), 2px 2px 4px rgba(0,0,0,0.3)';
         });
-        
-        heroTitle.addEventListener('mouseleave', function() {
-            this.style.textShadow = `
-                0 0 20px rgba(255,255,255,0.5),
-                0 0 40px rgba(58,159,135,0.3),
-                2px 2px 4px rgba(0,0,0,0.3)
-            `;
+        heroTitle.addEventListener('mouseleave', function () {
+            this.style.textShadow = '0 0 20px rgba(255,255,255,0.5), 0 0 40px rgba(58,159,135,0.3), 2px 2px 4px rgba(0,0,0,0.3)';
         });
     }
+
+    /* ── IntersectionObserver — cartes ── */
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.feature-card').forEach(card => observer.observe(card));
+
+    /* ── 3D Tilt on cards ── */
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    document.querySelectorAll('.feature-card').forEach(card => {
+        if (!prefersReducedMotion) {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width  - 0.5;
+                const y = (e.clientY - rect.top)  / rect.height - 0.5;
+                card.style.transform = `perspective(900px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg) translateZ(8px)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        }
+
+        /* keyboard navigation */
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                window.location.href = card.href;
+            }
+        });
+    });
 });
 </script>
+
 {% endblock %}

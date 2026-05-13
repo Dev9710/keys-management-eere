@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow, noarchive">
-    <title>Connexion | EERE - Gestion des Clés</title>
+    <title>Connexion | Portail de gestion des clés - EERE</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -46,7 +46,8 @@
         /* ─── Brand Panel (left) ──────────────────────── */
         .lw-brand {
             width: 44%;
-            background: linear-gradient(150deg, #0d3028 0%, #1a5040 45%, #2a7562 75%, #3a9f87 100%);
+            background: linear-gradient(-45deg, #0d3028, #1a5040, #2a9f78, #1e6b4e, #0d3028);
+            background-size: 400% 400%;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -56,19 +57,26 @@
             overflow: hidden;
             transform: translateX(-24px);
             opacity: 0;
-            animation: slideRight .65s cubic-bezier(.16,1,.3,1) .15s forwards;
+            animation: slideRight .65s cubic-bezier(.16,1,.3,1) .15s forwards,
+                       brandGrad 12s ease 1s infinite;
         }
         @keyframes slideRight { to { transform: translateX(0); opacity: 1; } }
+        @keyframes brandGrad {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-        /* decorative circles */
+        /* decorative circles — animated */
         .lw-brand::before {
             content: '';
             position: absolute;
             top: -90px; right: -90px;
             width: 320px; height: 320px;
             border-radius: 50%;
-            background: rgba(255,165,0,.07);
+            background: radial-gradient(circle, rgba(255,165,0,.12) 0%, transparent 65%);
             pointer-events: none;
+            animation: circleFloat1 9s ease-in-out 1s infinite;
         }
         .lw-brand::after {
             content: '';
@@ -76,8 +84,62 @@
             bottom: -70px; left: -70px;
             width: 260px; height: 260px;
             border-radius: 50%;
-            background: rgba(255,255,255,.04);
+            background: radial-gradient(circle, rgba(58,159,135,.18) 0%, transparent 65%);
             pointer-events: none;
+            animation: circleFloat2 11s ease-in-out 1s infinite;
+        }
+        @keyframes circleFloat1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50%       { transform: translate(-35px, 45px) scale(1.15); }
+        }
+        @keyframes circleFloat2 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50%       { transform: translate(40px, -35px) scale(1.1); }
+        }
+
+        /* ─── Inner orbs ──────────────────────────────── */
+        .brand-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(55px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .b-orb-1 {
+            width: 280px; height: 280px;
+            background: radial-gradient(circle, rgba(58,159,135,.45) 0%, transparent 65%);
+            top: 10%; right: -60px;
+            animation: bOrb1 10s ease-in-out 1.2s infinite;
+        }
+        .b-orb-2 {
+            width: 220px; height: 220px;
+            background: radial-gradient(circle, rgba(255,165,0,.18) 0%, transparent 65%);
+            bottom: 10%; left: -40px;
+            animation: bOrb2 13s ease-in-out 1.4s infinite;
+        }
+        @keyframes bOrb1 {
+            0%, 100% { transform: translate(0, 0); }
+            50%       { transform: translate(-30px, 50px); }
+        }
+        @keyframes bOrb2 {
+            0%, 100% { transform: translate(0, 0); }
+            50%       { transform: translate(40px, -30px); }
+        }
+
+        /* ─── Dot grid overlay ───────────────────────── */
+        .brand-dots-grid {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,.07) 1px, transparent 1px);
+            background-size: 22px 22px;
+            pointer-events: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .lw-brand { animation: slideRight .65s cubic-bezier(.16,1,.3,1) .15s forwards; }
+            .lw-brand::before, .lw-brand::after,
+            .brand-orb { animation: none; }
         }
 
         .brand-bar {
@@ -345,6 +407,9 @@
 
     <!-- ── Brand Panel ── -->
     <div class="lw-brand">
+        <div class="brand-dots-grid" aria-hidden="true"></div>
+        <div class="brand-orb b-orb-1" aria-hidden="true"></div>
+        <div class="brand-orb b-orb-2" aria-hidden="true"></div>
         <div class="brand-bar"></div>
 
         <div class="brand-body">
@@ -355,9 +420,9 @@
                 </svg>
             </div>
             <h1 class="brand-name">EERE</h1>
-            <p class="brand-tag">Gestion des Clés</p>
+            <p class="brand-tag">Portail de gestion des clés</p>
             <div class="brand-rule"></div>
-            <p class="brand-desc">Gérez l'accès à vos espaces en toute simplicité et sécurité.</p>
+            <p class="brand-desc">Église Évangélique Rencontre Espérance</p>
         </div>
 
         <div class="brand-dots">

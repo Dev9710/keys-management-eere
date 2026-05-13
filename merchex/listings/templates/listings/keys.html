@@ -1,371 +1,348 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 
-{% block title %}Gestion des Clés{% endblock %}
+{% block title %}Gestion des Clés | EERE{% endblock %}
 
 {% block extra_css %}
-/* Styles spécifiques à la page de gestion des clés */
-table {     
-    width: 100%;
-    border-collapse: collapse;
+<style>
+/* ═══════════════════════════════════════════════════
+   TOKENS — identiques à la page Équipes
+═══════════════════════════════════════════════════ */
+:root {
+  --teal:       #3a9f87;
+  --teal-dark:  #2a7562;
+  --teal-light: #edf7f5;
+  --grad:       linear-gradient(135deg, #0d3028 0%, #1a5040 100%);
+  --orange:     #e8920a;
+  --amber:      #fffbeb;
+  --amber-b:    #fef3c7;
+  --bg-page:    #f8fafc;
+  --bg-white:   #ffffff;
+  --border:     #e8f0ed;
+  --border-2:   #e2e8f0;
+  --text:       #0f172a;
+  --text-2:     #64748b;
+  --text-3:     #94a3b8;
+  --red:        #dc2626;
 }
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
+
+/* ═══════════════════════════════════════════════════
+   PAGE HEADER — identique Équipes
+═══════════════════════════════════════════════════ */
+.keys-header {
+    background: linear-gradient(135deg, #0d3028 0%, #1a5040 100%);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    border-radius: 12px;
+    position: static;
 }
-th {
-    background-color: #3a9f87;
+
+.keys-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
     color: white;
-    text-align: center;
-    font-weight: 600;
-    vertical-align: middle;
-}
-
-/* Centrage des titres et adaptation des largeurs de colonnes */
-.table-responsive thead th:nth-child(1) { width: 5%; }   /* N° */
-.table-responsive thead th:nth-child(2) { width: 18%; }  /* Noms des clés */
-.table-responsive thead th:nth-child(3) { width: 15%; }  /* Emplacements */
-.table-responsive thead th:nth-child(4) { width: 10%; }  /* Nombre total */
-.table-responsive thead th:nth-child(5) { width: 10%; }  /* Clés attribuées */
-.table-responsive thead th:nth-child(6) { width: 9%; }   /* Stock armoire */
-.table-responsive thead th:nth-child(7) { width: 9%; }   /* Stock coffre */
-.table-responsive thead th:nth-child(8) { width: 8%; }   /* Commentaires */
-.table-responsive thead th:nth-child(9) { width: 16%; }  /* Actions */
-
-/* ===== ALTERNANCE BLANC / VERT CLAIR ===== */
-
-/* Ligne impaire (1ère, 3ème, 5ème...) = BLANCHE */
-#keyTable tbody tr:nth-child(odd):not(.table-warning) {
-    background-color: #ffffff !important;
-}
-
-/* Ligne paire (2ème, 4ème, 6ème...) = VERTE CLAIRE */
-#keyTable tbody tr:nth-child(even):not(.table-warning) {
-    background-color: #d4f1e8 !important; /* Vert très clair */
-}
-
-/* Effet de survol pour les lignes normales */
-#keyTable tbody tr:hover:not(.table-warning) {
-    background-color: #b8e6d5 !important; /* Vert moyen au survol */
-    transition: background-color 0.2s ease;
-}
-
-/* Ligne d'incohérence mise en évidence (jaune par défaut) */
-#keyTable tbody tr.table-warning {
-    background-color: #fff3cd !important;
-}
-
-/* Au survol, les lignes d'incohérence deviennent VERTES */
-#keyTable tbody tr.table-warning:hover {
-    background-color: #b8e6d5 !important; /* MÊME vert que les autres lignes au survol */
-    transition: background-color 0.2s ease;
-}
-
-/* Surcharger les styles Bootstrap pour les lignes du tableau */
-.table-striped tbody tr:nth-of-type(odd):not(.table-warning) {
-    background-color: #ffffff !important;
-}
-
-.table-striped tbody tr:nth-of-type(even):not(.table-warning) {
-    background-color: #d4f1e8 !important;
-}
-
-.table-hover tbody tr:hover {
-    background-color: #b8e6d5 !important;
-}
-
-/* Forcer les couleurs des cellules */
-#keyTable tbody tr td {
-    background-color: transparent !important;
-}
-
-/* Centrage dans la cellule Actions */
-#keyTable tbody td:last-child {
-    vertical-align: middle !important;
-    text-align: center !important;
-}
-
-/* Container des boutons d'action */
-#keyTable tbody td .d-flex {
-    display: inline-flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    flex-wrap: nowrap !important;
-    gap: 6px;
-}
-
-/* Largeur uniforme pour les boutons Modifier, Retirer, Attributions */
-#keyTable tbody td:last-child .btn:not(.btn-warning-icon) {
-    min-width: 95px;
-    max-width: 95px;
-    padding: 5px 8px;
-    font-size: 0.85rem;
+    font-weight: 400;
+    margin: 0;
     white-space: nowrap;
+}
+
+.btn-add-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: .55rem 1.1rem;
+    background: #FFA500;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .2s, box-shadow .2s, transform .1s;
+}
+.btn-add-key:hover {
+    background: var(--orange);
+    box-shadow: 0 4px 14px rgba(255,165,0,.35);
+    transform: translateY(-1px);
+}
+.btn-add-key:active { transform: scale(.98); }
+
+.key-search-wrap {
+    flex: 1;
+    position: relative;
+    max-width: 380px;
+}
+.key-search-wrap i {
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255,255,255,.5);
+    font-size: .8rem;
+    pointer-events: none;
+}
+.key-search-wrap input {
+    width: 100%;
+    padding: .55rem 1rem .55rem 2.2rem;
+    border: 1.5px solid rgba(255,255,255,.25);
+    border-radius: 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    color: white;
+    background: rgba(255,255,255,.1);
+    outline: none;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+}
+.key-search-wrap input::placeholder { color: rgba(255,255,255,.5); }
+.key-search-wrap input:focus {
+    border-color: rgba(255,255,255,.6);
+    box-shadow: 0 0 0 3px rgba(255,255,255,.1);
+    background: rgba(255,255,255,.15);
+}
+
+.keys-count-wrap {
+    margin-left: auto;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .82rem;
+    color: rgba(255,255,255,.65);
+    white-space: nowrap;
+}
+.keys-count-wrap strong { color: rgba(255,255,255,.95); font-weight: 600; }
+
+/* ═══════════════════════════════════════════════════
+   MESSAGES
+═══════════════════════════════════════════════════ */
+.keys-messages {
+    padding: .75rem 2rem 0;
+}
+
+/* ═══════════════════════════════════════════════════
+   TABLE SECTION
+═══════════════════════════════════════════════════ */
+.keys-section {
+    padding: 1.25rem 2rem 2rem;
+    background: var(--bg-page);
+    box-sizing: border-box;
+}
+
+.keys-table-wrap {
+    background: var(--bg-white);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    margin-top: 1rem;
+    box-shadow:
+        0 4px 16px rgba(0,0,0,.06),
+        0 1px 3px rgba(0,0,0,.04);
+}
+
+/* ── TABLE ── */
+#keyTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 900px;
+}
+
+/* Header */
+#keyTable thead th {
+    background-color: #3a9f87 !important;
+    color: #ffffff !important;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: .75rem 1rem;
+    text-align: left;
+    vertical-align: middle;
+    border: none !important;
+    white-space: nowrap;
+}
+
+/* Header fantôme fixe */
+#keyTableGhostHeader {
+    position: fixed;
+    z-index: 500;
+    display: none;
+    overflow: hidden;
+    pointer-events: none;
+    background: #3a9f87;
+    border-radius: 10px 10px 0 0;
+}
+#keyTableGhostHeader table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    table-layout: fixed;
+}
+#keyTableGhostHeader th {
+    background-color: #3a9f87 !important;
+    color: #ffffff !important;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: .75rem 1rem;
+    text-align: left;
+    vertical-align: middle;
+    border: none !important;
+    white-space: nowrap;
+}
+#keyTableGhostHeader th:first-child { border-radius: 10px 0 0 0; }
+#keyTableGhostHeader th:last-child  { border-radius: 0 10px 0 0; }
+#keyTable thead th:nth-child(1) { width: 5%; text-align: center; }
+#keyTable thead th:nth-child(4),
+#keyTable thead th:nth-child(5),
+#keyTable thead th:nth-child(6),
+#keyTable thead th:nth-child(7) { text-align: center; }
+#keyTable thead th:nth-child(9) { text-align: center; }
+#keyTable thead th:first-child { border-radius: 10px 0 0 0; }
+#keyTable thead th:last-child  { border-radius: 0 10px 0 0; }
+
+/* Body rows */
+#keyTable tbody tr {
+    border-bottom: 1px solid #f1f5f4;
+    border-left: 3px solid transparent;
+    transition: background .15s, border-left-color .15s;
+}
+#keyTable tbody tr:last-child { border-bottom: none; }
+#keyTable tbody tr:nth-child(odd):not(.row-warning)  { background: #ffffff; }
+#keyTable tbody tr:nth-child(even):not(.row-warning) { background: #f8fffe; }
+#keyTable tbody tr:hover:not(.row-warning) {
+    background: #edf7f5;
+    border-left-color: var(--teal);
+}
+
+/* Warning rows (incohérence) — Bootstrap applique les styles sur td, on cible les deux */
+#keyTable tbody tr.row-warning,
+#keyTable tbody tr.row-warning td {
+    background-color: #fffbeb !important;
+    border-left-color: #e8920a;
+}
+#keyTable tbody tr.row-warning {
+    border-left: 3px solid #e8920a;
+}
+#keyTable tbody tr.row-warning:hover,
+#keyTable tbody tr.row-warning:hover td {
+    background-color: #fef3c7 !important;
+}
+
+/* Cells */
+#keyTable tbody td {
+    padding: .72rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    color: var(--text);
+    vertical-align: middle;
+    border: none;
+    background: transparent !important;
+}
+#keyTable tbody td:nth-child(1) { text-align: center; font-weight: 700; color: #0d3028; }
+
+/* Number badges — sans fond */
+.num-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 600;
+}
+.num-badge-teal    { color: var(--teal-dark); }
+.num-badge-grey    { color: var(--text-3); }
+.num-badge-orange  { color: #b45309; }
+.num-badge-default { color: var(--text-2); }
+
+/* Comment cell — truncated */
+.td-comment {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-2);
+    font-size: .82rem;
 }
 
-/* Icônes dans les boutons */
-#keyTable tbody td:last-child .btn:not(.btn-warning-icon) i {
-    margin-right: 5px;
-}
-
-/* S'assurer que le form ne casse pas l'alignement */
-#keyTable tbody td form {
-    display: inline-block;
-    margin: 0;
-}
-.table-responsive thead th {
-    position: sticky; /* Rend les en-têtes "collants" */
-    top: 0; /* Fixe l'en-tête tout en haut */
-    background-color: #3a9f87; /* Couleur de fond pour le header */
-    z-index: 2; /* S'assure que le header passe au-dessus des lignes */
-}
-
-/* Style pour les boutons d'export */
-.export-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin: 30px 0;
-}
-
-/* === CSS POUR LA VALIDATION === */
-
-/* Animation de secousse pour attirer l'attention sur les champs invalides */
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-    20%, 40%, 60%, 80% { transform: translateX(5px); }
-}
-
-/* Styles pour les champs valides */
-.form-control.is-valid {
-    border-color: #198754 !important;
-    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='m2.3 6.73.94-.94 1.88 1.88L7.7 5.09l.94.94L5.04 9.63z'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right calc(0.375em + 0.1875rem) center;
-    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
-}
-
-/* Styles pour les champs invalides */
-.form-control.is-invalid {
-    border-color: #dc3545 !important;
-    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 4.6 2.4 2.4m0-2.4L5.8 7'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right calc(0.375em + 0.1875rem) center;
-    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
-}
-
-/* Styles pour les select valides */
-.form-select.is-valid {
-    border-color: #198754 !important;
-    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e"), url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='m2.3 6.73.94-.94 1.88 1.88L7.7 5.09l.94.94L5.04 9.63z'/%3e%3c/svg%3e");
-    background-position: right 0.75rem center, center right 2.25rem;
-    background-size: 16px 12px, calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
-}
-
-/* Styles pour les select invalides */
-.form-select.is-invalid {
-    border-color: #dc3545 !important;
-    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e"), url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 4.6 2.4 2.4m0-2.4L5.8 7'/%3e%3c/svg%3e");
-    background-position: right 0.75rem center, center right 2.25rem;
-    background-size: 16px 12px, calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
-}
-
-/* Style pour les messages d'erreur */
-.invalid-feedback {
-    display: block !important;
-    font-size: 0.875rem;
-    color: #dc3545;
-    margin-top: 0.25rem;
-    font-weight: 500;
-}
-
-.valid-feedback {
-    display: block !important;
-    font-size: 0.875rem;
-    color: #198754;
-    margin-top: 0.25rem;
-    font-weight: 500;
-}
-
-/* Style pour l'alerte de validation */
-.validation-alert {
-    animation: slideInRight 0.3s ease-out;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border-left: 4px solid #dc3545;
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-/* Animation de pulsation pour les champs en erreur */
-@keyframes pulse-error {
-    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
-}
-
-.form-control.pulse-error {
-    animation: pulse-error 1s;
-}
-
-/* Styles pour les popover d'attribution */
-.holders-scroll-container {
-    max-height: 200px; /* Hauteur équivalente à environ 7 lignes */
-    overflow-y: auto;
-    border: 1px solid #e9ecef;
-    border-radius: 4px;
-    padding: 8px;
-    background-color: #f8f9fa;
-}
-
-.holder-item {
-    padding: 4px 0;
-    border-bottom: 1px solid #e9ecef;
-    font-size: 0.9rem;
-}
-
-.holder-item:last-child {
-    border-bottom: none;
-}
-
-/* Personnalisation de la scrollbar */
-.holders-scroll-container::-webkit-scrollbar {
-    width: 6px;
-}
-
-.holders-scroll-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.holders-scroll-container::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-}
-
-.holders-scroll-container::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-/* Style pour le compteur total */
-.text-muted {
-    font-style: italic;
-}
-
-/* Amélioration de l'apparence du popover */
-.popover {
-    max-width: 350px !important; /* Augmenter la largeur du popover */
-}
-
-.popover-body {
-    padding: 12px;
-}
-
-/* Animation de survol pour les items */
-.holder-item:hover {
-    background-color: #e9ecef;
-    padding-left: 8px;
-    transition: all 0.2s ease;
-}
-
-/* Styles pour la popup d'incohérence - VERSION AMÉLIORÉE */
-/* Styles pour la popup d'incohérence - VERSION AMÉLIORÉE AVEC FOND BLANC */
-.inconsistency-popup {
-    font-size: 13px;
-    line-height: 1.4;
-    max-width: 320px;
-}
-
-.problem-summary {
-    background: #ffffff; /* Fond blanc */
-    padding: 8px;
-    border-radius: 4px;
-    border-left: 4px solid #ffc107; /* Bordure jaune warning */
-    color: #856404; /* Texte jaune foncé */
-}
-
-.calculation-breakdown {
-    font-family: 'Courier New', monospace;
-    background: #ffffff; /* Fond blanc */
-    padding: 10px;
-    border-radius: 4px;
-    border: 1px solid #dee2e6; /* Bordure grise légère */
-}
-
-.calc-line {
-    display: flex;
-    justify-content: space-between;
-    margin: 3px 0;
+/* Actions cell */
+#keyTable tbody td:last-child { text-align: center; }
+.actions-wrap {
+    display: inline-flex;
     align-items: center;
+    gap: 5px;
+    flex-wrap: nowrap;
 }
 
-.calc-label {
-    font-size: 12px;
-    color: #495057; /* Gris foncé pour les labels */
+/* Action buttons — mêmes styles que Équipes */
+.btn-edit-card {
+    display: inline-flex !important; align-items: center; gap: 5px;
+    padding: .32rem .65rem;
+    background: #3a9f87 !important;
+    border: 1.5px solid #3a9f87 !important;
+    color: #ffffff !important;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .76rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .18s ease;
+}
+.btn-edit-card:hover {
+    background: #2a7562 !important;
+    border-color: #2a7562 !important;
+    box-shadow: 0 2px 8px rgba(58,159,135,.35);
+    transform: translateY(-1px);
 }
 
-.calc-value {
-    font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 3px;
-    background: #f8f9fa; /* Gris très clair */
-    min-width: 30px;
-    text-align: center;
-    color: #212529;
+.btn-del-card {
+    display: inline-flex !important; align-items: center; gap: 5px;
+    padding: .32rem .65rem;
+    background: #dc2626 !important;
+    border: 1.5px solid #dc2626 !important;
+    color: #ffffff !important;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .76rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .18s ease;
+}
+.btn-del-card:hover {
+    background: #b91c1c !important;
+    border-color: #b91c1c !important;
+    box-shadow: 0 2px 8px rgba(220,38,38,.35);
+    transform: translateY(-1px);
 }
 
-.calc-value.declared {
-    background: #d1ecf1; /* Bleu clair */
-    color: #0c5460;
-    border: 1px solid #bee5eb;
+.btn-attr-card {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: .32rem .65rem;
+    background: white;
+    border: 1.5px solid var(--border-2);
+    color: var(--teal);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .76rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .18s ease;
+}
+.btn-attr-card:hover {
+    background: var(--teal-light);
+    border-color: var(--teal);
+    box-shadow: 0 1px 6px rgba(58,159,135,.18);
 }
 
-.calc-value.calculated {
-    background: #f8d7da; /* Rouge clair pour l'erreur */
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-.calc-separator {
-    text-align: center;
-    color: #6c757d;
-    margin: 5px 0;
-    font-weight: bold;
-}
-
-.total-calc {
-    border-top: 2px solid #dee2e6;
-    padding-top: 5px;
-    margin-top: 5px;
-    font-weight: bold;
-}
-
-.action-suggestion {
-    background: #fff3cd; /* Jaune clair */
-    padding: 8px;
-    border-radius: 4px;
-    border-left: 4px solid #ffc107; /* Bordure jaune */
-    color: #856404;
-    font-size: 12px;
-}
-
-/* Style du bouton d'incohérence - icône seule sans fond */
+/* Warning icon button */
 .btn-warning-icon {
     background: none !important;
     border: none !important;
@@ -374,283 +351,725 @@ th {
     align-items: center !important;
     justify-content: center !important;
     cursor: pointer;
-    color: #e6a200;
-    font-size: 1.3rem;
+    color: #d97706;
+    font-size: 1.1rem;
     min-width: auto !important;
     max-width: none !important;
     width: auto !important;
+    transition: transform .2s, color .2s;
 }
+.btn-warning-icon:hover { color: var(--orange); transform: scale(1.2); }
+.btn-warning-icon i { margin: 0 !important; }
 
-.btn-warning-icon:hover,
-.btn-warning-icon:focus {
-    color: #d4890a;
-    transform: scale(1.2);
-    transition: all 0.2s ease;
-    background: none !important;
+/* ═══════════════════════════════════════════════════
+   EXPORT — identique Équipes
+═══════════════════════════════════════════════════ */
+.export-section {
+    padding: 1.5rem 2rem 3rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg-page);
+}
+.export-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .78rem;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: .75rem;
+}
+.export-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-export {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: .65rem 1.25rem;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: box-shadow .2s, transform .1s;
+}
+.btn-export:hover { transform: translateY(-1px); }
+.btn-export:active { transform: scale(.98); }
+.btn-export-pdf  { background: #fef2f2; color: var(--red); border: 1px solid rgba(220,38,38,.2); }
+.btn-export-pdf:hover  { box-shadow: 0 4px 12px rgba(220,38,38,.15); background: #fee2e2; }
+.btn-export-xlsx { background: #f0fdf4; color: #16a34a; border: 1px solid rgba(22,163,74,.2); }
+.btn-export-xlsx:hover { box-shadow: 0 4px 12px rgba(22,163,74,.15); background: #dcfce7; }
+
+/* ═══════════════════════════════════════════════════
+   STEPPER — composant +/- fiable
+═══════════════════════════════════════════════════ */
+.num-stepper {
+    display: flex;
+    align-items: stretch;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 9px;
+    overflow: hidden;
+    background: #ffffff;
+    transition: border-color .2s, box-shadow .2s;
+}
+.num-stepper:focus-within {
+    border-color: #3a9f87 !important;
+    box-shadow: 0 0 0 3px rgba(58,159,135,.12) !important;
+}
+.stepper-btn {
+    width: 36px;
+    flex-shrink: 0;
+    background: #f8fafc;
+    border: none;
+    color: #64748b;
+    font-size: 1.15rem;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    display: flex; align-items: center; justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.stepper-btn:hover { background: #edf7f5; color: #3a9f87; }
+.stepper-btn:active { background: #d1ede8; }
+.stepper-btn.stepper-minus { border-right: 1.5px solid #e2e8f0; }
+.stepper-btn.stepper-plus  { border-left:  1.5px solid #e2e8f0; }
+.stepper-input {
+    flex: 1;
+    min-width: 0;
     border: none !important;
+    outline: none !important;
     box-shadow: none !important;
+    text-align: center;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: .92rem !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    background: transparent !important;
+    padding: .5rem .25rem !important;
+    -moz-appearance: textfield;
+}
+.stepper-input::-webkit-inner-spin-button,
+.stepper-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* ═══════════════════════════════════════════════════
+   MODALS — design system EERE (avec !important contre Bootstrap)
+═══════════════════════════════════════════════════ */
+#addKeyModal .modal-content,
+#editKeyModal .modal-content,
+#deleteKeyModal .modal-content {
+    border: none !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,.25) !important;
 }
 
-.btn-warning-icon i {
-    margin: 0 !important;
+/* Header gradient */
+#addKeyModal .modal-header,
+#editKeyModal .modal-header,
+#deleteKeyModal .modal-header {
+    background: linear-gradient(135deg, #0d3028 0%, #1a5040 100%) !important;
+    border-bottom: none !important;
+    padding: 1.25rem 1.5rem !important;
+}
+#addKeyModal .modal-title,
+#editKeyModal .modal-title,
+#deleteKeyModal .modal-title {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 1.1rem !important;
+    color: #ffffff !important;
+    font-weight: 400 !important;
+}
+#addKeyModal .modal-header .btn-close,
+#editKeyModal .modal-header .btn-close,
+#deleteKeyModal .modal-header .btn-close {
+    filter: invert(1) brightness(2) !important;
+    opacity: .7 !important;
 }
 
-/* Amélioration du popover d'incohérence */
+/* Body */
+#addKeyModal .modal-body,
+#editKeyModal .modal-body,
+#deleteKeyModal .modal-body {
+    padding: 1.5rem !important;
+    background: #ffffff !important;
+}
+
+#addKeyModal .modal-body label,
+#editKeyModal .modal-body label,
+#deleteKeyModal .modal-body label {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: .82rem !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    margin-bottom: .3rem !important;
+    display: block !important;
+}
+
+#addKeyModal .modal-body .form-control,
+#addKeyModal .modal-body .form-control-sm,
+#addKeyModal .modal-body .form-select,
+#addKeyModal .modal-body .form-select-sm,
+#editKeyModal .modal-body .form-control,
+#editKeyModal .modal-body .form-control-sm,
+#editKeyModal .modal-body .form-select {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: .9rem !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 9px !important;
+    padding: .65rem 1rem !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+#addKeyModal .modal-body .form-control:focus,
+#addKeyModal .modal-body .form-control-sm:focus,
+#addKeyModal .modal-body .form-select:focus,
+#addKeyModal .modal-body .form-select-sm:focus,
+#editKeyModal .modal-body .form-control:focus,
+#editKeyModal .modal-body .form-control-sm:focus,
+#editKeyModal .modal-body .form-select:focus {
+    border-color: #3a9f87 !important;
+    box-shadow: 0 0 0 3px rgba(58,159,135,.12) !important;
+}
+
+/* Hint text */
+#editKeyModal .modal-body .form-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .78rem;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* Delete warning block */
+#deleteKeyModal .modal-body .delete-warning {
+    display: flex !important;
+    gap: .75rem !important;
+    align-items: flex-start !important;
+    background: #fef2f2 !important;
+    border: 1px solid #fecaca !important;
+    border-radius: 9px !important;
+    padding: 1rem !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: .9rem !important;
+    color: #0f172a !important;
+    line-height: 1.5 !important;
+}
+#deleteKeyModal .modal-body .delete-warning i {
+    color: #dc2626 !important;
+    font-size: 1.1rem !important;
+    margin-top: 2px !important;
+    flex-shrink: 0 !important;
+}
+
+/* Footer */
+#addKeyModal .modal-footer,
+#editKeyModal .modal-footer,
+#deleteKeyModal .modal-footer {
+    background: #f8fffe !important;
+    border-top: 1px solid #e8f0ed !important;
+    padding: 1rem 1.5rem !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: .6rem !important;
+}
+
+/* Bouton Annuler / Fermer */
+.modal-btn-cancel {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: .88rem !important;
+    font-weight: 500 !important;
+    padding: .6rem 1.25rem !important;
+    background: #ffffff !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 9px !important;
+    color: #64748b !important;
+    cursor: pointer !important;
+    transition: background .15s, border-color .15s;
+}
+.modal-btn-cancel:hover {
+    background: #f8f9fa !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* Bouton Enregistrer / Ajouter */
+.modal-btn-save {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: .88rem !important;
+    font-weight: 600 !important;
+    padding: .6rem 1.35rem !important;
+    background: #3a9f87 !important;
+    border: none !important;
+    border-radius: 9px !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+    transition: background .2s, box-shadow .2s;
+}
+.modal-btn-save:hover {
+    background: #2a7562 !important;
+    box-shadow: 0 4px 12px rgba(58,159,135,.3) !important;
+}
+
+/* Bouton Supprimer */
+.modal-btn-danger {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: .88rem !important;
+    font-weight: 600 !important;
+    padding: .6rem 1.35rem !important;
+    background: #dc2626 !important;
+    border: none !important;
+    border-radius: 9px !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+    transition: background .2s, box-shadow .2s;
+}
+.modal-btn-danger:hover {
+    background: #b91c1c !important;
+    box-shadow: 0 4px 12px rgba(220,38,38,.25) !important;
+}
+
+/* ═══════════════════════════════════════════════════
+   VALIDATION — conservé intégralement
+═══════════════════════════════════════════════════ */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+.form-control.is-valid {
+    border-color: #198754 !important;
+    box-shadow: 0 0 0 0.2rem rgba(25,135,84,.25);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='m2.3 6.73.94-.94 1.88 1.88L7.7 5.09l.94.94L5.04 9.63z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+.form-control.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220,53,69,.25);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 4.6 2.4 2.4m0-2.4L5.8 7'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+.form-select.is-valid {
+    border-color: #198754 !important;
+    box-shadow: 0 0 0 0.2rem rgba(25,135,84,.25);
+}
+.form-select.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220,53,69,.25);
+}
+.invalid-feedback { display: block !important; font-size: .875rem; color: #dc3545; margin-top: .25rem; font-weight: 500; }
+.valid-feedback   { display: block !important; font-size: .875rem; color: #198754; margin-top: .25rem; font-weight: 500; }
+.validation-alert {
+    animation: slideInRight .3s ease-out;
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    border-left: 4px solid #dc3545;
+}
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes pulse-error {
+    0%   { box-shadow: 0 0 0 0   rgba(220,53,69,.4); }
+    70%  { box-shadow: 0 0 0 10px rgba(220,53,69,0); }
+    100% { box-shadow: 0 0 0 0   rgba(220,53,69,0); }
+}
+.form-control.pulse-error { animation: pulse-error 1s; }
+
+/* ═══════════════════════════════════════════════════
+   POPOVERS — design system EERE
+═══════════════════════════════════════════════════ */
 .popover {
-    font-size: 13px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-width: 320px !important;
+    border: 1px solid #e8f0ed !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,.15) !important;
+    overflow: hidden !important;
+    font-family: 'DM Sans', sans-serif !important;
+}
+.popover-header {
+    background: linear-gradient(135deg, #0d3028 0%, #1a5040 100%) !important;
+    color: #ffffff !important;
+    font-family: 'DM Serif Display', serif !important;
+    font-size: .9rem !important;
+    font-weight: 400 !important;
+    border-bottom: none !important;
+    padding: .75rem 1rem !important;
+}
+.popover-header::before { display: none !important; }
+.popover-body {
+    padding: .85rem 1rem !important;
+    background: #ffffff !important;
+}
+.popover .popover-arrow::before,
+.popover .popover-arrow::after { border-top-color: #0d3028 !important; }
+
+/* Liste des détenteurs dans le popover */
+.holders-scroll-container {
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 8px;
+    background: #f8fafc;
+    border: 1px solid #e8f0ed;
+}
+.holders-scroll-container::-webkit-scrollbar { width: 5px; }
+.holders-scroll-container::-webkit-scrollbar-track { background: #f1f5f4; }
+.holders-scroll-container::-webkit-scrollbar-thumb { background: #3a9f87; border-radius: 3px; }
+
+.holder-item {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .45rem .75rem;
+    border-bottom: 1px solid #e8f0ed;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .82rem;
+    color: #0f172a;
+    transition: background .15s;
+}
+.holder-item:last-child { border-bottom: none; }
+.holder-item:hover { background: #edf7f5; }
+.holder-item::before {
+    content: '';
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #3a9f87;
+    flex-shrink: 0;
 }
 
-.popover-header {
-    background: #fff3cd;
-    border-bottom: 1px solid #ffc107;
-    color: #856404;
-    font-weight: bold;
+.popover-empty {
+    color: #94a3b8;
+    font-size: .82rem;
+    font-style: italic;
+    text-align: center;
+    padding: .5rem 0;
 }
+/* Popover warning — design system EERE */
+.popover-warning {
+    max-width: 310px !important;
+    border: 1px solid rgba(232,146,10,.3) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(232,146,10,.15), 0 2px 8px rgba(0,0,0,.1) !important;
+    overflow: hidden !important;
+    font-family: 'DM Sans', sans-serif !important;
+}
+.popover-warning .popover-header {
+    background: linear-gradient(135deg, #92490a 0%, #c96b0c 100%) !important;
+    color: #ffffff !important;
+    font-family: 'DM Serif Display', serif !important;
+    font-size: .88rem !important;
+    font-weight: 400 !important;
+    border-bottom: none !important;
+    padding: .75rem 1rem !important;
+}
+.popover-warning .popover-body {
+    padding: .9rem 1rem !important;
+    background: #ffffff !important;
+}
+
+/* Tableau de calcul dans le warning */
+.calc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .8rem;
+    margin-bottom: .65rem;
+}
+.calc-table td { padding: .28rem .3rem; color: #0f172a; }
+.calc-table td:last-child {
+    text-align: right;
+    font-weight: 700;
+}
+.calc-badge {
+    display: inline-block;
+    padding: .1rem .55rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: .78rem;
+}
+.calc-badge-blue  { background: #dbeafe; color: #1d4ed8; }
+.calc-badge-teal  { background: #d1fae5; color: #065f46; }
+.calc-badge-red   { background: #fee2e2; color: #b91c1c; }
+.calc-badge-grey  { background: #f1f5f9; color: #64748b; }
+.calc-divider { border: none; border-top: 1px solid #e8f0ed; margin: .4rem 0; }
+.calc-total-row td { font-weight: 700; color: #0f172a; padding-top: .4rem; }
+.calc-action {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-left: 3px solid #e8920a;
+    border-radius: 8px;
+    padding: .55rem .7rem;
+    font-size: .78rem;
+    color: #92400e;
+    line-height: 1.4;
+    margin-top: .65rem;
+}
+.calc-icon-warning { color: #e8920a; flex-shrink: 0; margin-top: 2px; }
+.calc-problem-banner {
+    background: #fffbeb;
+    border-left: 3px solid #e8920a;
+    border-radius: 6px;
+    padding: .5rem .75rem;
+    margin-bottom: .65rem;
+    color: #92400e;
+    font-size: .8rem;
+}
+.calc-separator-row {
+    text-align: center;
+    color: #94a3b8;
+    font-weight: 700;
+    margin: .25rem 0;
+    font-size: .85rem;
+}
+
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .keys-header { padding: 1rem; gap: .75rem; }
+    .keys-header h1 { font-size: 1.2rem; }
+    .key-search-wrap { max-width: none; flex: 1 0 100%; order: 3; }
+    .keys-count-wrap { order: 2; }
+    .keys-section { padding: .75rem; }
+    .export-section { padding: .75rem .75rem 2rem; }
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <!-- Affichage des Messages -->
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-    
-    <!-- Success message for deletion -->
-    {% if delete_success %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            Clé supprimée avec succès !
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    {% endif %}
 
-    <h1 class="mb-4">Gestion des clés</h1>
-    
-    <!-- Bouton Ajouter une Nouvelle Clé -->
-    <div class="d-flex flex-row bd-highlight mb-3 gap-3">
-        <!-- Bouton Ajouter une Nouvelle Clé -->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addKeyModal">
-            <i class="fas fa-plus"></i> Ajouter une Nouvelle Clé
+
+<!-- ══ MESSAGES ══ -->
+{% if messages %}
+<div class="keys-messages">
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show mt-3">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if delete_success %}
+<div class="keys-messages">
+    <div class="alert alert-success alert-dismissible fade show mt-3">
+        Clé supprimée avec succès !
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+    </div>
+</div>
+{% endif %}
+
+<!-- ══ TABLE ══ -->
+<div class="keys-section">
+
+    <!-- Header collé au tableau -->
+    <div class="keys-header">
+        <h1>Gestion des clés</h1>
+
+        <button type="button" class="btn-add-key"
+                data-bs-toggle="modal" data-bs-target="#addKeyModal"
+                aria-label="Ajouter une nouvelle clé">
+            <i class="fas fa-plus" aria-hidden="true"></i> Ajouter une nouvelle clé
         </button>
-        
-        <!-- Champ de Recherche -->
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Rechercher une clé..." class="form-control w-100">
+
+        <div class="key-search-wrap" role="search">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="text" id="searchInput"
+                   placeholder="Rechercher une clé..."
+                   aria-label="Rechercher une clé">
         </div>
-        
-        <!-- Total des clés aligné à droite -->
-        <div class="mb-3 ms-auto text-end">
-            <span class="fw-bold">Total des clés :</span>
+
+        <div class="keys-count-wrap ms-auto">
+            <strong>Total des clés :</strong>
             <span>{{ keys_count }}</span>
         </div>
     </div>
 
-    <table class="table table-hover table-responsive" id="keyTable">
-        <thead class="table-dark">
-            <tr>
-                <th scope="col">N°</th>
-                <th scope="col">Noms des clés</th>
-                <th scope="col">Emplacements</th>
-                <th scope="col">Nombre total de clés</th>
-                <th scope="col">Clés attribuées</th>
-                <th scope="col">Stock armoire</th>
-                <th scope="col">Stock coffre</th>
-                <th scope="col">Commentaires</th>
-                <th scope="col">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for key_data in keys %}
-            <tr {% if not key_data.is_consistent %}class="table-warning"{% endif %}>
-                <td>{{ key_data.key_type.number }}</td>
-                <td>{{ key_data.key_type.name }}</td>
-                <td>{{ key_data.key_type.place }}</td>
-                <td>{{ key_data.key_type.total_quantity }}</td>
-                <td>{{ key_data.assigned_count }}</td>
-                <td>{{ key_data.key_type.in_cabinet }}</td>
-                <td>{{ key_data.key_type.in_safe }}</td>
-                <td>{{ key_data.key_type.comments }}</td>
-                <!-- Actions -->
-                <td>
-                    <div class="d-flex">
-                        <!-- Bouton Modifier -->
-                        <button type="button" class="btn btn-warning btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#editKeyModal"
-                                data-id="{{ key_data.key_type.id }}"
-                                data-number="{{ key_data.key_type.number }}"
-                                data-name="{{ key_data.key_type.name }}"
-                                data-place="{{ key_data.key_type.place }}"
-                                data-total-quantity="{{ key_data.key_type.total_quantity }}"
-                                data-in-cabinet="{{ key_data.key_type.in_cabinet }}"
-                                data-in-safe="{{ key_data.key_type.in_safe }}"
-                                data-comments="{{ key_data.key_type.comments }}">
-                            <i class="fas fa-edit"></i> Modifier
-                        </button>
+    <div class="keys-table-wrap">
+        <table id="keyTable">
+            <thead>
+                <tr>
+                    <th>N°</th>
+                    <th>Nom de la clé</th>
+                    <th>Emplacement</th>
+                    <th>Total</th>
+                    <th>Attribuées</th>
+                    <th>Stock armoire</th>
+                    <th>Stock coffre</th>
+                    <th>Commentaires</th>
+                    <th style="text-align:center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for key_data in keys %}
+                <tr {% if not key_data.is_consistent %}class="row-warning"{% endif %}>
+                    <td><span class="num-badge {% if not key_data.is_consistent %}num-badge-orange{% else %}num-badge-default{% endif %}">{{ key_data.key_type.number }}</span></td>
+                    <td style="font-weight:500">{{ key_data.key_type.name }}</td>
+                    <td style="color:var(--text-2)">{{ key_data.key_type.place }}</td>
+                    <td style="text-align:center"><span class="num-badge num-badge-default">{{ key_data.key_type.total_quantity }}</span></td>
+                    <td style="text-align:center"><span class="num-badge {% if key_data.assigned_count > 0 %}num-badge-teal{% else %}num-badge-grey{% endif %}">{{ key_data.assigned_count }}</span></td>
+                    <td style="text-align:center"><span class="num-badge {% if key_data.key_type.in_cabinet == 0 %}num-badge-grey{% else %}num-badge-default{% endif %}">{{ key_data.key_type.in_cabinet }}</span></td>
+                    <td style="text-align:center"><span class="num-badge {% if key_data.key_type.in_safe == 0 %}num-badge-grey{% else %}num-badge-default{% endif %}">{{ key_data.key_type.in_safe }}</span></td>
+                    <td class="td-comment" title="{{ key_data.key_type.comments }}">{{ key_data.key_type.comments }}</td>
 
-                        <!-- Bouton Retirer -->
-                        <form method="post" action="{% url 'key_delete' key_data.key_type.id %}">
-                            {% csrf_token %}
-                            <button type="button" class="btn btn-danger btn-sm" 
-                                    data-bs-toggle="modal" data-bs-target="#deleteKeyModal" 
-                                    data-delete-url="{% url 'key_delete' key_data.key_type.id %}" 
-                                    data-key-number="{{ key_data.key_type.number }}">
-                                <i class="fas fa-trash"></i> Retirer
+                    <!-- Actions -->
+                    <td>
+                        <div class="actions-wrap">
+                            <!-- Modifier -->
+                            <button type="button" class="btn-edit-card edit-btn"
+                                    data-bs-toggle="modal" data-bs-target="#editKeyModal"
+                                    data-id="{{ key_data.key_type.id }}"
+                                    data-number="{{ key_data.key_type.number }}"
+                                    data-name="{{ key_data.key_type.name }}"
+                                    data-place="{{ key_data.key_type.place }}"
+                                    data-total-quantity="{{ key_data.key_type.total_quantity }}"
+                                    data-in-cabinet="{{ key_data.key_type.in_cabinet }}"
+                                    data-in-safe="{{ key_data.key_type.in_safe }}"
+                                    data-comments="{{ key_data.key_type.comments }}"
+                                    aria-label="Modifier clé {{ key_data.key_type.number }}">
+                                <i class="fas fa-edit" aria-hidden="true"></i> Modifier
                             </button>
-                        </form>
-                        <!-- Bouton Attributions avec popover amélioré -->
-                        <button type="button" class="btn btn-info btn-sm"
-                                data-bs-toggle="popover" 
-                                data-bs-trigger="focus"
-                                data-bs-html="true"
-                                data-bs-title="Attributions pour clé n°{{ key_data.key_type.number }}"
-                                data-bs-content="{% if key_data.assigned_count > 0 %}
-                                                    <p><strong>{{ key_data.assigned_count }} exemplaire(s) attribué(s)</strong></p>
-                                                    <hr class='my-2'>
-                                                    {% if key_data.key_holders|length <= 7 %}
-                                                        <!-- Liste courte : affichage normal -->
-                                                        <ul class='list-unstyled mb-0'>
-                                                            {% for holder in key_data.key_holders %}
-                                                                <li class='holder-item'><strong>{{ holder.name }}</strong> (depuis le {{ holder.assignment_date }})</li>
-                                                            {% endfor %}
-                                                        </ul>
-                                                    {% else %}
-                                                        <!-- Liste longue : scroll après 7 éléments -->
-                                                        <div class='holders-scroll-container'>
-                                                            <ul class='list-unstyled mb-0'>
-                                                                {% for holder in key_data.key_holders %}
-                                                                    <li class='holder-item'><strong>{{ holder.name }}</strong> (depuis le {{ holder.assignment_date }})</li>
-                                                                {% endfor %}
-                                                            </ul>
-                                                        </div>
-                                                        <div class='text-center mt-2'>
-                                                            <small class='text-muted'>{{ key_data.key_holders|length }} détenteurs au total</small>
-                                                        </div>
-                                                    {% endif %}
-                                                {% else %}
-                                                    Aucune attribution
-                                                {% endif %}">
-                            <i class="fas fa-key"></i> 
-                            <span class="badge bg-secondary">{{ key_data.assigned_count }}</span>
-                        </button>
-                        
-                        {% if not key_data.is_consistent %}
-                        <button type="button" class="btn btn-warning-icon"
-                                data-bs-toggle="popover"
-                                data-bs-trigger="hover focus"
-                                data-bs-html="true"
-                                data-bs-title="⚠️ Problème de comptage détecté"
-                                data-bs-content="<div class='inconsistency-popup'>
-                                                    <div class='problem-summary'>
-                                                        <strong>🔍 Ce qui ne va pas :</strong>
-                                                        <br>Les chiffres ne correspondent pas !
-                                                    </div>
-                                                    <hr class='my-2'>
-                                                    <div class='calculation-breakdown'>
-                                                        <div class='calc-line'>
-                                                            <span class='calc-label'>📋 Total clé déclaré:</span>
-                                                            <span class='calc-value declared'>{{ key_data.key_type.total_quantity }}</span>
-                                                        </div>
-                                                        <div class='calc-separator'>➖</div>
-                                                        <div class='calc-line'>
-                                                            <span class='calc-label'>➕ Nbr de clé Attribuées </span>
-                                                            <span class='calc-value'>{{ key_data.assigned_count }}</span>
-                                                        </div>
-                                                        <div class='calc-line'>
-                                                            <span class='calc-label'>➕ Nbr de clé dans l'armoire </span>
-                                                            <span class='calc-value'>{{ key_data.key_type.in_cabinet }}</span>
-                                                        </div>
-                                                        <div class='calc-line'>
-                                                            <span class='calc-label'>➕ Nbr de clé au coffre</span>
-                                                            <span class='calc-value'>{{ key_data.key_type.in_safe }}</span>
-                                                        </div>
-                                                        
-                                                        <div class='calc-line total-calc'>
-                                                            <span class='calc-label'>🧮 Total des clés calculés </span>
-                                                            <span class='calc-value calculated'>{{ key_data.assigned_count|add:key_data.key_type.in_cabinet|add:key_data.key_type.in_safe }}</span>
-                                                        </div>
-                                                    </div>
-                                                    <hr class='my-2'>
-                                                    <div class='action-suggestion'>
-                                                        <strong>💡 Solution :</strong>
-                                                        <br>• Cliquez sur <em>'Modifier'</em> pour corriger les chiffres
-                                                        <br>• Vérifiez le stock physique réel
-                                                    </div>
-                                                </div>">
-                            <i class="fas fa-exclamation-triangle" style="font-size: 1.2rem;"></i>
-                        </button>
-                        {% endif %}
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    
-    <!-- Boutons d'export ajoutés ici -->
-    <div class="export-buttons">
-        <button type="button" class="btn btn-danger" id="generatePdfBtn">
-            <i class="fas fa-file-pdf"></i> Générer PDF
+
+                            <!-- Retirer -->
+                            <form method="post" action="{% url 'key_delete' key_data.key_type.id %}" style="display:inline">
+                                {% csrf_token %}
+                                <button type="button" class="btn-del-card"
+                                        data-bs-toggle="modal" data-bs-target="#deleteKeyModal"
+                                        data-delete-url="{% url 'key_delete' key_data.key_type.id %}"
+                                        data-key-number="{{ key_data.key_type.number }}"
+                                        aria-label="Retirer clé {{ key_data.key_type.number }}">
+                                    <i class="fas fa-trash" aria-hidden="true"></i> Retirer
+                                </button>
+                            </form>
+
+                            <!-- Attributions -->
+                            <button type="button" class="btn-attr-card"
+                                    data-bs-toggle="popover"
+                                    data-bs-trigger="focus"
+                                    data-bs-html="true"
+                                    data-bs-title="<i class='fas fa-users me-2'></i>Détenteurs — clé n°{{ key_data.key_type.number }}"
+                                    data-bs-content="{% if key_data.assigned_count > 0 %}{% if key_data.key_holders|length <= 7 %}<div>{% for holder in key_data.key_holders %}<div class='holder-item'><strong>{{ holder.name }}</strong><span style='color:#94a3b8;font-size:.75rem;margin-left:auto'>{{ holder.assignment_date }}</span></div>{% endfor %}</div>{% else %}<div class='holders-scroll-container'>{% for holder in key_data.key_holders %}<div class='holder-item'><strong>{{ holder.name }}</strong><span style='color:#94a3b8;font-size:.75rem;margin-left:auto'>{{ holder.assignment_date }}</span></div>{% endfor %}</div><p style='text-align:center;margin:.5rem 0 0;font-size:.75rem;color:#94a3b8'>{{ key_data.key_holders|length }} détenteurs au total</p>{% endif %}{% else %}<p class='popover-empty'>Aucune attribution</p>{% endif %}"
+                                    aria-label="Voir attributions clé {{ key_data.key_type.number }}">
+                                <i class="fas fa-users" aria-hidden="true"></i>
+                                <span class="num-badge num-badge-grey" style="padding:.1rem .4rem;font-size:.72rem">{{ key_data.assigned_count }}</span>
+                            </button>
+
+                            <!-- Avertissement incohérence -->
+                            {% if not key_data.is_consistent %}
+                            <button type="button" class="btn-warning-icon"
+                                    data-bs-toggle="popover"
+                                    data-bs-trigger="hover focus"
+                                    data-bs-html="true"
+                                    data-bs-custom-class="popover-warning"
+                                    data-bs-title="<i class='fas fa-exclamation-triangle me-2'></i>Incohérence de stock"
+                                    data-bs-content="<div class='calc-problem-banner'><strong>🔍 Ce qui ne va pas :</strong><br>Les chiffres ne correspondent pas !</div><table class='calc-table'><tr><td>📋 Total clé déclaré :</td><td><span class='calc-badge calc-badge-blue'>{{ key_data.key_type.total_quantity }}</span></td></tr></table><div class='calc-separator-row'>➖</div><table class='calc-table'><tr><td>➕ Nbr de clé Attribuées</td><td><span class='calc-badge calc-badge-teal'>{{ key_data.assigned_count }}</span></td></tr><tr><td>➕ Nbr de clé dans l'armoire</td><td><span class='calc-badge calc-badge-grey'>{{ key_data.key_type.in_cabinet }}</span></td></tr><tr><td>➕ Nbr de clé au coffre</td><td><span class='calc-badge calc-badge-grey'>{{ key_data.key_type.in_safe }}</span></td></tr><tr><td colspan='2'><hr class='calc-divider'></td></tr><tr class='calc-total-row'><td>🧮 Total des clés calculés</td><td><span class='calc-badge calc-badge-red'>{{ key_data.assigned_count|add:key_data.key_type.in_cabinet|add:key_data.key_type.in_safe }}</span></td></tr></table><div class='calc-action'><i class='fas fa-lightbulb calc-icon-warning'></i><span><strong>💡 Solution :</strong><br>• Cliquez sur <em>Modifier</em> pour corriger les chiffres<br>• Vérifiez le stock physique réel</span></div>"
+                                    aria-label="Avertissement incohérence clé {{ key_data.key_type.number }}">
+                                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ══ EXPORT ══ -->
+<div class="export-section">
+    <p class="export-label">Exporter la liste</p>
+    <div class="export-btns">
+        <button type="button" class="btn-export btn-export-pdf" id="generatePdfBtn"
+                aria-label="Générer PDF">
+            <i class="fas fa-file-pdf" aria-hidden="true"></i> Générer PDF
         </button>
-        <button type="button" class="btn btn-success" id="generateXlsxBtn">
-            <i class="fas fa-file-excel"></i> Générer XLSX
+        <button type="button" class="btn-export btn-export-xlsx" id="generateXlsxBtn"
+                aria-label="Générer XLSX">
+            <i class="fas fa-file-excel" aria-hidden="true"></i> Générer XLSX
         </button>
     </div>
 </div>
 
-<!-- Modal for adding a new key -->
+<!-- ══ MODAL — Ajouter une clé ══ -->
 <div class="modal fade" id="addKeyModal" tabindex="-1" aria-labelledby="addKeyModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form method="post" action="{% url 'key_create' %}">
                 {% csrf_token %}
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addKeyModalLabel">Ajouter une Nouvelle Clé</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="addKeyModalLabel">
+                        <i class="fas fa-plus me-2" aria-hidden="true"></i>Ajouter une nouvelle clé
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                 </div>
-                <div class="modal-body">
-                    <!-- Champ Numéro de clé (select) -->
-                    <div class="mb-3">
-                        <label for="id_number" class="form-label fw-bold">Numéro de clé *</label>
-                        <select name="number" id="id_number" class="form-select" required>
-                            <option value="" selected disabled>Choisissez un numéro disponible</option>
-                            {% for number in available_numbers %}
-                                <option value="{{ number }}">{{ number }}</option>
-                            {% endfor %}
-                        </select>
+                <div class="modal-body" style="padding:1.25rem 1.5rem !important">
+
+                    <!-- Ligne 1 : N° + Nom de la clé -->
+                    <div class="mb-2 d-flex align-items-end gap-3">
+                        <div style="width:130px;flex-shrink:0">
+                            <label for="id_number" style="font-size:.75rem!important">Numéro de clé *</label>
+                            <select name="number" id="id_number" class="form-select form-select-sm" required>
+                                <option value="" selected disabled>N°</option>
+                                {% for number in available_numbers %}
+                                    <option value="{{ number }}">{{ number }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div style="flex:1">
+                            <label for="id_name" style="font-size:.75rem!important">Nom de la clé *</label>
+                            <input type="text" name="name" id="id_name" class="form-control form-control-sm" placeholder="Nom de la clé" required>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="id_name" class="form-label fw-bold">Nom de la clé *</label>
-                        <input type="text" name="name" id="id_name" class="form-control" placeholder="Entrez le nom de la clé" required>
+
+                    <!-- Ligne 2 : Emplacement + Total côte à côte -->
+                    <div class="mb-2 d-flex gap-3">
+                        <div style="flex:1">
+                            <label for="id_place" style="font-size:.75rem!important">Emplacement *</label>
+                            <input type="text" name="place" id="id_place" class="form-control form-control-sm" placeholder="Emplacement" required>
+                        </div>
+                        <div style="width:160px;flex-shrink:0">
+                            <label style="font-size:.75rem!important;display:block">Total exemplaires *</label>
+                            <div class="num-stepper">
+                                <button type="button" class="stepper-btn stepper-minus" data-target="id_total_quantity">−</button>
+                                <input type="number" name="total_quantity" id="id_total_quantity" class="stepper-input" value="0" min="0" required>
+                                <button type="button" class="stepper-btn stepper-plus" data-target="id_total_quantity">+</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="id_place" class="form-label fw-bold">Emplacement *</label>
-                        <input type="text" name="place" id="id_place" class="form-control" placeholder="Emplacement de la clé" required>
+
+                    <!-- Ligne 3 : Stock armoire + Stock coffre côte à côte -->
+                    <div class="mb-2 d-flex gap-3">
+                        <div style="flex:1">
+                            <label style="font-size:.75rem!important;display:block">Stock armoire *</label>
+                            <div class="num-stepper">
+                                <button type="button" class="stepper-btn stepper-minus" data-target="id_in_cabinet">−</button>
+                                <input type="number" name="in_cabinet" id="id_in_cabinet" class="stepper-input" value="0" min="0" required>
+                                <button type="button" class="stepper-btn stepper-plus" data-target="id_in_cabinet">+</button>
+                            </div>
+                        </div>
+                        <div style="flex:1">
+                            <label style="font-size:.75rem!important;display:block">Stock coffre *</label>
+                            <div class="num-stepper">
+                                <button type="button" class="stepper-btn stepper-minus" data-target="id_in_safe">−</button>
+                                <input type="number" name="in_safe" id="id_in_safe" class="stepper-input" value="0" min="0" required>
+                                <button type="button" class="stepper-btn stepper-plus" data-target="id_in_safe">+</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="id_total_quantity" class="form-label fw-bold">Nombre total d'exemplaire *</label>
-                        <input type="number" name="total_quantity" id="id_total_quantity" class="form-control" placeholder="Nombre total d'exemplaires à disposition" min="0" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_in_cabinet" class="form-label fw-bold">Stock armoire *</label>
-                        <input type="number" name="in_cabinet" id="id_in_cabinet" class="form-control" placeholder="Nombre de clés stocké dans l'armoire" min="0" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_in_safe" class="form-label fw-bold">Stock coffre *</label>
-                        <input type="number" name="in_safe" id="id_in_safe" class="form-control" placeholder="Nombre de clé stocké dans le coffre" min="0" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_comments" class="form-label fw-bold">Commentaires</label>
-                        <textarea name="comments" id="id_comments" class="form-control" rows="3" placeholder="Ajoutez des commentaires..."></textarea>
+
+                    <!-- Ligne 4 : Commentaires -->
+                    <div class="mb-0">
+                        <label for="id_comments" style="font-size:.75rem!important">Commentaires</label>
+                        <textarea name="comments" id="id_comments" class="form-control form-control-sm" rows="2" placeholder="Ajoutez des commentaires..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>Ajouter la clé
+                    <button type="button" class="modal-btn-cancel" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="modal-btn-save">
+                        <i class="fas fa-save me-2" aria-hidden="true"></i>Ajouter la clé
                     </button>
                 </div>
             </form>
@@ -658,61 +1077,85 @@ th {
     </div>
 </div>
 
-<!-- Modal for Editing a Key -->
+<!-- ══ MODAL — Modifier une clé ══ -->
 <div class="modal fade" id="editKeyModal" tabindex="-1" aria-labelledby="editKeyModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form method="post" action="{% url 'key_update' %}">
                 {% csrf_token %}
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="editKeyModalLabel">Modification des informations de la Clé</h5>
+                    <h5 class="modal-title" id="editKeyModalLabel">
+                        <i class="fas fa-edit me-2" aria-hidden="true"></i>Modification de la clé
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                 </div>
-                <div class="modal-body">
-                    <!-- Hidden fields to store original values -->
+                <div class="modal-body" style="padding:1.25rem 1.5rem !important">
                     <input type="hidden" name="key_id" id="editKeyId">
                     <input type="hidden" name="original_total_quantity" id="original_total_quantity">
                     <input type="hidden" name="original_in_cabinet" id="original_in_cabinet">
-                    
-                    <!-- Styled Form Fields for Editing -->
-                    <div class="mb-3 d-flex align-items-center">
-                        <!-- Champ Numéro de la clé -->
-                        <div style="width: 100px;">
-                            <label for="edit_id_number" class="form-label fw-bold">N° *</label>
-                            <input type="number" name="number" id="edit_id_number" class="form-control" placeholder="000" readonly required>
+                    <input type="hidden" name="original_in_safe" id="original_in_safe">
+
+                    <!-- Ligne 1 : N° + Nom -->
+                    <div class="mb-2 d-flex align-items-end gap-3">
+                        <div style="width:80px;flex-shrink:0">
+                            <label for="edit_id_number" style="font-size:.75rem!important">N° *</label>
+                            <input type="number" name="number" id="edit_id_number" class="form-control form-control-sm" placeholder="00" readonly required>
                         </div>
-                        <!-- Champ Nom de la clé -->
-                        <div class="flex-grow-1 me-3">
-                            <label for="edit_id_name" class="form-label fw-bold">Nom de la clé *</label>
-                            <input type="text" name="name" id="edit_id_name" class="form-control" placeholder="Entrez le nom de la clé" required>
-                        </div>                        
+                        <div style="flex:1">
+                            <label for="edit_id_name" style="font-size:.75rem!important">Nom de la clé *</label>
+                            <input type="text" name="name" id="edit_id_name" class="form-control form-control-sm" placeholder="Nom de la clé" required>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="edit_id_place" class="form-label fw-bold">Emplacement *</label>
-                        <input type="text" name="place" id="edit_id_place" class="form-control" placeholder="Emplacement de la clé" required>
+
+                    <!-- Ligne 2 : Emplacement + Total (côte à côte) -->
+                    <div class="mb-2 d-flex gap-3">
+                        <div style="flex:1">
+                            <label for="edit_id_place" style="font-size:.75rem!important">Emplacement *</label>
+                            <input type="text" name="place" id="edit_id_place" class="form-control form-control-sm" placeholder="Emplacement" required>
+                        </div>
+                        <div style="width:160px;flex-shrink:0">
+                            <label style="font-size:.75rem!important;display:block">Total exemplaires *</label>
+                            <div class="num-stepper">
+                                <button type="button" class="stepper-btn stepper-minus" data-target="edit_id_total_quantity">−</button>
+                                <input type="number" name="total_quantity" id="edit_id_total_quantity" class="stepper-input" value="0" min="0" required>
+                                <button type="button" class="stepper-btn stepper-plus" data-target="edit_id_total_quantity">+</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="edit_id_total_quantity" class="form-label fw-bold">Nombre total d'exemplaires *</label>
-                        <input type="number" name="total_quantity" id="edit_id_total_quantity" class="form-control" placeholder="Nombre total d'exemplaires" min="0" required>
-                        <small class="form-text text-muted">Augmenter ce nombre ajoutera automatiquement des clés dans l'armoire.</small>
+                    <p style="font-size:.72rem;color:#94a3b8;font-style:italic;margin:-4px 0 8px">
+                        <i class="fas fa-info-circle me-1"></i>Augmenter le total ajoutera automatiquement des clés dans l'armoire.
+                    </p>
+
+                    <!-- Ligne 3 : Stock armoire + Stock coffre côte à côte -->
+                    <div class="mb-2 d-flex gap-3">
+                        <div style="flex:1">
+                            <label style="font-size:.75rem!important;display:block">Stock armoire *</label>
+                            <div class="num-stepper">
+                                <button type="button" class="stepper-btn stepper-minus" data-target="edit_id_in_cabinet">−</button>
+                                <input type="number" name="in_cabinet" id="edit_id_in_cabinet" class="stepper-input" value="0" min="0" required>
+                                <button type="button" class="stepper-btn stepper-plus" data-target="edit_id_in_cabinet">+</button>
+                            </div>
+                        </div>
+                        <div style="flex:1">
+                            <label style="font-size:.75rem!important;display:block">Stock coffre *</label>
+                            <div class="num-stepper">
+                                <button type="button" class="stepper-btn stepper-minus" data-target="edit_id_in_safe">−</button>
+                                <input type="number" name="in_safe" id="edit_id_in_safe" class="stepper-input" value="0" min="0" required>
+                                <button type="button" class="stepper-btn stepper-plus" data-target="edit_id_in_safe">+</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="edit_id_in_cabinet" class="form-label fw-bold">Stock armoire *</label>
-                        <input type="number" name="in_cabinet" id="edit_id_in_cabinet" class="form-control" placeholder="Nombre de clés stocké dans l'armoire" min="0" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_id_in_safe" class="form-label fw-bold">Stock coffre *</label>
-                        <input type="number" name="in_safe" id="edit_id_in_safe" class="form-control" placeholder="Nombre de clé stocké dans le coffre" min="0" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_id_comments" class="form-label fw-bold">Commentaires</label>
-                        <textarea name="comments" id="edit_id_comments" class="form-control" rows="3" placeholder="Ajoutez des commentaires..."></textarea>
+
+                    <!-- Ligne 4 : Commentaires -->
+                    <div class="mb-0">
+                        <label for="edit_id_comments" style="font-size:.75rem!important">Commentaires</label>
+                        <textarea name="comments" id="edit_id_comments" class="form-control form-control-sm" rows="2" placeholder="Ajoutez des commentaires..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>Enregistrer les Modifications
+                    <button type="button" class="modal-btn-cancel" data-bs-dismiss="modal">Fermer</button>
+                    <button type="submit" class="modal-btn-save">
+                        <i class="fas fa-save me-2" aria-hidden="true"></i>Enregistrer
                     </button>
                 </div>
             </form>
@@ -720,31 +1163,38 @@ th {
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
+<!-- ══ MODAL — Confirmer suppression ══ -->
 <div class="modal fade" id="deleteKeyModal" tabindex="-1" aria-labelledby="deleteKeyModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteKeyModalLabel">Retirer la clé</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title" id="deleteKeyModalLabel">
+                    <i class="fas fa-trash me-2" aria-hidden="true"></i>Retirer la clé
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <div class="modal-body">
-                Voulez-vous vraiment supprimer la clé numéro <strong id="keyNumberToDelete"></strong> et tous ses exemplaires ? Cette action ne peut pas être annulée. Cependant le numéro de clé sera de nouveau disponible pour une nouvelle clé.
+                <div class="delete-warning">
+                    <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                    <span>Voulez-vous vraiment supprimer la clé numéro <strong id="keyNumberToDelete"></strong> et tous ses exemplaires ? Cette action ne peut pas être annulée. Cependant le numéro de clé sera de nouveau disponible pour une nouvelle clé.</span>
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <form id="deleteKeyForm" method="post">
+                <button type="button" class="modal-btn-cancel" data-bs-dismiss="modal">Annuler</button>
+                <form id="deleteKeyForm" method="post" style="margin:0">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                    <button type="submit" class="modal-btn-danger">
+                        <i class="fas fa-trash me-1" aria-hidden="true"></i> Supprimer
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
-<!-- Scripts pour la génération de PDF et XLSX -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.min.js"></script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -754,70 +1204,42 @@ th {
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     console.log('🔧 Initialisation de la validation des formulaires...');
-    
+
     // ========== FONCTIONS UTILITAIRES ==========
-    
-    // Fonction pour valider un champ individuel
+
     function validateField(field, fieldName) {
         const value = field.value.trim();
         const isValid = value !== '' && value !== null;
-        
-        // Supprimer les classes existantes
         field.classList.remove('is-valid', 'is-invalid', 'pulse-error');
-        
-        // Supprimer le message d'erreur existant
         const existingError = field.parentNode.querySelector('.invalid-feedback');
-        if (existingError) {
-            existingError.remove();
-        }
-        
+        if (existingError) existingError.remove();
         if (!isValid) {
-            // Ajouter la classe d'erreur
             field.classList.add('is-invalid');
-            
-            // Créer et ajouter le message d'erreur
             const errorDiv = document.createElement('div');
             errorDiv.className = 'invalid-feedback';
             errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>Le champ "${fieldName}" est obligatoire.`;
             field.parentNode.appendChild(errorDiv);
-            
-            // Animation de secousse et pulsation
             field.style.animation = 'shake 0.5s';
-            setTimeout(() => {
-                field.style.animation = '';
-                field.classList.add('pulse-error');
-            }, 500);
-            
+            setTimeout(() => { field.style.animation = ''; field.classList.add('pulse-error'); }, 500);
             return false;
         } else {
-            // Ajouter la classe de succès
             field.classList.add('is-valid');
-            
-            // Ajouter un message de succès (optionnel)
             const successDiv = document.createElement('div');
             successDiv.className = 'valid-feedback';
             successDiv.innerHTML = `<i class="fas fa-check-circle me-1"></i>Champ valide`;
             field.parentNode.appendChild(successDiv);
-            
             return true;
         }
     }
-    
-    // Fonction pour valider un champ numérique
+
     function validateNumericField(field, fieldName) {
         const value = field.value.trim();
         const numValue = parseInt(value);
-        
-        // Supprimer les classes existantes
         field.classList.remove('is-valid', 'is-invalid', 'pulse-error');
-        
-        // Supprimer les messages existants
         const existingError = field.parentNode.querySelector('.invalid-feedback');
         const existingSuccess = field.parentNode.querySelector('.valid-feedback');
         if (existingError) existingError.remove();
         if (existingSuccess) existingSuccess.remove();
-        
-        // Vérifier si le champ est vide
         if (value === '') {
             field.classList.add('is-invalid');
             const errorDiv = document.createElement('div');
@@ -826,8 +1248,6 @@ document.addEventListener('DOMContentLoaded', function () {
             field.parentNode.appendChild(errorDiv);
             return false;
         }
-        
-        // Vérifier si c'est un nombre valide et positif
         if (isNaN(numValue) || numValue < 0) {
             field.classList.add('is-invalid');
             const errorDiv = document.createElement('div');
@@ -836,8 +1256,6 @@ document.addEventListener('DOMContentLoaded', function () {
             field.parentNode.appendChild(errorDiv);
             return false;
         }
-        
-        // Champ valide
         field.classList.add('is-valid');
         const successDiv = document.createElement('div');
         successDiv.className = 'valid-feedback';
@@ -845,58 +1263,32 @@ document.addEventListener('DOMContentLoaded', function () {
         field.parentNode.appendChild(successDiv);
         return true;
     }
-    
-    // Fonction pour valider tous les champs obligatoires d'un formulaire
+
     function validateForm(form, requiredFields) {
         let isFormValid = true;
         let firstInvalidField = null;
-        
         console.log('🔍 Validation du formulaire...');
-        
         requiredFields.forEach(({ selector, name, type }) => {
             const field = form.querySelector(selector);
             if (field) {
-                let isFieldValid;
-                
-                if (type === 'numeric') {
-                    isFieldValid = validateNumericField(field, name);
-                } else {
-                    isFieldValid = validateField(field, name);
-                }
-                
+                let isFieldValid = type === 'numeric' ? validateNumericField(field, name) : validateField(field, name);
                 if (!isFieldValid) {
                     isFormValid = false;
-                    if (!firstInvalidField) {
-                        firstInvalidField = field;
-                    }
+                    if (!firstInvalidField) firstInvalidField = field;
                     console.log(`❌ Champ invalide: ${name}`);
-                } else {
-                    console.log(`✅ Champ valide: ${name}`);
-                }
+                } else { console.log(`✅ Champ valide: ${name}`); }
             }
         });
-        
-        // Faire défiler vers le premier champ invalide et le focuser
         if (firstInvalidField) {
             firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => {
-                firstInvalidField.focus();
-                firstInvalidField.select();
-            }, 300);
+            setTimeout(() => { firstInvalidField.focus(); firstInvalidField.select(); }, 300);
         }
-        
         return isFormValid;
     }
-    
-    // Fonction pour afficher une alerte de validation
+
     function showValidationAlert(message, type = 'danger') {
-        // Supprimer l'alerte existante
         const existingAlert = document.querySelector('.validation-alert');
-        if (existingAlert) {
-            existingAlert.remove();
-        }
-        
-        // Créer la nouvelle alerte
+        if (existingAlert) existingAlert.remove();
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type} alert-dismissible fade show validation-alert`;
         alertDiv.style.position = 'fixed';
@@ -904,28 +1296,12 @@ document.addEventListener('DOMContentLoaded', function () {
         alertDiv.style.right = '20px';
         alertDiv.style.zIndex = '9999';
         alertDiv.style.maxWidth = '400px';
-        
         const icon = type === 'danger' ? 'exclamation-triangle' : 'check-circle';
-        
-        alertDiv.innerHTML = `
-            <i class="fas fa-${icon} me-2"></i>
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        
+        alertDiv.innerHTML = `<i class="fas fa-${icon} me-2"></i>${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
         document.body.appendChild(alertDiv);
-        
-        // Auto-supprimer après 5 secondes
-        setTimeout(() => {
-            if (alertDiv && alertDiv.parentNode) {
-                alertDiv.remove();
-            }
-        }, 5000);
+        setTimeout(() => { if (alertDiv && alertDiv.parentNode) alertDiv.remove(); }, 5000);
     }
-    
-    // ========== CONFIGURATION DES CHAMPS OBLIGATOIRES ==========
-    
-    // Champs obligatoires pour le formulaire d'ajout
+
     const addFormRequiredFields = [
         { selector: '#id_number', name: 'Numéro de clé', type: 'text' },
         { selector: '#id_name', name: 'Nom de la clé', type: 'text' },
@@ -934,8 +1310,7 @@ document.addEventListener('DOMContentLoaded', function () {
         { selector: '#id_in_cabinet', name: 'Stock armoire', type: 'numeric' },
         { selector: '#id_in_safe', name: 'Stock coffre', type: 'numeric' }
     ];
-    
-    // Champs obligatoires pour le formulaire de modification
+
     const editFormRequiredFields = [
         { selector: '#edit_id_number', name: 'Numéro de clé', type: 'text' },
         { selector: '#edit_id_name', name: 'Nom de la clé', type: 'text' },
@@ -944,36 +1319,24 @@ document.addEventListener('DOMContentLoaded', function () {
         { selector: '#edit_id_in_cabinet', name: 'Stock armoire', type: 'numeric' },
         { selector: '#edit_id_in_safe', name: 'Stock coffre', type: 'numeric' }
     ];
-    
-    // ========== VALIDATION EN TEMPS RÉEL ==========
-    
+
     function setupRealTimeValidation(requiredFields) {
         requiredFields.forEach(({ selector, name, type }) => {
             const field = document.querySelector(selector);
             if (field) {
                 console.log(`🔗 Configuration validation temps réel pour: ${selector}`);
-                
-                // Validation à la perte de focus
                 field.addEventListener('blur', function() {
+                    if (isModalClosing) return;
                     if (this.value.trim() !== '') {
-                        if (type === 'numeric') {
-                            validateNumericField(this, name);
-                        } else {
-                            validateField(this, name);
-                        }
+                        if (type === 'numeric') { validateNumericField(this, name); }
+                        else { validateField(this, name); }
                     }
                 });
-                
-                // Supprimer les erreurs dès que l'utilisateur commence à taper
                 field.addEventListener('input', function() {
                     if (this.classList.contains('is-invalid') && this.value.trim() !== '') {
                         this.classList.remove('is-invalid', 'pulse-error');
                         const errorMsg = this.parentNode.querySelector('.invalid-feedback');
-                        if (errorMsg) {
-                            errorMsg.remove();
-                        }
-                        
-                        // Revalider en temps réel pour les champs numériques
+                        if (errorMsg) errorMsg.remove();
                         if (type === 'numeric') {
                             const numValue = parseInt(this.value);
                             if (!isNaN(numValue) && numValue >= 0) {
@@ -992,117 +1355,69 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     }
                 });
-                
-                // Validation spéciale pour les champs numériques
                 if (type === 'numeric') {
                     field.addEventListener('input', function() {
-                        // Empêcher la saisie de caractères non numériques
                         this.value = this.value.replace(/[^0-9]/g, '');
                     });
                 }
             }
         });
     }
-    
-    // Configurer la validation en temps réel
+
     setupRealTimeValidation([...addFormRequiredFields, ...editFormRequiredFields]);
-    
-    // ========== VALIDATION DU FORMULAIRE D'AJOUT ==========
-    
+
     const addKeyForm = document.querySelector('#addKeyModal form');
     if (addKeyForm) {
         console.log('📝 Configuration validation formulaire d\'ajout');
-        
         addKeyForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Empêcher la soumission par défaut
-            
+            e.preventDefault();
             console.log('🔍 Validation formulaire d\'ajout déclenchée...');
-            
             const isValid = validateForm(this, addFormRequiredFields);
-            
             if (isValid) {
                 console.log('✅ Formulaire d\'ajout valide - Soumission autorisée');
-                
-                // Afficher feedback de chargement
                 const submitBtn = this.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Ajout en cours...';
                 submitBtn.disabled = true;
-                
-                // Afficher alerte de succès
                 showValidationAlert('Formulaire valide. Ajout de la clé en cours...', 'success');
-                
-                // Soumettre le formulaire
-                setTimeout(() => {
-                    this.submit();
-                }, 500);
+                setTimeout(() => { this.submit(); }, 500);
             } else {
                 console.log('❌ Formulaire d\'ajout invalide');
                 showValidationAlert('Veuillez corriger les erreurs avant de continuer.');
             }
         });
     }
-    
-    // ========== VALIDATION DU FORMULAIRE DE MODIFICATION ==========
-    
+
     const editKeyForm = document.querySelector('#editKeyModal form');
     if (editKeyForm) {
         console.log('📝 Configuration validation formulaire de modification');
-        
         editKeyForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Empêcher la soumission par défaut
-            
+            e.preventDefault();
             console.log('🔍 Validation formulaire de modification déclenchée...');
-            
             const isValid = validateForm(this, editFormRequiredFields);
-            
             if (isValid) {
                 console.log('✅ Formulaire de modification valide');
-                
-                // Demander confirmation
                 const confirmation = confirm("Êtes-vous sûr de vouloir modifier cette clé ?");
                 if (confirmation) {
                     console.log('✅ Confirmation reçue - Soumission autorisée');
-                    
-                    // Afficher feedback de chargement
                     const submitBtn = this.querySelector('button[type="submit"]');
-                    const originalText = submitBtn.innerHTML;
                     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Modification en cours...';
                     submitBtn.disabled = true;
-                    
-                    // Afficher alerte de succès
                     showValidationAlert('Formulaire valide. Modification en cours...', 'success');
-                    
-                    // Soumettre le formulaire
-                    setTimeout(() => {
-                        this.submit();
-                    }, 500);
-                } else {
-                    console.log('❌ Confirmation annulée par l\'utilisateur');
-                }
+                    setTimeout(() => { this.submit(); }, 500);
+                } else { console.log('❌ Confirmation annulée par l\'utilisateur'); }
             } else {
                 console.log('❌ Formulaire de modification invalide');
                 showValidationAlert('Veuillez corriger les erreurs avant de continuer.');
             }
         });
     }
-    
-    // ========== RÉINITIALISATION DES FORMULAIRES ==========
-    
-    // Fonction pour réinitialiser la validation d'un formulaire
+
     function resetFormValidation(form) {
         if (form) {
-            // Supprimer toutes les classes de validation
             const fields = form.querySelectorAll('.form-control, .form-select');
-            fields.forEach(field => {
-                field.classList.remove('is-valid', 'is-invalid', 'pulse-error');
-            });
-            
-            // Supprimer tous les messages de feedback
+            fields.forEach(field => { field.classList.remove('is-valid', 'is-invalid', 'pulse-error'); });
             const feedbacks = form.querySelectorAll('.invalid-feedback, .valid-feedback');
             feedbacks.forEach(feedback => feedback.remove());
-            
-            // Réactiver le bouton de soumission
             const submitBtn = form.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = false;
@@ -1112,94 +1427,69 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     }
-    
-    // Réinitialiser la validation quand les modals s'ouvrent
-    const addModal = document.getElementById('addKeyModal');
+
+    let isModalClosing = false;
+    const addModal  = document.getElementById('addKeyModal');
     const editModal = document.getElementById('editKeyModal');
-    
+
+    // mousedown sur les boutons Fermer/Annuler : set le flag AVANT que le blur se déclenche
+    document.querySelectorAll('.modal-btn-cancel').forEach(btn => {
+        btn.addEventListener('mousedown', () => { isModalClosing = true; });
+    });
+
     if (addModal) {
-        addModal.addEventListener('show.bs.modal', function() {
-            console.log('🔄 Réinitialisation formulaire d\'ajout');
-            const form = this.querySelector('form');
-            resetFormValidation(form);
-        });
+        addModal.addEventListener('show.bs.modal', function() { resetFormValidation(this.querySelector('form')); });
+        addModal.addEventListener('hide.bs.modal',   () => { isModalClosing = true; });
+        addModal.addEventListener('hidden.bs.modal', () => { isModalClosing = false; });
     }
-    
     if (editModal) {
-        editModal.addEventListener('show.bs.modal', function() {
-            console.log('🔄 Réinitialisation formulaire de modification');
-            const form = this.querySelector('form');
-            resetFormValidation(form);
-        });
+        editModal.addEventListener('show.bs.modal', function() { resetFormValidation(this.querySelector('form')); });
+        editModal.addEventListener('hide.bs.modal',   () => { isModalClosing = true; });
+        editModal.addEventListener('hidden.bs.modal', () => { isModalClosing = false; });
     }
-    
+
     console.log('✅ Validation des formulaires initialisée avec succès!');
 });
 </script>
 
-<!-- VOS SCRIPTS EXISTANTS CONTINUENT ICI -->
 <script>
-// Add event listener to delete buttons
 document.addEventListener('DOMContentLoaded', function () {
     var deleteButtons = document.querySelectorAll('[data-bs-target="#deleteKeyModal"]');
     deleteButtons.forEach(function (button) {
         button.addEventListener('click', function () {
-            // Get the key number and delete URL from the clicked button
             var keyNumber = this.getAttribute('data-key-number');
             var deleteUrl = this.getAttribute('data-delete-url');
-            // Update the modal content with the key number
             document.getElementById('keyNumberToDelete').innerText = keyNumber;
-            // Set the action of the delete form to the delete URL
             document.getElementById('deleteKeyForm').setAttribute('action', deleteUrl);
         });
     });
-    
-    // Ajout des gestionnaires pour les boutons d'export
-    document.getElementById('generatePdfBtn').addEventListener('click', function() {
-        // Générer le PDF avec jsPDF
-        generatePDF();
-    });
-    
-    document.getElementById('generateXlsxBtn').addEventListener('click', function() {
-        // Générer le fichier XLSX avec SheetJS
-        generateXLSX();
-    });
-    
-    // Fonction pour générer le PDF
+
+    document.getElementById('generatePdfBtn').addEventListener('click', function() { generatePDF(); });
+    document.getElementById('generateXlsxBtn').addEventListener('click', function() { generateXLSX(); });
+
     function generatePDF() {
-        // Créer un nouveau document PDF
         const doc = new jsPDF();
-        
-        // Titre du document
         doc.setFontSize(18);
         doc.text("Liste des clés", 14, 20);
-        
-        // Informations du document
         const date = new Date().toLocaleDateString('fr-FR');
         doc.setFontSize(11);
         doc.text(`Généré le: ${date}`, 14, 30);
         doc.text(`Total des clés: ${document.querySelector('.ms-auto span:last-child').textContent}`, 14, 35);
-        
-        // Création du tableau
         const tableData = [];
         const table = document.getElementById('keyTable');
         const rows = table.querySelectorAll('tbody tr');
-        
-        // Parcourir toutes les lignes du tableau visible
         rows.forEach((row) => {
             if (row.style.display !== 'none') {
-                const number = row.cells[0].textContent.trim();
-                const name = row.cells[1].textContent.trim();
-                const place = row.cells[2].textContent.trim();
+                const number        = row.cells[0].textContent.trim();
+                const name          = row.cells[1].textContent.trim();
+                const place         = row.cells[2].textContent.trim();
                 const totalQuantity = row.cells[3].textContent.trim();
                 const assignedCount = row.cells[4].textContent.trim();
-                const inCabinet = row.cells[5].textContent.trim();
-                const inSafe = row.cells[6].textContent.trim();
+                const inCabinet     = row.cells[5].textContent.trim();
+                const inSafe        = row.cells[6].textContent.trim();
                 tableData.push([number, name, place, totalQuantity, assignedCount, inCabinet, inSafe]);
             }
         });
-        
-        // Ajouter le tableau au PDF
         doc.autoTable({
             head: [['N°', 'Nom de la clé', 'Emplacement', 'Nb. exemplaires', 'Attribués', 'En armoire', 'En coffre']],
             body: tableData,
@@ -1207,131 +1497,183 @@ document.addEventListener('DOMContentLoaded', function () {
             styles: { fontSize: 8, cellPadding: 2 },
             headStyles: { fillColor: [58, 159, 135] },
             margin: { top: 40 },
-            columnStyles: {
-                0: { cellWidth: 15 }, // N°
-                1: { cellWidth: 40 }, // Nom
-                2: { cellWidth: 30 }, // Emplacement
-                3: { cellWidth: 20 }, // Nb exemplaires
-                4: { cellWidth: 20 }, // Attribués
-                5: { cellWidth: 20 }, // En armoire
-                6: { cellWidth: 20 }  // En coffre
-            }
+            columnStyles: { 0: { cellWidth: 15 }, 1: { cellWidth: 40 }, 2: { cellWidth: 30 }, 3: { cellWidth: 20 }, 4: { cellWidth: 20 }, 5: { cellWidth: 20 }, 6: { cellWidth: 20 } }
         });
-        
-        // Ajouter le footer
         doc.setFontSize(10);
         doc.text("© Église Évangélique Rencontre Espérance", 14, doc.internal.pageSize.height - 10);
-        
-        // Enregistrer le PDF
         doc.save("liste_cles.pdf");
     }
-    
-    // Fonction pour générer le fichier XLSX
+
     function generateXLSX() {
-        // Créer un nouveau workbook
-        const wb = XLSX.utils.book_new();
-        
-        // Préparer les données
-        const tableData = [];
-        const table = document.getElementById('keyTable');
-        const rows = table.querySelectorAll('tbody tr');
-        
-        // Parcourir toutes les lignes du tableau visible
-        rows.forEach((row) => {
-            if (row.style.display !== 'none') {
-                const number = row.cells[0].textContent.trim();
-                const name = row.cells[1].textContent.trim();
-                const place = row.cells[2].textContent.trim();
-                const totalQuantity = row.cells[3].textContent.trim();
-                const assignedCount = row.cells[4].textContent.trim();
-                const inCabinet = row.cells[5].textContent.trim();
-                const inSafe = row.cells[6].textContent.trim();
-                const comments = row.cells[7].textContent.trim();
-                
-                tableData.push({
-                    "N°": number,
-                    "Nom de la clé": name,
-                    "Emplacement": place,
-                    "Nombre d'exemplaires": totalQuantity,
-                    "Exemplaires attribués": assignedCount,
-                    "En armoire": inCabinet,
-                    "En coffre": inSafe,
-                    "Commentaires": comments
-                });
-            }
+        const wb   = XLSX.utils.book_new();
+        const date = new Date().toLocaleDateString('fr-FR');
+        const rows = document.querySelectorAll('#keyTable tbody tr');
+
+        // ── Données ─────────────────────────────────────────────
+        const dataRows = [];
+        rows.forEach(function (row) {
+            if (row.style.display === 'none') return;
+            dataRows.push([
+                parseInt(row.cells[0].textContent.trim()) || 0,
+                row.cells[1].textContent.trim(),
+                row.cells[2].textContent.trim(),
+                parseInt(row.cells[3].textContent.trim()) || 0,
+                parseInt(row.cells[4].textContent.trim()) || 0,
+                parseInt(row.cells[5].textContent.trim()) || 0,
+                parseInt(row.cells[6].textContent.trim()) || 0,
+                row.cells[7].textContent.trim()
+            ]);
         });
-        
-        // Créer une feuille de calcul à partir des données
-        const ws = XLSX.utils.json_to_sheet(tableData);
-        
-        // Ajouter la feuille au workbook
+
+        const headerLabels = ["N°","Nom de la clé","Emplacement","Total","Attribuées","Stock armoire","Stock coffre","Commentaires"];
+        const allData = [
+            ["Liste des clés EERE — Générée le " + date],
+            [],
+            headerLabels,
+            ...dataRows
+        ];
+
+        const ws = XLSX.utils.aoa_to_sheet(allData);
+
+        // ── Largeurs de colonnes ────────────────────────────────
+        ws['!cols'] = [
+            { wch: 6  }, { wch: 45 }, { wch: 22 }, { wch: 10 },
+            { wch: 13 }, { wch: 15 }, { wch: 14 }, { wch: 35 }
+        ];
+
+        // ── Hauteurs de lignes ──────────────────────────────────
+        const rowHeights = [{ hpt: 28 }, { hpt: 6 }, { hpt: 22 }];
+        dataRows.forEach(function() { rowHeights.push({ hpt: 18 }); });
+        ws['!rows'] = rowHeights;
+
+        // ── Fusion titre ────────────────────────────────────────
+        ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }];
+
+        // ── Styles ──────────────────────────────────────────────
+        const COLS = ['A','B','C','D','E','F','G','H'];
+
+        // Couleurs design system
+        const COLOR_TITLE_BG   = '0D3028';  // vert très foncé (gradient site)
+        const COLOR_HEADER_BG  = '3A9F87';  // teal accent
+        const COLOR_DATA_BG    = 'EDF7F5';  // vert très clair
+        const COLOR_WHITE      = 'FFFFFF';
+        const COLOR_TEXT       = '0F172A';
+        const COLOR_BORDER     = 'C8E6DF';
+
+        // Style titre
+        const titleStyle = {
+            fill: { patternType: 'solid', fgColor: { rgb: COLOR_TITLE_BG } },
+            font: { bold: true, sz: 13, color: { rgb: COLOR_WHITE }, name: 'Calibri' },
+            alignment: { horizontal: 'center', vertical: 'center' }
+        };
+
+        // Style en-têtes colonnes
+        const headerStyle = {
+            fill: { patternType: 'solid', fgColor: { rgb: COLOR_HEADER_BG } },
+            font: { bold: true, sz: 10, color: { rgb: COLOR_WHITE }, name: 'Calibri' },
+            alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+            border: {
+                top:    { style: 'thin', color: { rgb: COLOR_WHITE } },
+                bottom: { style: 'thin', color: { rgb: COLOR_WHITE } },
+                left:   { style: 'thin', color: { rgb: COLOR_WHITE } },
+                right:  { style: 'thin', color: { rgb: COLOR_WHITE } }
+            }
+        };
+
+        // Style données (colonnes texte)
+        function dataStyle(isNum) {
+            return {
+                fill: { patternType: 'solid', fgColor: { rgb: COLOR_DATA_BG } },
+                font: { sz: 10, color: { rgb: COLOR_TEXT }, name: 'Calibri' },
+                alignment: { horizontal: isNum ? 'center' : 'left', vertical: 'center' },
+                border: {
+                    top:    { style: 'hair', color: { rgb: COLOR_BORDER } },
+                    bottom: { style: 'hair', color: { rgb: COLOR_BORDER } },
+                    left:   { style: 'hair', color: { rgb: COLOR_BORDER } },
+                    right:  { style: 'hair', color: { rgb: COLOR_BORDER } }
+                }
+            };
+        }
+
+        // Appliquer style titre (ligne 1 = index 0)
+        const titleCell = ws['A1'];
+        if (titleCell) titleCell.s = titleStyle;
+
+        // Appliquer style en-têtes (ligne 3 = index 2)
+        COLS.forEach(function(col) {
+            const addr = col + '3';
+            if (ws[addr]) ws[addr].s = headerStyle;
+        });
+
+        // Appliquer style données (lignes 4+ = index 3+)
+        const numCols = new Set([0, 3, 4, 5, 6]); // N°, Total, Attribuées, Stocks
+        for (let r = 0; r < dataRows.length; r++) {
+            COLS.forEach(function(col, ci) {
+                const addr = col + (r + 4); // ligne 4 = index 3
+                if (ws[addr]) ws[addr].s = dataStyle(numCols.has(ci));
+            });
+        }
+
         XLSX.utils.book_append_sheet(wb, ws, "Clés");
-        
-        // Générer le fichier XLSX et le télécharger
-        XLSX.writeFile(wb, "liste_cles.xlsx");
+        XLSX.writeFile(wb, "liste_cles_eere.xlsx");
     }
 });
 </script>
 
-<!-- JavaScript to Populate Edit Modal -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Get all edit buttons
     var editButtons = document.querySelectorAll('.edit-btn');
-    
-    // Loop through buttons and add click event listener
     editButtons.forEach(function (button) {
         button.addEventListener('click', function () {
-            // Get key data from the button's data attributes
-            var keyId = this.getAttribute('data-id');
-            var keyNumber = this.getAttribute('data-number');
-            var keyName = this.getAttribute('data-name');
-            var keyPlace = this.getAttribute('data-place');
-            var keyTotal = this.getAttribute('data-total-quantity');
-            var keyInCabinet = this.getAttribute('data-in-cabinet');
-            var keyInSafe = this.getAttribute('data-in-safe');
+            var keyId       = this.getAttribute('data-id');
+            var keyNumber   = this.getAttribute('data-number');
+            var keyName     = this.getAttribute('data-name');
+            var keyPlace    = this.getAttribute('data-place');
+            var keyTotal    = this.getAttribute('data-total-quantity');
+            var keyInCabinet= this.getAttribute('data-in-cabinet');
+            var keyInSafe   = this.getAttribute('data-in-safe');
             var keyComments = this.getAttribute('data-comments');
-            
-            // Populate the modal fields
-            document.getElementById('editKeyId').value = keyId;
-            document.getElementById('edit_id_number').value = keyNumber;
-            document.getElementById('edit_id_name').value = keyName;
-            document.getElementById('edit_id_place').value = keyPlace;
-            document.getElementById('edit_id_total_quantity').value = keyTotal;
-            document.getElementById('original_total_quantity').value = keyTotal; // Stocker la valeur originale
-            document.getElementById('original_in_cabinet').value = keyInCabinet; // Stocker la valeur originale du stock armoire
-            document.getElementById('edit_id_in_cabinet').value = keyInCabinet;
-            document.getElementById('edit_id_in_safe').value = keyInSafe;
-            document.getElementById('edit_id_comments').value = keyComments;
+            document.getElementById('editKeyId').value                = keyId;
+            document.getElementById('edit_id_number').value           = keyNumber;
+            document.getElementById('edit_id_name').value             = keyName;
+            document.getElementById('edit_id_place').value            = keyPlace;
+            document.getElementById('edit_id_total_quantity').value   = keyTotal;
+            document.getElementById('original_total_quantity').value  = keyTotal;
+            document.getElementById('original_in_cabinet').value      = keyInCabinet;
+            document.getElementById('original_in_safe').value         = keyInSafe;
+            document.getElementById('edit_id_in_cabinet').value       = keyInCabinet;
+            document.getElementById('edit_id_in_safe').value          = keyInSafe;
+            document.getElementById('edit_id_comments').value         = keyComments;
         });
     });
-    
-    // Add event listener for total quantity changes
+
     const totalQuantityInput = document.getElementById('edit_id_total_quantity');
-    const inCabinetInput = document.getElementById('edit_id_in_cabinet');
-    
-    if (totalQuantityInput && inCabinetInput) {
+    const inCabinetInput     = document.getElementById('edit_id_in_cabinet');
+    const inSafeInput        = document.getElementById('edit_id_in_safe');
+
+    if (totalQuantityInput && inCabinetInput && inSafeInput) {
         totalQuantityInput.addEventListener('input', function() {
-            // Get original values
-            const originalTotal = parseInt(document.getElementById('original_total_quantity').value) || 0;
+            const originalTotal   = parseInt(document.getElementById('original_total_quantity').value) || 0;
             const originalCabinet = parseInt(document.getElementById('original_in_cabinet').value) || 0;
-            const newTotal = parseInt(this.value) || 0;
-            
-            // Calculate the difference from original
-            const difference = newTotal - originalTotal;
-            
-            // If total has increased from original, add the difference to the original cabinet value
-            if (difference > 0) {
-                inCabinetInput.value = originalCabinet + difference;
-                
-                // Visual feedback (optional)
-                inCabinetInput.classList.add('is-valid');
-                setTimeout(() => {
-                    inCabinetInput.classList.remove('is-valid');
-                }, 1000);
+            const originalSafe    = parseInt(document.getElementById('original_in_safe').value) || 0;
+            const newTotal        = parseInt(this.value) || 0;
+            const difference      = newTotal - originalTotal;
+
+            if (difference === 0) return;
+
+            const cabinetHasStock = originalCabinet > 0;
+            const safeHasStock    = originalSafe > 0;
+
+            if (cabinetHasStock && !safeHasStock) {
+                inCabinetInput.value = Math.max(0, originalCabinet + difference);
+            } else if (!cabinetHasStock && safeHasStock) {
+                inSafeInput.value = Math.max(0, originalSafe + difference);
+            } else if (!cabinetHasStock && !safeHasStock) {
+                // TODO: les deux stocks sont = 0 — comportement à confirmer avec le client
+                inCabinetInput.value = Math.max(0, originalCabinet + difference);
             } else {
-                // If total is less than or equal to original, reset to original cabinet value
-                inCabinetInput.value = originalCabinet;
+                // TODO: les deux stocks sont > 0 — règle de distribution à confirmer avec le client
+                inCabinetInput.value = Math.max(0, originalCabinet + difference);
             }
         });
     }
@@ -1340,34 +1682,138 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Initialisation des popovers
     const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
-    [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl, {
-        html: true,
-        trigger: 'focus',
-        container: 'body'
-    }));
-    
+    [...popoverTriggerList].map(function (el) {
+        const isWarning = (el.dataset.bsCustomClass || '').includes('popover-warning');
+        return new bootstrap.Popover(el, {
+            html:        true,
+            sanitize:    !isWarning,   // désactivé pour le popover warning (contenu contrôlé)
+            trigger:     el.getAttribute('data-bs-trigger') || 'focus',
+            container:   'body',
+            customClass: el.dataset.bsCustomClass || ''
+        });
+    });
     console.log('Nombre de popovers initialisés:', popoverTriggerList.length);
 });
 </script>
 
-<!-- Script de recherche dans le tableau -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Gestion de la recherche
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('keyup', function () {
             const filter = this.value.toLowerCase();
             const rows = document.querySelectorAll('#keyTable tbody tr');
-            
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
                 row.style.display = text.includes(filter) ? '' : 'none';
             });
         });
     }
+});
+</script>
+
+<script>
+/* ── Header tableau fixe ────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', function () {
+    const table  = document.getElementById('keyTable');
+    const navbar = document.querySelector('.top-header');
+    if (!table) return;
+
+    const thead = table.querySelector('thead');
+
+    // Crée le ghost header
+    const ghost = document.createElement('div');
+    ghost.id = 'keyTableGhostHeader';
+    const ghostTable = document.createElement('table');
+    ghostTable.appendChild(thead.cloneNode(true));
+    ghost.appendChild(ghostTable);
+    document.body.appendChild(ghost);
+
+    function navbarH() {
+        return navbar ? navbar.offsetHeight : 60;
+    }
+
+    function syncGhost() {
+        const wrap    = table.closest('.keys-table-wrap');
+        const wrapRect = wrap.getBoundingClientRect();
+        const navH    = navbarH();
+
+        // Aligne horizontalement sur le wrapper du tableau
+        ghost.style.left  = wrapRect.left + 'px';
+        ghost.style.width = wrapRect.width + 'px';
+        ghost.style.top   = navH + 'px';
+
+        // Synchronise chaque largeur de colonne
+        const origThs  = thead.querySelectorAll('th');
+        const ghostThs = ghost.querySelectorAll('th');
+        origThs.forEach(function (th, i) {
+            if (ghostThs[i]) ghostThs[i].style.width = th.getBoundingClientRect().width + 'px';
+        });
+
+        // Synchronise le scroll horizontal
+        ghost.querySelector('table').style.marginLeft = '-' + wrap.scrollLeft + 'px';
+    }
+
+    function onScroll() {
+        const theadRect = thead.getBoundingClientRect();
+        const navH      = navbarH();
+        if (theadRect.bottom < navH + 2) {
+            syncGhost();
+            ghost.style.display = 'block';
+        } else {
+            ghost.style.display = 'none';
+        }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', function () {
+        if (ghost.style.display !== 'none') syncGhost();
+    });
+
+    // Synchronise le scroll horizontal du tableau
+    const wrap = table.closest('.keys-table-wrap');
+    if (wrap) {
+        wrap.addEventListener('scroll', function () {
+            if (ghost.style.display !== 'none') syncGhost();
+        }, { passive: true });
+    }
+});
+
+/* ── Stepper : boutons +/- fiables ─────────────────────────────── */
+document.addEventListener('DOMContentLoaded', function () {
+
+    function initSteppers() {
+        document.querySelectorAll('.stepper-btn').forEach(function (btn) {
+            if (btn.dataset.stepperInit) return;
+            btn.dataset.stepperInit = '1';
+
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.dataset.target;
+                const input    = document.getElementById(targetId);
+                if (!input) return;
+
+                const min     = parseInt(input.min) ?? 0;
+                const current = parseInt(input.value) || 0;
+                const isPlus  = this.classList.contains('stepper-plus');
+                const newVal  = isPlus ? current + 1 : Math.max(min, current - 1);
+
+                input.value = newVal;
+
+                // Déclenche input ET change pour activer la logique d'auto-ajustement
+                input.dispatchEvent(new Event('input',  { bubbles: true }));
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        });
+    }
+
+    initSteppers();
+
+    ['addKeyModal', 'editKeyModal'].forEach(function (id) {
+        const modal = document.getElementById(id);
+        if (modal) modal.addEventListener('shown.bs.modal', initSteppers);
+    });
 });
 </script>
 {% endblock %}

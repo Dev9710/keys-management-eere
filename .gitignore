@@ -1,0 +1,24 @@
+# Base de données — NE PAS versionner (données de prod)
+*.sqlite3
+*.db
+
+# Environnement virtuel
+.venv-eere/
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyc
+
+# Django
+*.log
+local_settings.py
+media/
+
+# OS
+.DS_Store
+Thumbs.db
