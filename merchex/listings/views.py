@@ -1378,6 +1378,11 @@ def history_view(request):
     action_choices = ActionLog.ACTION_TYPES
     object_choices = ActionLog.OBJECT_TYPES
 
+    # Compteurs de filtres pour l'UI (chips + badge "Filtres avancés")
+    advanced_filters = [action_type, object_type, user_filter, date_from, date_to]
+    has_advanced_filters = any(advanced_filters)
+    active_filter_count = sum(1 for f in advanced_filters if f) + (1 if search else 0)
+
     context = {
         'page_obj': page_obj,
         'action_choices': action_choices,
@@ -1385,6 +1390,8 @@ def history_view(request):
         'total_actions': total_actions,
         'today_actions': today_actions,
         'week_actions': week_actions,
+        'has_advanced_filters': has_advanced_filters,
+        'active_filter_count': active_filter_count,
         'current_filters': {
             'action_type': action_type,
             'object_type': object_type,

@@ -1,325 +1,566 @@
-<!-- ================================ -->
-<!-- TEMPLATE PRINCIPAL HISTORIQUE (history.html) -->
-<!-- ================================ -->
 {% extends "listings/base.html" %}
 {% load static %}
 
-{% block title %}Historique des actions | Gestion des Clés{% endblock %}
+{% block title %}Historique des actions | EERE{% endblock %}
+
+{% block extra_css %}
+/* ═══════════════════════════════════════════════════
+   PAGE HISTORIQUE — refonte user-friendly · design system EERE
+   IMPORTANT : ce bloc est deja injecte a l'interieur de la
+   balise <style> de base.html. NE JAMAIS rouvrir de balise <style>
+   ici (cela ferait sauter toutes les var() CSS). CSS brut uniquement.
+═══════════════════════════════════════════════════ */
+:root {
+  --teal:       #3a9f87;
+  --teal-dark:  #2a7562;
+  --teal-light: #edf7f5;
+  --grad:       linear-gradient(135deg, #0d3028 0%, #1a5040 100%);
+  --orange:     #FFA500;
+  --bg-page:    #f6f9f8;
+  --bg-white:   #ffffff;
+  --border:     #e8f0ed;
+  --border-2:   #e2e8f0;
+  --text:       #0f172a;
+  --text-2:     #64748b;
+  --text-3:     #94a3b8;
+}
+
+.hist {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem 2.5rem;
+  box-sizing: border-box;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ── EN-TÊTE DE PAGE ── */
+.hist-head { margin-bottom: 1.4rem; }
+.hist-head h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.85rem;
+  color: #0d3028;
+  font-weight: 400;
+  margin: 0 0 .25rem;
+}
+.hist-head p { font-size: .92rem; color: var(--text-2); margin: 0; max-width: 60ch; }
+
+/* ── KPIs ── */
+.hist-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+.kpi {
+  display: flex; align-items: center; gap: .9rem;
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.05rem 1.2rem;
+  box-shadow: 0 1px 3px rgba(13,48,40,.05);
+  text-decoration: none;
+  transition: box-shadow .2s, transform .12s, border-color .2s;
+}
+a.kpi:hover { box-shadow: 0 8px 22px rgba(13,48,40,.10); transform: translateY(-2px); border-color: rgba(58,159,135,.4); }
+.kpi-ic {
+  width: 48px; height: 48px; border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 1.15rem;
+}
+.kpi-ic.teal  { background: var(--teal-light); color: var(--teal-dark); }
+.kpi-ic.amber { background: #fff7ed; color: #b45309; }
+.kpi-v  { font-family: 'DM Serif Display', serif; font-size: 1.7rem; color: var(--text); line-height: 1; }
+.kpi-l  { font-size: .8rem; color: var(--text-2); margin-top: .15rem; }
+.kpi.kpi-link .kpi-v { font-size: 1.1rem; }
+.kpi.kpi-link .kpi-l { color: var(--teal-dark); font-weight: 600; }
+
+/* ── BARRE D'OUTILS ── */
+.hist-toolbar {
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: .85rem 1rem;
+  box-shadow: 0 1px 3px rgba(13,48,40,.04);
+  margin-bottom: 1rem;
+}
+.hist-search { position: relative; flex: 1 1 280px; min-width: 220px; }
+.hist-search i {
+  position: absolute; left: .9rem; top: 50%; transform: translateY(-50%);
+  color: var(--text-3); font-size: .9rem; pointer-events: none;
+}
+.hist-search input {
+  width: 100%;
+  padding: .62rem .9rem .62rem 2.4rem;
+  border: 1.5px solid var(--border-2);
+  border-radius: 11px;
+  font-family: 'DM Sans', sans-serif; font-size: .9rem; color: var(--text);
+  background: var(--bg-page); outline: none; box-sizing: border-box;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+.hist-search input:focus {
+  border-color: var(--teal); background: #fff;
+  box-shadow: 0 0 0 3px rgba(58,159,135,.12);
+}
+
+.tbtn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: .6rem 1rem;
+  border-radius: 11px;
+  font-family: 'DM Sans', sans-serif; font-size: .86rem; font-weight: 600;
+  cursor: pointer; text-decoration: none; white-space: nowrap;
+  border: 1.5px solid var(--border-2); background: #fff; color: var(--text-2);
+  transition: all .16s ease;
+}
+.tbtn:hover { border-color: #cbd5e1; color: var(--text); background: var(--bg-page); }
+.tbtn.is-active { border-color: var(--teal); color: var(--teal-dark); background: var(--teal-light); }
+.tbtn-primary { background: var(--teal); border-color: var(--teal); color: #fff; }
+.tbtn-primary:hover { background: var(--teal-dark); border-color: var(--teal-dark); color: #fff; box-shadow: 0 4px 12px rgba(58,159,135,.3); }
+.tbtn .count-pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 5px;
+  background: var(--orange); color: #fff; border-radius: 50px;
+  font-size: .68rem; font-weight: 700;
+}
+
+/* dropdown colonnes (Bootstrap) re-style */
+.col-menu { min-width: 230px; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 30px rgba(13,48,40,.14); padding: .5rem; }
+.col-menu .col-menu-head { font-size: .68rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); padding: .35rem .6rem .5rem; }
+.col-check { display: flex; align-items: center; gap: .6rem; padding: .45rem .6rem; border-radius: 8px; cursor: pointer; font-size: .88rem; color: var(--text); user-select: none; }
+.col-check:hover { background: var(--teal-light); }
+.col-check input { width: 16px; height: 16px; accent-color: var(--teal); cursor: pointer; }
+
+/* ── FILTRES AVANCÉS (repliable) ── */
+.hist-filters {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(13,48,40,.04);
+}
+.hist-filters[hidden] { display: none; }
+.hist-filters-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: .9rem; }
+.fgroup { display: flex; flex-direction: column; gap: .35rem; min-width: 0; }
+.flabel { font-size: .68rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); }
+.fselect, .finput {
+  width: 100%; padding: .55rem .75rem;
+  border: 1.5px solid var(--border-2); border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: .86rem; color: var(--text);
+  background: #fff; outline: none; box-sizing: border-box;
+  transition: border-color .2s, box-shadow .2s;
+}
+.fselect:focus, .finput:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(58,159,135,.12); }
+.hist-filters-actions { display: flex; gap: .6rem; margin-top: 1.05rem; flex-wrap: wrap; }
+
+/* ── CHIPS DE FILTRES ACTIFS ── */
+.hist-chips { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.hist-chips .chips-label { font-size: .78rem; color: var(--text-3); font-weight: 600; }
+.chip {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .32rem .35rem .32rem .7rem;
+  background: var(--teal-light); border: 1px solid rgba(58,159,135,.25);
+  border-radius: 50px; font-size: .78rem; color: var(--teal-dark); font-weight: 600;
+}
+.chip b { font-weight: 700; color: #0d3028; }
+.chip button {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border: none; border-radius: 50%;
+  background: rgba(42,117,98,.15); color: var(--teal-dark);
+  cursor: pointer; font-size: .65rem; line-height: 1;
+  transition: background .15s, color .15s;
+}
+.chip button:hover { background: var(--teal-dark); color: #fff; }
+.chip-clear-all { font-size: .78rem; color: var(--text-2); text-decoration: underline; cursor: pointer; background: none; border: none; }
+.chip-clear-all:hover { color: #b91c1c; }
+
+/* ── TABLE ── */
+.hist-table-wrap {
+  background: var(--bg-white);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  overflow-x: auto;
+  box-shadow: 0 4px 16px rgba(13,48,40,.06), 0 1px 3px rgba(13,48,40,.04);
+}
+#histTable { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 880px; margin: 0; }
+#histTable thead th {
+  background: var(--teal); color: #fff;
+  font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  padding: .8rem 1rem; text-align: left; vertical-align: middle;
+  border: none; white-space: nowrap; position: sticky; top: 0; z-index: 2;
+}
+#histTable thead th.th-detail { text-align: center; }
+#histTable thead th:first-child { border-radius: 12px 0 0 0; }
+#histTable thead th:last-child  { border-radius: 0 12px 0 0; }
+#histTable tbody td {
+  padding: .8rem 1rem; font-size: .86rem; color: var(--text);
+  vertical-align: middle; border: none; border-bottom: 1px solid #f1f5f4;
+  background: transparent;
+}
+#histTable tbody tr { border-left: 3px solid transparent; transition: background .14s, border-left-color .14s; }
+#histTable tbody tr:nth-child(even) td { background: #fbfdfc; }
+#histTable tbody tr:hover { background: var(--teal-light); border-left-color: var(--teal); }
+#histTable tbody tr:hover td { background: var(--teal-light); }
+#histTable tbody tr:last-child td { border-bottom: none; }
+
+.c-date-main { font-weight: 600; color: #0d3028; font-variant-numeric: tabular-nums; }
+.c-date-sub  { color: var(--text-3); font-size: .76rem; font-variant-numeric: tabular-nums; }
+.c-user { display: flex; align-items: center; gap: .65rem; }
+.c-user-av {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--grad); color: #fff; font-size: .78rem; font-weight: 600;
+}
+.c-user-main { font-weight: 600; color: var(--text); line-height: 1.1; }
+.c-user-sub  { color: var(--text-3); font-size: .7rem; letter-spacing: .04em; text-transform: uppercase; }
+.c-type { color: var(--text-2); font-size: .82rem; }
+.c-obj  { font-weight: 600; color: #0d3028; }
+.c-desc { color: var(--text-2); font-size: .83rem; }
+.td-detail { text-align: center; }
+
+/* badge action (pastille pleine teinte douce) */
+.act-badge {
+  display: inline-flex; align-items: center; gap: .35rem;
+  font-weight: 600; font-size: .73rem; padding: .32rem .7rem;
+  border-radius: 50px; letter-spacing: .01em; white-space: nowrap;
+}
+.act-create { background: #f0fdf4; color: #16a34a; }
+.act-update { background: #fff7ed; color: #b45309; }
+.act-delete { background: #fef2f2; color: #b91c1c; }
+.act-assign { background: var(--teal-light); color: var(--teal-dark); }
+.act-unassign { background: #f1f5f9; color: #64748b; }
+.act-login  { background: #eef2ff; color: #4f46e5; }
+.act-logout { background: #e2e8f0; color: #334155; }
+.act-pwd    { background: #fff7ed; color: #b45309; }
+.act-other  { background: #f1f5f9; color: #64748b; }
+
+.detail-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--teal-light); border: 1.5px solid rgba(58,159,135,.25);
+  color: var(--teal-dark); text-decoration: none; transition: all .16s ease;
+}
+.detail-btn:hover { background: var(--teal); border-color: var(--teal); color: #fff; transform: translateY(-1px); box-shadow: 0 3px 10px rgba(58,159,135,.32); }
+
+/* état vide */
+.hist-empty { text-align: center; padding: 3.5rem 1rem; color: var(--text-2); }
+.hist-empty i { font-size: 2.4rem; color: var(--text-3); margin-bottom: .8rem; }
+.hist-empty .empty-t { font-weight: 600; color: var(--text); margin-bottom: .25rem; }
+
+/* animation d'apparition des lignes (equiv. framer-motion stagger) */
+@keyframes rowIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+#histTable tbody tr.anim { animation: rowIn .4s cubic-bezier(.4,0,.2,1) both; }
+#histTable tbody tr.anim:nth-child(1){animation-delay:.02s}  #histTable tbody tr.anim:nth-child(2){animation-delay:.05s}
+#histTable tbody tr.anim:nth-child(3){animation-delay:.08s}  #histTable tbody tr.anim:nth-child(4){animation-delay:.11s}
+#histTable tbody tr.anim:nth-child(5){animation-delay:.14s}  #histTable tbody tr.anim:nth-child(6){animation-delay:.17s}
+#histTable tbody tr.anim:nth-child(7){animation-delay:.20s}  #histTable tbody tr.anim:nth-child(8){animation-delay:.23s}
+#histTable tbody tr.anim:nth-child(9){animation-delay:.26s}  #histTable tbody tr.anim:nth-child(10){animation-delay:.29s}
+#histTable tbody tr.anim:nth-child(11){animation-delay:.32s} #histTable tbody tr.anim:nth-child(12){animation-delay:.35s}
+@media (prefers-reduced-motion: reduce) { #histTable tbody tr.anim { animation: none; } }
+
+/* ── PAGINATION ── */
+.hist-pagination { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.4rem; flex-wrap: wrap; }
+.hist-pg-info { font-size: .82rem; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.hist-pages { display: flex; align-items: center; gap: .3rem; list-style: none; margin: 0; padding: 0; }
+.hist-pages a, .hist-pages span {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 38px; height: 38px; padding: 0 .55rem;
+  border: 1.5px solid var(--border-2); border-radius: 10px;
+  background: #fff; color: var(--text); font-size: .84rem; font-weight: 500;
+  text-decoration: none; transition: all .15s ease;
+}
+.hist-pages a:hover { border-color: var(--teal); color: var(--teal-dark); background: var(--teal-light); }
+.hist-pages .active span { background: var(--teal); border-color: var(--teal); color: #fff; }
+
+.scroll-hint { display: none; font-size: .76rem; color: var(--text-3); margin: .5rem .25rem 0; }
+
+@media (max-width: 992px) {
+  .hist { padding: 1.25rem 1rem 2rem; }
+  .hist-kpis { grid-template-columns: repeat(2, 1fr); }
+  .hist-filters-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .hist-head h1 { font-size: 1.5rem; }
+  .hist-kpis { grid-template-columns: 1fr 1fr; gap: .7rem; }
+  .hist-filters-grid { grid-template-columns: 1fr; }
+  .hist-toolbar { padding: .75rem; }
+  .tbtn { flex: 1 1 auto; justify-content: center; }
+  .scroll-hint { display: block; }
+}
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="row">
-        <div class="col-12">
-            <!-- En-tête avec statistiques -->
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="card text-white bg-primary">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-0">{{ total_actions }}</h4>
-                                    <p class="mb-0">Actions totales</p>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-history fa-2x"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-success">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-0">{{ today_actions }}</h4>
-                                    <p class="mb-0">Aujourd'hui</p>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-calendar-day fa-2x"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-info">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-0">{{ week_actions }}</h4>
-                                    <p class="mb-0">Cette semaine</p>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-calendar-week fa-2x"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-warning">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <a href="{% url 'history_stats' %}" class="text-white text-decoration-none">
-                                        <h4 class="mb-0">Stats</h4>
-                                        <p class="mb-0">Voir détails</p>
-                                    </a>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-chart-bar fa-2x"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="hist">
 
-            <!-- Carte principale -->
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0">
-                            <i class="fas fa-history me-2"></i>
-                            Historique des actions
-                        </h4>
-                        <div>
-                            <a href="{% url 'export_history_csv' %}?{{ request.GET.urlencode }}" 
-                               class="btn btn-outline-light btn-sm">
-                                <i class="fas fa-download me-1"></i>
-                                Exporter CSV
-                            </a>
-                        </div>
-                    </div>
-                </div>
+  <!-- ══ EN-TÊTE ══ -->
+  <div class="hist-head">
+    <h1>Historique des actions</h1>
+    <p>Suivez toutes les opérations réalisées dans l'application : créations, modifications, attributions de clés et connexions. Filtrez, recherchez et exportez en un clic.</p>
+  </div>
 
-                <div class="card-body">
-                    <!-- Filtres -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h6 class="mb-0">
-                                        <i class="fas fa-filter me-1"></i>
-                                        Filtres de recherche
-                                    </h6>
-                                </div>
-                                <div class="card-body">
-                                    <form method="get" class="row g-3">
-                                        <div class="col-md-2">
-                                            <label for="action_type" class="form-label">Type d'action</label>
-                                            <select name="action_type" id="action_type" class="form-select form-select-sm">
-                                                <option value="">Toutes</option>
-                                                {% for value, label in action_choices %}
-                                                <option value="{{ value }}" {% if current_filters.action_type == value %}selected{% endif %}>
-                                                    {{ label }}
-                                                </option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="col-md-2">
-                                            <label for="object_type" class="form-label">Type d'objet</label>
-                                            <select name="object_type" id="object_type" class="form-select form-select-sm">
-                                                <option value="">Tous</option>
-                                                {% for value, label in object_choices %}
-                                                <option value="{{ value }}" {% if current_filters.object_type == value %}selected{% endif %}>
-                                                    {{ label }}
-                                                </option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="col-md-2">
-                                            <label for="user_filter" class="form-label">Utilisateur</label>
-                                            <input type="text" name="user_filter" id="user_filter" 
-                                                   class="form-control form-control-sm" 
-                                                   placeholder="Nom utilisateur"
-                                                   value="{{ current_filters.user_filter }}">
-                                        </div>
-                                        
-                                        <div class="col-md-2">
-                                            <label for="date_from" class="form-label">Date de début</label>
-                                            <input type="date" name="date_from" id="date_from" 
-                                                   class="form-control form-control-sm"
-                                                   value="{{ current_filters.date_from }}">
-                                        </div>
-                                        
-                                        <div class="col-md-2">
-                                            <label for="date_to" class="form-label">Date de fin</label>
-                                            <input type="date" name="date_to" id="date_to" 
-                                                   class="form-control form-control-sm"
-                                                   value="{{ current_filters.date_to }}">
-                                        </div>
-                                        
-                                        <div class="col-md-2">
-                                            <label for="search" class="form-label">Mots clés</label>
-                                            <input type="text" name="search" id="search" 
-                                                   class="form-control form-control-sm" 
-                                                   placeholder="Rechercher..."
-                                                   value="{{ current_filters.search }}">
-                                        </div>
-                                        
-                                        <div class="col-12">
-                                            <button type="submit" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-search me-1"></i>
-                                                Filtrer
-                                            </button>
-                                            <a href="{% url 'history_view' %}" class="btn btn-outline-secondary btn-sm ms-2">
-                                                <i class="fas fa-times me-1"></i>
-                                                Effacer les filtres
-                                            </a>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tableau des actions -->
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Date et Heure</th>
-                                    <th>Utilisateur</th>
-                                    <th>Action</th>
-                                    <th>Type</th>
-                                    <th>Objet</th>
-                                    <th>Description</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for action in page_obj %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            <small class="fw-bold">{{ action.timestamp|date:"d/m/Y" }}</small>
-                                            <small class="text-muted">{{ action.timestamp|time:"H:i:s" }}</small>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            <strong>{{ action.user_name }}</strong>
-                                            <small class="text-muted">{{ action.user_role|upper }}</small>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge 
-                                            {% if action.action_type == 'CREATE' %}bg-success
-                                            {% elif action.action_type == 'UPDATE' %}bg-warning text-dark
-                                            {% elif action.action_type == 'DELETE' %}bg-danger
-                                            {% elif action.action_type == 'ASSIGN' %}bg-info
-                                            {% elif action.action_type == 'UNASSIGN' %}bg-secondary
-                                            {% elif action.action_type == 'LOGIN' %}bg-primary
-                                            {% elif action.action_type == 'LOGOUT' %}bg-dark
-                                            {% elif action.action_type == 'BULK_DELETE' %}bg-danger
-                                            {% elif action.action_type == 'PASSWORD_CHANGE' %}bg-warning text-dark
-                                            {% elif action.action_type == 'PASSWORD_RESET' %}bg-info
-                                            {% else %}bg-light text-dark
-                                            {% endif %}">
-                                            {% if action.action_type == 'CREATE' %}<i class="fas fa-plus-circle me-1"></i>
-                                            {% elif action.action_type == 'UPDATE' %}<i class="fas fa-edit me-1"></i>
-                                            {% elif action.action_type == 'DELETE' %}<i class="fas fa-trash me-1"></i>
-                                            {% elif action.action_type == 'ASSIGN' %}<i class="fas fa-arrow-right me-1"></i>
-                                            {% elif action.action_type == 'UNASSIGN' %}<i class="fas fa-arrow-left me-1"></i>
-                                            {% elif action.action_type == 'LOGIN' %}<i class="fas fa-sign-in-alt me-1"></i>
-                                            {% elif action.action_type == 'LOGOUT' %}<i class="fas fa-sign-out-alt me-1"></i>
-                                            {% elif action.action_type == 'BULK_DELETE' %}<i class="fas fa-trash-alt me-1"></i>
-                                            {% elif action.action_type == 'PASSWORD_CHANGE' %}<i class="fas fa-key me-1"></i>
-                                            {% elif action.action_type == 'PASSWORD_RESET' %}<i class="fas fa-unlock me-1"></i>
-                                            {% endif %}
-                                            {{ action.get_action_type_display }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <small class="text-muted">
-                                            {{ action.get_object_type_display }}
-                                        </small>
-                                    </td>
-                                    <td>
-                                        <span class="fw-bold">{{ action.object_name|truncatechars:50 }}</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-muted">{{ action.description|truncatechars:100 }}</span>
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'history_detail' action.id %}" 
-                                           class="btn btn-sm btn-outline-primary" 
-                                           title="Voir les détails">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">
-                                        <i class="fas fa-inbox fa-2x mb-2"></i><br>
-                                        Aucune action trouvée avec les filtres actuels
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    {% if page_obj.has_other_pages %}
-                    <div class="d-flex justify-content-between align-items-center mt-4">
-                        <div>
-                            <small class="text-muted">
-                                Affichage {{ page_obj.start_index }} à {{ page_obj.end_index }} 
-                                sur {{ page_obj.paginator.count }} actions
-                            </small>
-                        </div>
-                        <nav aria-label="Navigation pagination">
-                            <ul class="pagination pagination-sm mb-0">
-                                {% if page_obj.has_previous %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page=1{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
-                                            <i class="fas fa-angle-double-left"></i>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
-                                            <i class="fas fa-angle-left"></i>
-                                        </a>
-                                    </li>
-                                {% endif %}
-
-                                {% for num in page_obj.paginator.page_range %}
-                                    {% if page_obj.number == num %}
-                                        <li class="page-item active">
-                                            <span class="page-link">{{ num }}</span>
-                                        </li>
-                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page={{ num }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
-                                        </li>
-                                    {% endif %}
-                                {% endfor %}
-
-                                {% if page_obj.has_next %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
-                                            <i class="fas fa-angle-right"></i>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
-                                            <i class="fas fa-angle-double-right"></i>
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </nav>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+  <!-- ══ KPIs ══ -->
+  <div class="hist-kpis">
+    <div class="kpi">
+      <div class="kpi-ic teal"><i class="fas fa-history" aria-hidden="true"></i></div>
+      <div><div class="kpi-v">{{ total_actions }}</div><div class="kpi-l">Actions au total</div></div>
     </div>
+    <div class="kpi">
+      <div class="kpi-ic teal"><i class="fas fa-calendar-day" aria-hidden="true"></i></div>
+      <div><div class="kpi-v">{{ today_actions }}</div><div class="kpi-l">Aujourd'hui</div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-ic teal"><i class="fas fa-calendar-week" aria-hidden="true"></i></div>
+      <div><div class="kpi-v">{{ week_actions }}</div><div class="kpi-l">Cette semaine</div></div>
+    </div>
+    <a href="{% url 'history_stats' %}" class="kpi kpi-link">
+      <div class="kpi-ic amber"><i class="fas fa-chart-bar" aria-hidden="true"></i></div>
+      <div><div class="kpi-v">Statistiques</div><div class="kpi-l">Voir les détails &rarr;</div></div>
+    </a>
+  </div>
+
+  <!-- ══ FORMULAIRE (englobe recherche + filtres) ══ -->
+  <form method="get" id="histForm">
+
+    <!-- Barre d'outils : recherche + actions -->
+    <div class="hist-toolbar">
+      <div class="hist-search">
+        <i class="fas fa-search" aria-hidden="true"></i>
+        <input type="text" name="search" id="search" placeholder="Rechercher une action, un objet, un utilisateur…"
+               value="{{ current_filters.search }}" aria-label="Rechercher">
+      </div>
+
+      <button type="submit" class="tbtn tbtn-primary">
+        <i class="fas fa-search" aria-hidden="true"></i> Rechercher
+      </button>
+
+      <button type="button" class="tbtn" id="toggleFilters" aria-expanded="false" aria-controls="advFilters">
+        <i class="fas fa-sliders-h" aria-hidden="true"></i> Filtres avancés
+        {% if active_filter_count %}<span class="count-pill">{{ active_filter_count }}</span>{% endif %}
+      </button>
+
+      <!-- Dropdown colonnes (Bootstrap) -->
+      <div class="dropdown">
+        <button type="button" class="tbtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+          <i class="fas fa-table-columns" aria-hidden="true"></i> Colonnes
+        </button>
+        <div class="dropdown-menu dropdown-menu-end col-menu" id="colMenu">
+          <div class="col-menu-head">Afficher les colonnes</div>
+          <label class="col-check"><input type="checkbox" data-col="date" checked> Date et heure</label>
+          <label class="col-check"><input type="checkbox" data-col="user" checked> Utilisateur</label>
+          <label class="col-check"><input type="checkbox" data-col="action" checked> Action</label>
+          <label class="col-check"><input type="checkbox" data-col="type" checked> Type d'objet</label>
+          <label class="col-check"><input type="checkbox" data-col="object" checked> Objet</label>
+          <label class="col-check"><input type="checkbox" data-col="description" checked> Description</label>
+        </div>
+      </div>
+
+      <a href="{% url 'export_history_csv' %}?{{ request.GET.urlencode }}" class="tbtn">
+        <i class="fas fa-download" aria-hidden="true"></i> Exporter CSV
+      </a>
+    </div>
+
+    <!-- Filtres avancés (repliés par défaut, ouverts si actifs) -->
+    <div class="hist-filters" id="advFilters" {% if not has_advanced_filters %}hidden{% endif %}>
+      <div class="hist-filters-grid">
+        <div class="fgroup">
+          <label for="action_type" class="flabel">Type d'action</label>
+          <select name="action_type" id="action_type" class="fselect">
+            <option value="">Toutes</option>
+            {% for value, label in action_choices %}
+            <option value="{{ value }}" {% if current_filters.action_type == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="fgroup">
+          <label for="object_type" class="flabel">Type d'objet</label>
+          <select name="object_type" id="object_type" class="fselect">
+            <option value="">Tous</option>
+            {% for value, label in object_choices %}
+            <option value="{{ value }}" {% if current_filters.object_type == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="fgroup">
+          <label for="user_filter" class="flabel">Utilisateur</label>
+          <input type="text" name="user_filter" id="user_filter" class="finput" placeholder="Nom" value="{{ current_filters.user_filter }}">
+        </div>
+        <div class="fgroup">
+          <label for="date_from" class="flabel">Du</label>
+          <input type="date" name="date_from" id="date_from" class="finput" value="{{ current_filters.date_from }}">
+        </div>
+        <div class="fgroup">
+          <label for="date_to" class="flabel">Au</label>
+          <input type="date" name="date_to" id="date_to" class="finput" value="{{ current_filters.date_to }}">
+        </div>
+      </div>
+      <div class="hist-filters-actions">
+        <button type="submit" class="tbtn tbtn-primary"><i class="fas fa-check" aria-hidden="true"></i> Appliquer</button>
+        <a href="{% url 'history_view' %}" class="tbtn"><i class="fas fa-times" aria-hidden="true"></i> Réinitialiser</a>
+      </div>
+    </div>
+  </form>
+
+  <!-- ══ CHIPS DE FILTRES ACTIFS ══ -->
+  {% if active_filter_count %}
+  <div class="hist-chips">
+    <span class="chips-label">Filtres actifs&nbsp;:</span>
+    {% if current_filters.search %}<span class="chip"><b>Recherche</b> {{ current_filters.search }} <button type="button" class="chip-x" data-remove="search" aria-label="Retirer">✕</button></span>{% endif %}
+    {% if current_filters.action_type %}<span class="chip"><b>Action</b> {{ current_filters.action_type }} <button type="button" class="chip-x" data-remove="action_type" aria-label="Retirer">✕</button></span>{% endif %}
+    {% if current_filters.object_type %}<span class="chip"><b>Objet</b> {{ current_filters.object_type }} <button type="button" class="chip-x" data-remove="object_type" aria-label="Retirer">✕</button></span>{% endif %}
+    {% if current_filters.user_filter %}<span class="chip"><b>Utilisateur</b> {{ current_filters.user_filter }} <button type="button" class="chip-x" data-remove="user_filter" aria-label="Retirer">✕</button></span>{% endif %}
+    {% if current_filters.date_from %}<span class="chip"><b>Du</b> {{ current_filters.date_from }} <button type="button" class="chip-x" data-remove="date_from" aria-label="Retirer">✕</button></span>{% endif %}
+    {% if current_filters.date_to %}<span class="chip"><b>Au</b> {{ current_filters.date_to }} <button type="button" class="chip-x" data-remove="date_to" aria-label="Retirer">✕</button></span>{% endif %}
+    <a href="{% url 'history_view' %}" class="chip-clear-all">Tout effacer</a>
+  </div>
+  {% endif %}
+
+  <p class="scroll-hint"><i class="fas fa-arrows-left-right"></i> Faites défiler le tableau horizontalement</p>
+
+  <!-- ══ TABLE ══ -->
+  <div class="hist-table-wrap">
+    <table id="histTable">
+      <thead>
+        <tr>
+          <th data-col="date">Date et heure</th>
+          <th data-col="user">Utilisateur</th>
+          <th data-col="action">Action</th>
+          <th data-col="type">Type</th>
+          <th data-col="object">Objet</th>
+          <th data-col="description">Description</th>
+          <th class="th-detail">Détail</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for action in page_obj %}
+        <tr class="anim">
+          <td data-col="date">
+            <div class="c-date-main">{{ action.timestamp|date:"d/m/Y" }}</div>
+            <div class="c-date-sub">{{ action.timestamp|time:"H:i:s" }}</div>
+          </td>
+          <td data-col="user">
+            <div class="c-user">
+              <span class="c-user-av">{{ action.user_name|slice:":2"|upper }}</span>
+              <span>
+                <span class="c-user-main">{{ action.user_name }}</span><br>
+                <span class="c-user-sub">{{ action.user_role }}</span>
+              </span>
+            </div>
+          </td>
+          <td data-col="action">
+            {% if action.action_type == 'CREATE' %}<span class="act-badge act-create"><i class="fas fa-plus-circle"></i> {{ action.get_action_type_display }}</span>
+            {% elif action.action_type == 'UPDATE' %}<span class="act-badge act-update"><i class="fas fa-edit"></i> {{ action.get_action_type_display }}</span>
+            {% elif action.action_type == 'DELETE' %}<span class="act-badge act-delete"><i class="fas fa-trash"></i> {{ action.get_action_type_display }}</span>
+            {% elif action.action_type == 'ASSIGN' %}<span class="act-badge act-assign"><i class="fas fa-arrow-right"></i> {{ action.get_action_type_display }}</span>
+            {% elif action.action_type == 'UNASSIGN' %}<span class="act-badge act-unassign"><i class="fas fa-arrow-left"></i> {{ action.get_action_type_display }}</span>
+            {% elif action.action_type == 'LOGIN' %}<span class="act-badge act-login"><i class="fas fa-sign-in-alt"></i> {{ action.get_action_type_display }}</span>
+            {% elif action.action_type == 'LOGOUT' %}<span class="act-badge act-logout"><i class="fas fa-sign-out-alt"></i> {{ action.get_action_type_display }}</span>
+            {% elif action.action_type == 'BULK_DELETE' %}<span class="act-badge act-delete"><i class="fas fa-trash-alt"></i> {{ action.get_action_type_display }}</span>
+            {% elif action.action_type == 'PASSWORD_CHANGE' %}<span class="act-badge act-pwd"><i class="fas fa-key"></i> {{ action.get_action_type_display }}</span>
+            {% elif action.action_type == 'PASSWORD_RESET' %}<span class="act-badge act-pwd"><i class="fas fa-unlock"></i> {{ action.get_action_type_display }}</span>
+            {% else %}<span class="act-badge act-other">{{ action.get_action_type_display }}</span>{% endif %}
+          </td>
+          <td data-col="type"><span class="c-type">{{ action.get_object_type_display }}</span></td>
+          <td data-col="object"><span class="c-obj">{{ action.object_name|truncatechars:50 }}</span></td>
+          <td data-col="description"><span class="c-desc">{{ action.description|truncatechars:100 }}</span></td>
+          <td class="td-detail">
+            <a href="{% url 'history_detail' action.id %}" class="detail-btn" title="Voir les détails" aria-label="Voir les détails">
+              <i class="fas fa-eye" aria-hidden="true"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7">
+            <div class="hist-empty">
+              <i class="fas fa-inbox" aria-hidden="true"></i>
+              <div class="empty-t">Aucune action trouvée</div>
+              <div>Essayez de modifier ou de réinitialiser vos filtres.</div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══ PAGINATION ══ -->
+  {% if page_obj.has_other_pages %}
+  <div class="hist-pagination">
+    <div class="hist-pg-info">
+      Affichage de {{ page_obj.start_index }} à {{ page_obj.end_index }} sur {{ page_obj.paginator.count }} actions
+    </div>
+    <nav aria-label="Navigation pagination">
+      <ul class="hist-pages">
+        {% if page_obj.has_previous %}
+        <li><a href="?page=1{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Première page"><i class="fas fa-angle-double-left"></i></a></li>
+        <li><a href="?page={{ page_obj.previous_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Page précédente"><i class="fas fa-angle-left"></i></a></li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="active"><span>{{ num }}</span></li>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li><a href="?page={{ num }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a></li>
+          {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li><a href="?page={{ page_obj.next_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Page suivante"><i class="fas fa-angle-right"></i></a></li>
+        <li><a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Dernière page"><i class="fas fa-angle-double-right"></i></a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  // ── Repli/ouverture des filtres avancés ──
+  var toggle = document.getElementById('toggleFilters');
+  var panel  = document.getElementById('advFilters');
+  if (toggle && panel) {
+    if (!panel.hasAttribute('hidden')) { toggle.classList.add('is-active'); toggle.setAttribute('aria-expanded', 'true'); }
+    toggle.addEventListener('click', function () {
+      var open = panel.hasAttribute('hidden');
+      if (open) { panel.removeAttribute('hidden'); } else { panel.setAttribute('hidden', ''); }
+      toggle.classList.toggle('is-active', open);
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
+
+  // ── Suppression d'un filtre via les chips ──
+  document.querySelectorAll('.chip-x').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var url = new URL(window.location.href);
+      url.searchParams.delete(btn.getAttribute('data-remove'));
+      url.searchParams.delete('page');
+      window.location.href = url.toString();
+    });
+  });
+
+  // ── Affichage/masquage des colonnes (persisté en localStorage) ──
+  var STORE = 'eere_hist_hidden_cols';
+  var hidden = [];
+  try { hidden = JSON.parse(localStorage.getItem(STORE)) || []; } catch (e) { hidden = []; }
+
+  function applyCol(col, show) {
+    document.querySelectorAll('#histTable [data-col="' + col + '"]').forEach(function (el) {
+      el.style.display = show ? '' : 'none';
+    });
+  }
+
+  document.querySelectorAll('#colMenu input[data-col]').forEach(function (input) {
+    var col = input.getAttribute('data-col');
+    if (hidden.indexOf(col) !== -1) { input.checked = false; applyCol(col, false); }
+    input.addEventListener('change', function () {
+      applyCol(col, input.checked);
+      hidden = hidden.filter(function (c) { return c !== col; });
+      if (!input.checked) { hidden.push(col); }
+      try { localStorage.setItem(STORE, JSON.stringify(hidden)); } catch (e) {}
+    });
+  });
+})();
+</script>
 {% endblock %}

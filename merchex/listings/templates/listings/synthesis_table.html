@@ -1,573 +1,248 @@
 {% extends 'listings/base.html' %}
 {% load static %}
 
-{% block title %}Synthèse des Clés - Vue Tableau{% endblock %}
+{% block title %}Synthèse des clés | EERE{% endblock %}
 
 {% block extra_css %}
-<style>
-    /* Variables CSS reprises du design principal */
-    :root {
-        --primary-color: #3a9f87;
-        --primary-hover: #2a7562;
-        --accent-color: #FFA500;
-    }
+/* ═══════════════════════════════════════════════════
+   SYNTHÈSE DES CLÉS — design system EERE
+   IMPORTANT : injecte a l'interieur du <style> de base.html.
+   NE JAMAIS rouvrir de balise <style> ici. CSS brut uniquement.
+═══════════════════════════════════════════════════ */
+:root {
+  --teal:#3a9f87; --teal-dark:#2a7562; --teal-light:#edf7f5;
+  --grad:linear-gradient(135deg,#0d3028 0%,#1a5040 100%);
+  --orange:#FFA500; --bg-page:#f6f9f8; --bg-white:#fff;
+  --border:#e8f0ed; --border-2:#e2e8f0;
+  --text:#0f172a; --text-2:#64748b; --text-3:#94a3b8;
+}
+.syn { width:100%; max-width:1320px; margin:0 auto; padding:1.5rem 2rem 2.5rem; box-sizing:border-box; font-family:'DM Sans',sans-serif; }
 
-    /* Container principal */
-    .synthesis-container {
-        background: white;
-        border-radius: 0.5rem;
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        margin: 20px 0;
-        overflow: hidden;
-    }
+.syn-head { margin-bottom:1.4rem; }
+.syn-head h1 { font-family:'DM Serif Display',serif; font-size:1.85rem; color:#0d3028; font-weight:400; margin:0 0 .25rem; }
+.syn-head p { font-size:.92rem; color:var(--text-2); margin:0; max-width:62ch; }
 
-    /* Header de la synthèse */
-    .synthesis-header {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
-        color: white;
-        padding: 30px;
-        text-align: center;
-    }
+/* messages */
+.syn .alert { border-radius:12px; border:1px solid var(--border); font-family:'DM Sans',sans-serif; }
 
-    .synthesis-header h1 {
-        font-size: 2.2rem;
-        margin-bottom: 10px;
-        font-weight: 300;
-    }
+/* KPIs */
+.syn-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.4rem; }
+.kpi { display:flex; align-items:center; gap:.9rem; background:var(--bg-white); border:1px solid var(--border); border-radius:14px; padding:1.05rem 1.2rem; box-shadow:0 1px 3px rgba(13,48,40,.05); }
+.kpi-ic { width:48px; height:48px; border-radius:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:1.15rem; }
+.kpi-ic.teal{background:var(--teal-light);color:var(--teal-dark);} .kpi-ic.green{background:#f0fdf4;color:#16a34a;}
+.kpi-ic.blue{background:#eef2ff;color:#4f46e5;} .kpi-ic.amber{background:#fff7ed;color:#b45309;}
+.kpi-v { font-family:'DM Serif Display',serif; font-size:1.7rem; color:var(--text); line-height:1; }
+.kpi-l { font-size:.8rem; color:var(--text-2); margin-top:.15rem; }
 
-    .synthesis-header p {
-        opacity: 0.9;
-        font-size: 1.1rem;
-        margin-bottom: 0;
-    }
+/* barre d'outils */
+.syn-toolbar { display:flex; align-items:flex-end; gap:.75rem; flex-wrap:wrap; background:var(--bg-white); border:1px solid var(--border); border-radius:14px; padding:.95rem 1rem; box-shadow:0 1px 3px rgba(13,48,40,.04); margin-bottom:1rem; }
+.syn-search { position:relative; flex:1 1 260px; min-width:200px; }
+.syn-search i { position:absolute; left:.9rem; top:50%; transform:translateY(-50%); color:var(--text-3); font-size:.9rem; pointer-events:none; }
+.syn-search input { width:100%; padding:.62rem .9rem .62rem 2.4rem; border:1.5px solid var(--border-2); border-radius:11px; font-family:'DM Sans',sans-serif; font-size:.9rem; color:var(--text); background:var(--bg-page); outline:none; box-sizing:border-box; transition:border-color .2s,box-shadow .2s,background .2s; }
+.syn-search input:focus { border-color:var(--teal); background:#fff; box-shadow:0 0 0 3px rgba(58,159,135,.12); }
+.fgroup { display:flex; flex-direction:column; gap:.35rem; }
+.flabel { font-size:.68rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-3); }
+.fselect { padding:.6rem .8rem; border:1.5px solid var(--border-2); border-radius:11px; font-family:'DM Sans',sans-serif; font-size:.88rem; color:var(--text); background:#fff; outline:none; min-width:180px; transition:border-color .2s,box-shadow .2s; }
+.fselect:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(58,159,135,.12); }
+.fcheck { display:inline-flex; align-items:center; gap:.5rem; font-size:.86rem; color:var(--text); cursor:pointer; user-select:none; padding-bottom:.6rem; }
+.fcheck input { width:17px; height:17px; accent-color:var(--teal); cursor:pointer; }
+.tbtn { display:inline-flex; align-items:center; gap:7px; padding:.62rem 1.1rem; border-radius:11px; font-family:'DM Sans',sans-serif; font-size:.86rem; font-weight:600; cursor:pointer; text-decoration:none; white-space:nowrap; border:1.5px solid var(--border-2); background:#fff; color:var(--text-2); transition:all .16s ease; }
+.tbtn:hover { border-color:#cbd5e1; color:var(--text); background:var(--bg-page); }
+.tbtn.primary { background:var(--teal); border-color:var(--teal); color:#fff; }
+.tbtn.primary:hover { background:var(--teal-dark); border-color:var(--teal-dark); color:#fff; box-shadow:0 4px 12px rgba(58,159,135,.3); }
 
-    /* Grille des statistiques */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        padding: 30px;
-        background: #f8f9fa;
-    }
+/* table */
+.syn-table-wrap { background:var(--bg-white); border:1px solid var(--border); border-radius:14px; overflow-x:auto; box-shadow:0 4px 16px rgba(13,48,40,.06),0 1px 3px rgba(13,48,40,.04); margin-bottom:1.25rem; }
+.syn-table { width:100%; border-collapse:separate; border-spacing:0; min-width:820px; margin:0; }
+.syn-table thead th { background:var(--teal); color:#fff; font-size:.72rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:.8rem 1rem; text-align:left; white-space:nowrap; position:sticky; top:0; z-index:2; }
+.syn-table thead th:first-child { border-radius:14px 0 0 0; }
+.syn-table thead th:last-child { border-radius:0 14px 0 0; }
+.syn-table thead th.center { text-align:center; }
+.syn-table tbody td { padding:.8rem 1rem; font-size:.86rem; color:var(--text); border-bottom:1px solid #f1f5f4; vertical-align:middle; }
+.syn-table tbody tr { border-left:3px solid transparent; transition:background .14s,border-left-color .14s; }
+.syn-table tbody tr:nth-child(even) td { background:#fbfdfc; }
+.syn-table tbody tr:hover { border-left-color:var(--teal); }
+.syn-table tbody tr:hover td { background:var(--teal-light); }
+.syn-table tbody tr:last-child td { border-bottom:none; }
+.team-tag { display:inline-flex; align-items:center; gap:.4rem; font-weight:600; color:#0d3028; }
+.team-tag i { color:var(--teal); font-size:.8rem; }
+.u-cell { display:flex; align-items:center; gap:.6rem; }
+.u-av { width:32px; height:32px; border-radius:50%; background:var(--grad); color:#fff; display:flex; align-items:center; justify-content:center; font-size:.74rem; font-weight:600; flex-shrink:0; }
+.kcount { display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:26px; padding:0 .5rem; border-radius:50px; font-size:.8rem; font-weight:700; }
+.kcount.has { background:var(--teal-light); color:var(--teal-dark); }
+.kcount.none { background:#f1f5f9; color:var(--text-3); }
+.keys-list { max-width:340px; }
+.key-item { display:inline-block; background:var(--teal-light); color:var(--teal-dark); border:1px solid rgba(58,159,135,.22); padding:.18rem .5rem; margin:.12rem; border-radius:7px; font-size:.78rem; font-weight:600; }
+.no-key { color:var(--text-3); font-style:italic; font-size:.83rem; }
+.cmt { color:var(--text-2); font-size:.83rem; }
 
-    .stat-card {
-        background: white;
-        padding: 25px;
-        border-radius: 0.5rem;
-        text-align: center;
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border: none;
-    }
+/* animation lignes */
+@keyframes rowIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:none;} }
+.syn-table tbody tr.anim { animation:rowIn .4s cubic-bezier(.4,0,.2,1) both; }
+.syn-table tbody tr.anim:nth-child(1){animation-delay:.02s} .syn-table tbody tr.anim:nth-child(2){animation-delay:.05s}
+.syn-table tbody tr.anim:nth-child(3){animation-delay:.08s} .syn-table tbody tr.anim:nth-child(4){animation-delay:.11s}
+.syn-table tbody tr.anim:nth-child(5){animation-delay:.14s} .syn-table tbody tr.anim:nth-child(6){animation-delay:.17s}
+.syn-table tbody tr.anim:nth-child(7){animation-delay:.20s} .syn-table tbody tr.anim:nth-child(8){animation-delay:.23s}
+.syn-table tbody tr.anim:nth-child(9){animation-delay:.26s} .syn-table tbody tr.anim:nth-child(10){animation-delay:.29s}
+@media (prefers-reduced-motion:reduce){ .syn-table tbody tr.anim{animation:none;} }
 
-    .stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    }
+/* etat vide */
+.syn-empty { text-align:center; padding:3.5rem 1rem; color:var(--text-2); }
+.syn-empty i { font-size:2.4rem; color:var(--text-3); margin-bottom:.8rem; }
+.syn-empty .empty-t { font-weight:600; color:var(--text); margin-bottom:.25rem; }
 
-    .stat-number {
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: var(--primary-color);
-        margin-bottom: 10px;
-    }
+/* stats par equipe */
+.team-section { margin-bottom:1.25rem; }
+.team-section h2 { font-family:'DM Serif Display',serif; font-weight:400; font-size:1.25rem; color:#0d3028; margin:0 0 1rem; display:flex; align-items:center; gap:.55rem; }
+.team-section h2 i { color:var(--teal); font-size:1rem; }
+.team-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:1rem; }
+.team-card { background:var(--bg-white); border:1px solid var(--border); border-radius:14px; padding:1.1rem 1.25rem; box-shadow:0 1px 3px rgba(13,48,40,.05); transition:box-shadow .2s,transform .12s; }
+.team-card:hover { box-shadow:0 8px 22px rgba(13,48,40,.1); transform:translateY(-2px); }
+.team-card-name { font-weight:700; color:#0d3028; font-size:1rem; margin-bottom:.9rem; display:flex; align-items:center; gap:.5rem; }
+.team-card-name i { color:var(--teal); }
+.team-metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:.6rem; text-align:center; }
+.tm { background:var(--bg-page); border-radius:10px; padding:.7rem .4rem; }
+.tm-n { font-family:'DM Serif Display',serif; font-size:1.35rem; color:var(--teal-dark); line-height:1; }
+.tm-l { font-size:.7rem; color:var(--text-2); margin-top:.35rem; }
 
-    .stat-label {
-        color: #6c757d;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: 500;
-    }
+/* export */
+.syn-export { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; background:var(--bg-white); border:1px solid var(--border); border-radius:14px; padding:1rem 1.25rem; box-shadow:0 1px 3px rgba(13,48,40,.04); }
+.syn-export .lbl { font-size:.88rem; color:var(--text-2); }
+.syn-export .lbl strong { color:#0d3028; }
 
-    /* Section des filtres */
-    .filters-section {
-        padding: 30px;
-        background: white;
-        border-bottom: 1px solid #dee2e6;
-    }
+.scroll-hint { display:none; font-size:.76rem; color:var(--text-3); margin:.5rem .25rem 0; }
 
-    .filters-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        align-items: end;
-    }
-
-    .filter-group {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .filter-group label {
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: var(--primary-color);
-    }
-
-    /* Styles pour les éléments de formulaire cohérents avec Bootstrap */
-    .filter-group select,
-    .filter-group input[type="text"] {
-        padding: 0.375rem 0.75rem;
-        border: 1px solid #ced4da;
-        border-radius: 0.375rem;
-        font-size: 1rem;
-        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    }
-
-    .filter-group select:focus,
-    .filter-group input[type="text"]:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(58, 159, 135, 0.25);
-    }
-
-    .filter-group input[type="checkbox"] {
-        margin-right: 8px;
-    }
-
-    /* Boutons cohérents avec le style de l'application */
-    .btn-synthesis-primary {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-        color: white;
-        padding: 0.375rem 0.75rem;
-        border-radius: 0.375rem;
-        transition: all 0.15s ease-in-out;
-    }
-
-    .btn-synthesis-primary:hover {
-        background-color: var(--primary-hover);
-        border-color: var(--primary-hover);
-        color: white;
-    }
-
-    .btn-synthesis-success {
-        background-color: #198754;
-        border-color: #198754;
-        color: white;
-        padding: 0.375rem 0.75rem;
-        border-radius: 0.375rem;
-        transition: all 0.15s ease-in-out;
-    }
-
-    .btn-synthesis-success:hover {
-        background-color: #157347;
-        border-color: #146c43;
-        color: white;
-    }
-
-    /* Container du tableau */
-    .table-container {
-        padding: 30px;
-        overflow-x: auto;
-    }
-
-    /* Styles du tableau cohérents avec Bootstrap */
-    .synthesis-table {
-        width: 100%;
-        margin-bottom: 1rem;
-        color: #212529;
-        border-collapse: collapse;
-    }
-
-    .synthesis-table th {
-        background-color: #343a40;
-        color: white;
-        padding: 0.75rem;
-        text-align: left;
-        font-weight: 600;
-        border-bottom: 2px solid #dee2e6;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
-
-    .synthesis-table td {
-        padding: 0.75rem;
-        border-bottom: 1px solid #dee2e6;
-        vertical-align: top;
-    }
-
-    .synthesis-table tbody tr:hover {
-        background-color: rgba(0, 0, 0, 0.075);
-    }
-
-    .synthesis-table tbody tr:nth-of-type(odd) {
-        background-color: rgba(0, 0, 0, 0.05);
-    }
-
-    /* Badges de statut */
-    .status-badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        text-align: center;
-        display: inline-block;
-    }
-
-    .status-active {
-        color: #0f5132;
-        background-color: #d1e7dd;
-        border: 1px solid #badbcc;
-    }
-
-    .status-inactive {
-        color: #842029;
-        background-color: #f8d7da;
-        border: 1px solid #f5c2c7;
-    }
-
-    /* Liste des clés */
-    .keys-list {
-        max-width: 300px;
-    }
-
-    .key-item {
-        background-color: #cff4fc;
-        color: #055160;
-        border: 1px solid #b8daff;
-        padding: 0.25rem 0.5rem;
-        margin: 0.125rem;
-        border-radius: 0.25rem;
-        font-size: 0.875rem;
-        display: inline-block;
-    }
-
-    /* Section des statistiques par équipe */
-    .team-stats-section {
-        padding: 30px;
-        background: #f8f9fa;
-    }
-
-    .team-stats-section h3 {
-        margin-bottom: 20px;
-        color: var(--primary-color);
-        font-weight: 600;
-    }
-
-    .team-stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-    }
-
-    .team-card {
-        background: white;
-        padding: 20px;
-        border-radius: 0.5rem;
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        border: none;
-    }
-
-    .team-name {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--primary-color);
-        margin-bottom: 15px;
-    }
-
-    .team-metrics {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-        text-align: center;
-    }
-
-    .team-metric {
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 0.375rem;
-    }
-
-    .team-metric-number {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: var(--primary-color);
-    }
-
-    .team-metric-label {
-        font-size: 0.875rem;
-        color: #6c757d;
-        margin-top: 5px;
-        font-weight: 500;
-    }
-
-    /* Message d'absence de données */
-    .no-data {
-        text-align: center;
-        padding: 60px 20px;
-        color: #6c757d;
-        font-size: 1.1rem;
-    }
-
-    .no-data i {
-        color: #adb5bd;
-        margin-bottom: 20px;
-    }
-
-    /* Section d'export */
-    .export-section {
-        padding: 20px 30px;
-        background: #f8f9fa;
-        border-top: 1px solid #dee2e6;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-
-    .export-section strong {
-        color: var(--primary-color);
-        font-weight: 600;
-    }
-
-    /* Responsive design */
-    @media (max-width: 768px) {
-        .filters-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        
-        .synthesis-table {
-            font-size: 0.875rem;
-        }
-        
-        .synthesis-table th,
-        .synthesis-table td {
-            padding: 0.5rem 0.25rem;
-        }
-
-        .export-section {
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .synthesis-header h1 {
-            font-size: 1.75rem;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .team-metrics {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
+@media (max-width:992px){ .syn{padding:1.25rem 1rem 2rem;} .syn-kpis{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:640px){ .syn-head h1{font-size:1.5rem;} .syn-kpis{grid-template-columns:1fr 1fr;gap:.7rem;} .fselect{min-width:0;width:100%;} .fgroup,.syn-search{flex:1 1 100%;} .tbtn{flex:1 1 auto;justify-content:center;} .scroll-hint{display:block;} }
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <!-- Messages d'alerte (cohérent avec votre design) -->
-    {% if messages %}
-    <div class="messages-container">
-        {% for message in messages %}
-        <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+<div class="syn">
+
+  {% if messages %}
+  <div class="mb-3">
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="syn-head">
+    <h1>Tableau de synthèse des clés</h1>
+    <p>Vue d'ensemble des membres et des clés qui leur sont attribuées. Filtrez par équipe, recherchez un membre et exportez les données.</p>
+  </div>
+
+  <!-- KPIs -->
+  <div class="syn-kpis">
+    <div class="kpi"><div class="kpi-ic teal"><i class="fas fa-users"></i></div><div><div class="kpi-v">{{ stats.total_users }}</div><div class="kpi-l">Membres</div></div></div>
+    <div class="kpi"><div class="kpi-ic green"><i class="fas fa-key"></i></div><div><div class="kpi-v">{{ stats.users_with_keys }}</div><div class="kpi-l">Membres avec clés</div></div></div>
+    <div class="kpi"><div class="kpi-ic amber"><i class="fas fa-layer-group"></i></div><div><div class="kpi-v">{{ stats.total_keys_assigned }}</div><div class="kpi-l">Clés attribuées</div></div></div>
+    <div class="kpi"><div class="kpi-ic blue"><i class="fas fa-people-group"></i></div><div><div class="kpi-v">{{ stats.teams_count }}</div><div class="kpi-l">Équipes actives</div></div></div>
+  </div>
+
+  <!-- Barre d'outils / filtres -->
+  <form method="get" id="synForm">
+    <div class="syn-toolbar">
+      <div class="syn-search">
+        <i class="fas fa-search"></i>
+        <input type="text" name="search" id="search" placeholder="Nom, prénom, équipe…" value="{{ filters.search_query }}" aria-label="Rechercher">
+      </div>
+      <div class="fgroup">
+        <label for="team" class="flabel">Équipe</label>
+        <select name="team" id="team" class="fselect">
+          <option value="">Toutes les équipes</option>
+          {% for team in all_teams %}
+          <option value="{{ team.id }}" {% if team.id|stringformat:"s" == filters.selected_team_id %}selected{% endif %}>{{ team.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <label class="fcheck">
+        <input type="checkbox" name="with_keys" value="true" {% if filters.show_only_with_keys %}checked{% endif %}>
+        Uniquement avec clés
+      </label>
+      <button type="submit" class="tbtn primary"><i class="fas fa-search"></i> Filtrer</button>
+      <a href="{% url 'synthesis_table' %}" class="tbtn"><i class="fas fa-times"></i> Réinitialiser</a>
+    </div>
+  </form>
+
+  <p class="scroll-hint"><i class="fas fa-arrows-left-right"></i> Faites défiler le tableau horizontalement</p>
+
+  <!-- Tableau -->
+  <div class="syn-table-wrap">
+    {% if table_data %}
+    <table class="syn-table">
+      <thead>
+        <tr>
+          <th>Équipe</th>
+          <th>Membre</th>
+          <th class="center">Nb de clés</th>
+          <th>Clés attribuées</th>
+          <th>Commentaires</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in table_data %}
+        <tr class="anim">
+          <td><span class="team-tag"><i class="fas fa-people-group"></i> {{ user.team }}</span></td>
+          <td><div class="u-cell"><span class="u-av">{{ user.firstname|slice:":1"|upper }}{{ user.name|slice:":1"|upper }}</span><span>{{ user.full_name }}</span></div></td>
+          <td style="text-align:center;"><span class="kcount {% if user.has_keys %}has{% else %}none{% endif %}">{{ user.keys_count }}</span></td>
+          <td class="keys-list">
+            {% if user.keys %}
+              {% for key in user.keys %}<span class="key-item" title="{{ key.name }} — {{ key.place }}">#{{ key.number }}</span>{% endfor %}
+            {% else %}<span class="no-key">Aucune clé</span>{% endif %}
+          </td>
+          <td><span class="cmt">{{ user.comment|default:"—" }}</span></td>
+        </tr>
         {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="syn-empty">
+      <i class="fas fa-user-slash"></i>
+      <div class="empty-t">Aucun membre trouvé</div>
+      <div>Essayez de modifier ou de réinitialiser vos filtres.</div>
     </div>
     {% endif %}
+  </div>
 
-    <div class="synthesis-container">
-        <!-- Header -->
-        <div class="synthesis-header">
-            <h1><i class="fas fa-table"></i> Tableau de Synthèse des Clés</h1>
-            <p>Vue d'ensemble complète et contrôle visuel optimisé</p>
+  <!-- Stats par équipe -->
+  {% if team_stats %}
+  <div class="team-section">
+    <h2><i class="fas fa-chart-bar"></i> Statistiques par équipe</h2>
+    <div class="team-grid">
+      {% for team in team_stats %}
+      <div class="team-card">
+        <div class="team-card-name"><i class="fas fa-people-group"></i> {{ team.team_name }}</div>
+        <div class="team-metrics">
+          <div class="tm"><div class="tm-n">{{ team.total_members }}</div><div class="tm-l">Membres</div></div>
+          <div class="tm"><div class="tm-n">{{ team.members_with_keys }}</div><div class="tm-l">Avec clés</div></div>
+          <div class="tm"><div class="tm-n">{{ team.total_keys }}</div><div class="tm-l">Total clés</div></div>
         </div>
-
-        <!-- Statistiques -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number">{{ stats.total_users }}</div>
-                <div class="stat-label">Membres</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ stats.users_with_keys }}</div>
-                <div class="stat-label">Membres ont des clés</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ stats.total_keys_assigned }}</div>
-                <div class="stat-label">Clés Assignées au total dans l'équipe</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ stats.teams_count }}</div>
-                <div class="stat-label">Équipes Actives</div>
-            </div>
-        </div>
-
-        <!-- Filtres -->
-        <div class="filters-section">
-            <form method="get" class="filters-grid">
-                <div class="filter-group">
-                    <label for="team">Équipe :</label>
-                    <select name="team" id="team" class="form-select">
-                        <option value="">Toutes les équipes</option>
-                        {% for team in all_teams %}
-                        <option value="{{ team.id }}" {% if team.id|stringformat:"s" == filters.selected_team_id %}selected{% endif %}>
-                            {{ team.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label for="search">Recherche :</label>
-                    <input type="text" name="search" id="search" class="form-control" placeholder="Nom, prénom, équipe..." value="{{ filters.search_query }}">
-                </div>
-                
-                <div class="filter-group">
-                    <label style="margin-bottom: 0;">
-                        <input type="checkbox" name="with_keys" value="true" {% if filters.show_only_with_keys %}checked{% endif %}>
-                        Uniquement avec clés
-                    </label>
-                </div>
-                
-                <div class="filter-group">
-                    <button type="submit" class="btn btn-synthesis-primary">
-                        <i class="fas fa-search"></i> Filtrer
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Tableau principal -->
-        <div class="table-container">
-            {% if table_data %}
-            <div class="table-responsive">
-                <table class="synthesis-table table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Équipe</th>
-                            <th scope="col">Nom Complet</th>
-                           <!--  <th scope="col">Statut</th>-->
-                            <th scope="col">Nombre de clés</th>
-                            <th scope="col">Liste des clés attribués</th>
-                            <th scope="col">Commentaires</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user in table_data %}
-                        <tr>
-                            <td><strong>{{ user.team }}</strong></td>
-                            <td>{{ user.full_name }}</td>
-                           <!--  <td>
-                                <span class="badge status-badge {% if user.has_keys %}status-active{% else %}status-inactive{% endif %}">
-                                    {{ user.status }}
-                                </span>
-                            </td>-->
-                            <td style="text-align: center;">
-                                <strong>{{ user.keys_count }}</strong>
-                            </td>
-                            <td class="keys-list">
-                                {% if user.keys %}
-                                    {% for key in user.keys %}
-                                    <span class="key-item" title="{{ key.name }} - {{ key.place }}">
-                                        #{{ key.number }}
-                                    </span>
-                                    {% endfor %}
-                                {% else %}
-                                    <em style="color: #6c757d;">Aucune clé</em>
-                                {% endif %}
-                            </td>
-                            <td>{{ user.comment|default:"—" }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="no-data">
-                <i class="fas fa-search fa-3x"></i>
-                <p>Aucun utilisateur trouvé avec les critères de recherche actuels.</p>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Statistiques par équipe -->
-        {% if team_stats %}
-        <div class="team-stats-section">
-            <h3><i class="fas fa-chart-bar"></i> Statistiques par Équipe</h3>
-            <div class="team-stats-grid">
-                {% for team in team_stats %}
-                <div class="team-card">
-                    <div class="team-name">{{ team.team_name }}</div>
-                    <div class="team-metrics">
-                        <div class="team-metric">
-                            <div class="team-metric-number">{{ team.total_members }}</div>
-                            <div class="team-metric-label">Membres</div>
-                        </div>
-                        <div class="team-metric">
-                            <div class="team-metric-number">{{ team.members_with_keys }}</div>
-                            <div class="team-metric-label">Membres ont des clés</div>
-                        </div>
-                        <div class="team-metric">
-                            <div class="team-metric-number">{{ team.total_keys }}</div>
-                            <div class="team-metric-label">Total des clés de l'équipe</div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Section d'export -->
-        <div class="export-section">
-            <div>
-                <strong>Export des données :</strong>
-            </div>
-            <div>
-                <a href="{% url 'synthesis_export' %}?{{ request.GET.urlencode }}" class="btn btn-synthesis-success">
-                    <i class="fas fa-file-csv"></i> Exporter CSV
-                </a>
-            </div>
-        </div>
+      </div>
+      {% endfor %}
     </div>
+  </div>
+  {% endif %}
+
+  <!-- Export -->
+  <div class="syn-export">
+    <div class="lbl"><strong>Export des données</strong> — télécharge la sélection courante au format CSV.</div>
+    <a href="{% url 'synthesis_export' %}?{{ request.GET.urlencode }}" class="tbtn primary"><i class="fas fa-file-csv"></i> Exporter CSV</a>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-submit form on filter change (cohérent avec votre approche JS)
-    const teamSelect = document.getElementById('team');
-    const withKeysCheckbox = document.querySelector('input[name="with_keys"]');
-    
-    if (teamSelect) {
-        teamSelect.addEventListener('change', function() {
-            this.form.submit();
-        });
-    }
-    
-    if (withKeysCheckbox) {
-        withKeysCheckbox.addEventListener('change', function() {
-            this.form.submit();
-        });
-    }
-
-    // Recherche en temps réel (optionnel)
-    const searchInput = document.getElementById('search');
-    if (searchInput) {
-        let searchTimeout;
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                // Optionnel: soumettre automatiquement après 500ms
-                // this.form.submit();
-            }, 500);
-        });
-    }
+document.addEventListener('DOMContentLoaded', function () {
+  // Auto-soumission sur changement d'équipe / case à cocher
+  var teamSelect = document.getElementById('team');
+  var withKeys = document.querySelector('input[name="with_keys"]');
+  if (teamSelect) teamSelect.addEventListener('change', function () { this.form.submit(); });
+  if (withKeys) withKeys.addEventListener('change', function () { this.form.submit(); });
 });
 </script>
 {% endblock %}

@@ -1,237 +1,201 @@
-<!-- ================================ -->
-<!-- TEMPLATE STATISTIQUES (history_stats.html) -->
-<!-- ================================ -->
 {% extends "listings/base.html" %}
 {% load static %}
 
-{% block title %}Statistiques de l'historique | Gestion des Clés{% endblock %}
+{% block title %}Statistiques de l'historique | EERE{% endblock %}
 
-{% block content %}
-<div class="container-fluid mt-4">
-    <div class="row">
-        <div class="col-12">
-            <!-- Navigation -->
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'history_view' %}">
-                            <i class="fas fa-history me-1"></i>
-                            Historique
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">
-                        Statistiques
-                    </li>
-                </ol>
-            </nav>
+{% block extra_css %}
+/* ═══════════════════════════════════════════════════
+   STATISTIQUES HISTORIQUE — design system EERE
+   IMPORTANT : injecte a l'interieur du <style> de base.html.
+   NE JAMAIS rouvrir de balise <style> ici. CSS brut uniquement.
+═══════════════════════════════════════════════════ */
+:root {
+  --teal:#3a9f87; --teal-dark:#2a7562; --teal-light:#edf7f5;
+  --grad:linear-gradient(135deg,#0d3028 0%,#1a5040 100%);
+  --orange:#FFA500; --bg-page:#f6f9f8; --bg-white:#fff;
+  --border:#e8f0ed; --border-2:#e2e8f0;
+  --text:#0f172a; --text-2:#64748b; --text-3:#94a3b8;
+}
+.stx { width:100%; max-width:1320px; margin:0 auto; padding:1.5rem 2rem 2.5rem; box-sizing:border-box; font-family:'DM Sans',sans-serif; }
 
-            <!-- En-tête -->
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-chart-bar me-2"></i>
-                        Statistiques de l'historique des actions
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 text-center">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h2 class="text-primary">{{ total_actions }}</h2>
-                                    <p class="mb-0">Actions totales</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h2 class="text-success">{{ action_stats.0.count|default:0 }}</h2>
-                                    <p class="mb-0">Action la plus fréquente</p>
-                                    <small class="text-muted">{{ action_stats.0.name|default:"N/A" }}</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h2 class="text-info">{{ user_stats.0.count|default:0 }}</h2>
-                                    <p class="mb-0">Utilisateur le plus actif</p>
-                                    <small class="text-muted">{{ user_stats.0.user_name|default:"N/A" }}</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h2 class="text-warning">{{ daily_activity|length }}</h2>
-                                    <p class="mb-0">Jours d'activité</p>
-                                    <small class="text-muted">(30 derniers jours)</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+/* fil d'ariane + titre */
+.stx-back { display:inline-flex; align-items:center; gap:.45rem; font-size:.82rem; color:var(--text-2); text-decoration:none; margin-bottom:.75rem; transition:color .15s; }
+.stx-back:hover { color:var(--teal-dark); }
+.stx-head { margin-bottom:1.4rem; }
+.stx-head h1 { font-family:'DM Serif Display',serif; font-size:1.85rem; color:#0d3028; font-weight:400; margin:0 0 .25rem; }
+.stx-head p { font-size:.92rem; color:var(--text-2); margin:0; }
 
-            <div class="row">
-                <!-- Statistiques par type d'action -->
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="fas fa-tasks me-2"></i>
-                                Actions par type
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            {% for stat in action_stats %}
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between">
-                                    <span>{{ stat.name }}</span>
-                                    <span class="badge bg-primary">{{ stat.count }}</span>
-                                </div>
-                                <div class="progress mt-1" style="height: 8px;">
-                                    <div class="progress-bar" role="progressbar" 
-                                         style="width: {% widthratio stat.count total_actions 100 %}%">
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
+/* KPIs */
+.stx-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.6rem; }
+.kpi { display:flex; align-items:center; gap:.9rem; background:var(--bg-white); border:1px solid var(--border); border-radius:14px; padding:1.05rem 1.2rem; box-shadow:0 1px 3px rgba(13,48,40,.05); }
+.kpi-ic { width:48px; height:48px; border-radius:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:1.15rem; }
+.kpi-ic.teal{background:var(--teal-light);color:var(--teal-dark);} .kpi-ic.green{background:#f0fdf4;color:#16a34a;}
+.kpi-ic.blue{background:#eef2ff;color:#4f46e5;} .kpi-ic.amber{background:#fff7ed;color:#b45309;}
+.kpi-v { font-family:'DM Serif Display',serif; font-size:1.7rem; color:var(--text); line-height:1; }
+.kpi-l { font-size:.8rem; color:var(--text-2); margin-top:.15rem; }
+.kpi-sub { font-size:.74rem; color:var(--text-3); margin-top:.1rem; }
 
-                <!-- Statistiques par type d'objet -->
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="fas fa-cubes me-2"></i>
-                                Actions par type d'objet
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            {% for stat in object_stats %}
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between">
-                                    <span>{{ stat.name }}</span>
-                                    <span class="badge bg-info">{{ stat.count }}</span>
-                                </div>
-                                <div class="progress mt-1" style="height: 8px;">
-                                    <div class="progress-bar bg-info" role="progressbar" 
-                                         style="width: {% widthratio stat.count total_actions 100 %}%">
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
+/* grille de cartes */
+.stx-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1.25rem; }
+.card-x { background:var(--bg-white); border:1px solid var(--border); border-radius:14px; box-shadow:0 1px 3px rgba(13,48,40,.05); overflow:hidden; animation:cardIn .45s ease both; }
+.stx-grid .card-x:nth-child(2){animation-delay:.07s}
+@keyframes cardIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:none;} }
+@media (prefers-reduced-motion:reduce){ .card-x{animation:none;} }
+.card-x-head { display:flex; align-items:center; gap:.6rem; padding:1rem 1.25rem; border-bottom:1px solid var(--border); }
+.card-x-head i { color:var(--teal-dark); }
+.card-x-head h2 { font-family:'DM Sans',sans-serif; font-size:.95rem; font-weight:700; color:#0d3028; margin:0; }
+.card-x-body { padding:1.1rem 1.25rem; }
 
-            <div class="row mt-4">
-                <!-- Top utilisateurs -->
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="fas fa-users me-2"></i>
-                                Top 10 utilisateurs les plus actifs
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Utilisateur</th>
-                                            <th>Rôle</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for user_stat in user_stats %}
-                                        <tr>
-                                            <td>{{ forloop.counter }}</td>
-                                            <td>{{ user_stat.user_name }}</td>
-                                            <td>
-                                                <span class="badge bg-secondary">
-                                                    {{ user_stat.user_role|upper }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-success">
-                                                    {{ user_stat.count }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+/* barres de progression */
+.bar-row { margin-bottom:1rem; }
+.bar-row:last-child { margin-bottom:0; }
+.bar-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:.4rem; }
+.bar-name { font-size:.86rem; color:var(--text); font-weight:500; }
+.bar-count { font-size:.78rem; font-weight:700; color:var(--teal-dark); background:var(--teal-light); padding:.15rem .55rem; border-radius:50px; }
+.bar-track { height:8px; background:#eef2f0; border-radius:50px; overflow:hidden; }
+.bar-fill { height:100%; max-width:100%; border-radius:50px; background:linear-gradient(90deg,var(--teal),var(--teal-dark)); animation:barGrow .7s cubic-bezier(.4,0,.2,1) both; }
+.bar-fill.amber { background:linear-gradient(90deg,#fbbf24,var(--orange)); }
+@keyframes barGrow { from{transform:scaleX(0);transform-origin:left;} to{transform:scaleX(1);transform-origin:left;} }
+@media (prefers-reduced-motion:reduce){ .bar-fill{animation:none;} }
 
-                <!-- Activité quotidienne -->
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="fas fa-calendar-alt me-2"></i>
-                                Activité des 30 derniers jours
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div style="max-height: 400px; overflow-y: auto;">
-                                {% for day in daily_activity %}
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <small>{{ day.date_only|date:"d/m/Y" }}</small>
-                                    <div class="flex-grow-1 mx-3">
-                                        <div class="progress" style="height: 6px;">
-                                            <div class="progress-bar bg-primary" role="progressbar" 
-                                                 style="width: {% widthratio day.count 50 100 %}%">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span class="badge bg-primary">{{ day.count }}</span>
-                                </div>
-                                {% empty %}
-                                <p class="text-muted text-center">Aucune activité récente</p>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+/* table top utilisateurs */
+.stx-table { width:100%; border-collapse:separate; border-spacing:0; }
+.stx-table th { font-size:.7rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); text-align:left; padding:.5rem .6rem; border-bottom:1px solid var(--border); }
+.stx-table td { padding:.6rem; font-size:.86rem; color:var(--text); border-bottom:1px solid #f1f5f4; vertical-align:middle; }
+.stx-table tbody tr:last-child td { border-bottom:none; }
+.stx-table tbody tr:hover td { background:var(--teal-light); }
+.rank { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:7px; background:#f1f5f9; color:var(--text-2); font-size:.78rem; font-weight:700; }
+.rank.top { background:var(--grad); color:#fff; }
+.u-cell { display:flex; align-items:center; gap:.55rem; }
+.u-av { width:30px; height:30px; border-radius:50%; background:var(--grad); color:#fff; display:flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:600; flex-shrink:0; }
+.pill { display:inline-flex; align-items:center; font-size:.72rem; font-weight:600; padding:.22rem .6rem; border-radius:50px; }
+.pill-role { background:#f1f5f9; color:#64748b; text-transform:uppercase; letter-spacing:.03em; }
+.pill-count { background:#f0fdf4; color:#16a34a; }
 
-            <!-- Boutons d'action -->
-            <div class="mt-4 text-center">
-                <a href="{% url 'history_view' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>
-                    Retour à l'historique
-                </a>
-                <button class="btn btn-outline-primary ms-2" onclick="window.print()">
-                    <i class="fas fa-print me-2"></i>
-                    Imprimer les statistiques
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+/* activité jour */
+.day-scroll { max-height:360px; overflow-y:auto; padding-right:.3rem; }
+.day-row { display:flex; align-items:center; gap:.85rem; margin-bottom:.7rem; }
+.day-row:last-child { margin-bottom:0; }
+.day-date { font-size:.78rem; color:var(--text-2); font-variant-numeric:tabular-nums; min-width:78px; }
+.day-track { flex:1; height:6px; background:#eef2f0; border-radius:50px; overflow:hidden; }
+.day-count { font-size:.74rem; font-weight:700; color:var(--teal-dark); min-width:26px; text-align:right; }
+
+.stx-empty { text-align:center; color:var(--text-3); padding:2rem 1rem; font-size:.88rem; }
+
+/* actions bas de page */
+.stx-actions { display:flex; gap:.6rem; margin-top:1.5rem; flex-wrap:wrap; }
+.btn-x { display:inline-flex; align-items:center; gap:7px; padding:.62rem 1.15rem; border-radius:11px; font-family:'DM Sans',sans-serif; font-size:.86rem; font-weight:600; cursor:pointer; text-decoration:none; border:1.5px solid var(--border-2); background:#fff; color:var(--text-2); transition:all .16s ease; }
+.btn-x:hover { border-color:#cbd5e1; color:var(--text); background:var(--bg-page); }
+.btn-x.primary { background:var(--teal); border-color:var(--teal); color:#fff; }
+.btn-x.primary:hover { background:var(--teal-dark); border-color:var(--teal-dark); color:#fff; box-shadow:0 4px 12px rgba(58,159,135,.3); }
+
+@media (max-width:992px){ .stx{padding:1.25rem 1rem 2rem;} .stx-kpis{grid-template-columns:repeat(2,1fr);} .stx-grid{grid-template-columns:1fr;} }
+@media (max-width:640px){ .stx-head h1{font-size:1.5rem;} .stx-kpis{grid-template-columns:1fr 1fr;gap:.7rem;} }
+
+@media print {
+  .stx-back, .stx-actions { display:none !important; }
+  .card-x, .kpi { box-shadow:none !important; border:1px solid #cbd5e1 !important; animation:none !important; }
+}
 {% endblock %}
 
-<!-- Styles CSS personnalisés pour l'impression -->
-<style>
-@media print {
-    .btn, .breadcrumb, nav {
-        display: none !important;
-    }
-    .card {
-        border: 1px solid #000 !important;
-        box-shadow: none !important;
-    }
-}
-</style>
+{% block content %}
+<div class="stx">
+
+  <a href="{% url 'history_view' %}" class="stx-back"><i class="fas fa-arrow-left"></i> Retour à l'historique</a>
+
+  <div class="stx-head">
+    <h1>Statistiques de l'historique</h1>
+    <p>Vue d'ensemble de l'activité : types d'actions, utilisateurs les plus actifs et tendance sur 30 jours.</p>
+  </div>
+
+  <!-- KPIs -->
+  <div class="stx-kpis">
+    <div class="kpi">
+      <div class="kpi-ic teal"><i class="fas fa-history"></i></div>
+      <div><div class="kpi-v">{{ total_actions }}</div><div class="kpi-l">Actions au total</div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-ic green"><i class="fas fa-trophy"></i></div>
+      <div><div class="kpi-v">{{ action_stats.0.count|default:0 }}</div><div class="kpi-l">Action la plus fréquente</div><div class="kpi-sub">{{ action_stats.0.name|default:"—" }}</div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-ic blue"><i class="fas fa-user-check"></i></div>
+      <div><div class="kpi-v">{{ user_stats.0.count|default:0 }}</div><div class="kpi-l">Utilisateur le plus actif</div><div class="kpi-sub">{{ user_stats.0.user_name|default:"—" }}</div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-ic amber"><i class="fas fa-calendar-alt"></i></div>
+      <div><div class="kpi-v">{{ daily_activity|length }}</div><div class="kpi-l">Jours d'activité</div><div class="kpi-sub">30 derniers jours</div></div>
+    </div>
+  </div>
+
+  <!-- Répartition actions / objets -->
+  <div class="stx-grid">
+    <div class="card-x">
+      <div class="card-x-head"><i class="fas fa-tasks"></i><h2>Actions par type</h2></div>
+      <div class="card-x-body">
+        {% for stat in action_stats %}
+        <div class="bar-row">
+          <div class="bar-top"><span class="bar-name">{{ stat.name }}</span><span class="bar-count">{{ stat.count }}</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:{% widthratio stat.count total_actions 100 %}%"></div></div>
+        </div>
+        {% empty %}<div class="stx-empty">Aucune donnée</div>{% endfor %}
+      </div>
+    </div>
+
+    <div class="card-x">
+      <div class="card-x-head"><i class="fas fa-cubes"></i><h2>Actions par type d'objet</h2></div>
+      <div class="card-x-body">
+        {% for stat in object_stats %}
+        <div class="bar-row">
+          <div class="bar-top"><span class="bar-name">{{ stat.name }}</span><span class="bar-count">{{ stat.count }}</span></div>
+          <div class="bar-track"><div class="bar-fill amber" style="width:{% widthratio stat.count total_actions 100 %}%"></div></div>
+        </div>
+        {% empty %}<div class="stx-empty">Aucune donnée</div>{% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Top utilisateurs / activité 30 jours -->
+  <div class="stx-grid">
+    <div class="card-x">
+      <div class="card-x-head"><i class="fas fa-users"></i><h2>Top 10 des utilisateurs les plus actifs</h2></div>
+      <div class="card-x-body">
+        <table class="stx-table">
+          <thead><tr><th>#</th><th>Utilisateur</th><th>Rôle</th><th>Actions</th></tr></thead>
+          <tbody>
+            {% for u in user_stats %}
+            <tr>
+              <td><span class="rank {% if forloop.counter <= 3 %}top{% endif %}">{{ forloop.counter }}</span></td>
+              <td><div class="u-cell"><span class="u-av">{{ u.user_name|slice:":2"|upper }}</span><span>{{ u.user_name }}</span></div></td>
+              <td><span class="pill pill-role">{{ u.user_role }}</span></td>
+              <td><span class="pill pill-count">{{ u.count }}</span></td>
+            </tr>
+            {% empty %}<tr><td colspan="4"><div class="stx-empty">Aucune donnée</div></td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card-x">
+      <div class="card-x-head"><i class="fas fa-chart-line"></i><h2>Activité des 30 derniers jours</h2></div>
+      <div class="card-x-body">
+        <div class="day-scroll">
+          {% for day in daily_activity %}
+          <div class="day-row">
+            <span class="day-date">{{ day.date_only|date:"d/m/Y" }}</span>
+            <div class="day-track"><div class="bar-fill" style="width:{% widthratio day.count 50 100 %}%"></div></div>
+            <span class="day-count">{{ day.count }}</span>
+          </div>
+          {% empty %}<div class="stx-empty">Aucune activité récente</div>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="stx-actions">
+    <a href="{% url 'history_view' %}" class="btn-x"><i class="fas fa-arrow-left"></i> Retour à l'historique</a>
+    <button type="button" class="btn-x primary" onclick="window.print()"><i class="fas fa-print"></i> Imprimer</button>
+  </div>
+</div>
+{% endblock %}

@@ -4,230 +4,492 @@
 {% block title %}Gestion d'attribution des clés{% endblock %}
 
 {% block extra_css %}
-<style>
-/* Style personnalisé pour la page d'attribution des clés */
-.action-btn {
+/* ═══════════════════════════════════════════════════
+   PAGE CLÉS ATTRIBUÉES — design system EERE
+   IMPORTANT : ce bloc est deja injecte a l'interieur de la
+   balise principale de base.html. Ne JAMAIS rouvrir de balise
+   ici (cela invaliderait la regle suivante). CSS brut uniquement.
+═══════════════════════════════════════════════════ */
+:root {
+  --teal:       #3a9f87;
+  --teal-dark:  #2a7562;
+  --teal-light: #edf7f5;
+  --grad:       linear-gradient(135deg, #0d3028 0%, #1a5040 100%);
+  --orange:     #FFA500;
+  --orange-d:   #e8920a;
+  --bg-page:    #f8fafc;
+  --bg-white:   #ffffff;
+  --border:     #e8f0ed;
+  --border-2:   #e2e8f0;
+  --text:       #0f172a;
+  --text-2:     #64748b;
+  --text-3:     #94a3b8;
+  --red:        #dc2626;
+  --red-d:      #b91c1c;
+}
+
+/* ── SECTION ── */
+.attr-section {
+    width: 100%;
+    padding: 1.25rem 2rem 1.5rem;
+    box-sizing: border-box;
+    background: var(--bg-page);
+}
+.attr-messages { padding: 0; }
+
+/* ── HEADER vert ── */
+.attr-header {
+    background: var(--grad);
+    padding: 1rem 1.5rem;
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 1.25rem;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    border-radius: 12px;
 }
-.action-btn i {
-    margin-right: 5px;
+.attr-header-text { display: flex; flex-direction: column; gap: .15rem; }
+.attr-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: white;
+    font-weight: 400;
+    margin: 0;
+    white-space: nowrap;
 }
-.table-with-button-container {
+.attr-header p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .82rem;
+    color: rgba(255,255,255,.65);
+    margin: 0;
+}
+
+.btn-update-keys {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: .6rem 1.2rem;
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .2s, box-shadow .2s, transform .1s;
+}
+.btn-update-keys:hover:not(:disabled) {
+    background: var(--orange-d);
+    box-shadow: 0 4px 14px rgba(255,165,0,.35);
+    transform: translateY(-1px);
+}
+.btn-update-keys:active:not(:disabled) { transform: scale(.98); }
+.btn-update-keys:disabled {
+    background: rgba(255,255,255,.16);
+    color: rgba(255,255,255,.55);
+    cursor: not-allowed;
+}
+
+/* ── FILTRES ── */
+.attr-filters {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: flex-end;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-top: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
-.button-container {
-    margin-top: 10px;
+.filter-group { display: flex; flex-direction: column; gap: .35rem; flex: 1; min-width: 220px; }
+.filter-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text-3);
 }
-#delete-selected-btn {
-    margin-left: 115px;
+.filter-select {
+    width: 100%;
+    padding: .55rem 1rem;
+    border: 1.5px solid var(--border-2);
+    border-radius: 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    color: var(--text);
+    background: var(--bg-white);
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
 }
- 
-.flatpickr-calendar {
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    border-radius: 8px;
+.filter-select:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(58,159,135,.12);
 }
-.flatpickr-day {
-    transition: all 0.2s ease;
+
+/* ── MESSAGE d'attribution ── */
+#assignment-message {
+    margin-top: 1rem;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    background: var(--teal-light);
+    color: var(--teal-dark);
 }
-.flatpickr-day:hover {
-    background-color: #e9ecef;
-    border-radius: 50%;
+
+/* ── TABLE — identique Clés ── */
+.attr-table-wrap {
+    background: var(--bg-white);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    margin-top: 1rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
 }
-.flatpickr-day.selected {
-    background-color: var(--primary-color) !important;
-    color: white !important;
+#assigned-keys-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 820px;
+    margin: 0;
 }
-.modal-footer {
-    padding: 1rem;
+#assigned-keys-table thead th {
+    background-color: var(--teal) !important;
+    color: #ffffff !important;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: .75rem 1rem;
+    text-align: left;
+    vertical-align: middle;
+    border: none !important;
+    white-space: nowrap;
 }
-.form-control{
-    width: 415px;
-    margin-left: 180px;
+#assigned-keys-table thead th:first-child { border-radius: 10px 0 0 0; text-align: center; }
+#assigned-keys-table thead th:last-child  { border-radius: 0 10px 0 0; }
+#assigned-keys-table tbody tr {
+    border-bottom: 1px solid #f1f5f4;
+    border-left: 3px solid transparent;
+    transition: background .15s, border-left-color .15s;
 }
-.fa-file-pdf{
-    margin-right: auto;
+#assigned-keys-table tbody tr:last-child { border-bottom: none; }
+#assigned-keys-table tbody tr:nth-child(odd)  { background: #ffffff; }
+#assigned-keys-table tbody tr:nth-child(even) { background: #f8fffe; }
+#assigned-keys-table tbody tr:hover {
+    background: var(--teal-light);
+    border-left-color: var(--teal);
 }
-/* Styles pour le modal d'attribution */
-.key-item .key-details {
-    display: flex;
-    flex-direction: column;
+#assigned-keys-table tbody td {
+    padding: .72rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    color: var(--text);
+    vertical-align: middle;
+    border: none;
+    background: transparent !important;
 }
-.key-item .location-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    font-size: 0.7rem;
+#assigned-keys-table tbody td:first-child { text-align: center; font-weight: 700; color: #0d3028; }
+/* Ligne de message (placeholder / vide) */
+#assigned-keys-table tbody td[colspan] {
+    text-align: center !important;
+    color: var(--text-2);
+    padding: 2.5rem 1rem;
+    font-style: normal;
 }
+
+/* ── EXPORT — identique Clés ── */
+.export-section {
+    padding: 1.5rem 2rem 3rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg-page);
+}
+.export-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .78rem;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: .75rem;
+}
+.export-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-export {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: .65rem 1.25rem;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: box-shadow .2s, transform .1s, opacity .2s;
+}
+.btn-export:hover:not(:disabled) { transform: translateY(-1px); }
+.btn-export:active:not(:disabled) { transform: scale(.98); }
+.btn-export:disabled { opacity: .45; cursor: not-allowed; }
+.btn-export-pdf  { background: #fef2f2; color: var(--red); border: 1px solid rgba(220,38,38,.2); }
+.btn-export-pdf:hover:not(:disabled)  { box-shadow: 0 4px 12px rgba(220,38,38,.15); background: #fee2e2; }
+.btn-export-xlsx { background: #f0fdf4; color: #16a34a; border: 1px solid rgba(22,163,74,.2); }
+.btn-export-xlsx:hover:not(:disabled) { box-shadow: 0 4px 12px rgba(22,163,74,.15); background: #dcfce7; }
+
+/* ═══════════════════════════════════════════════════
+   MODAL — coque identique Équipes / Clés
+═══════════════════════════════════════════════════ */
+#keyModal .modal-content {
+    border: none;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,.2);
+}
+#keyModal .modal-header {
+    background: var(--grad);
+    border-bottom: none;
+    padding: 1.25rem 1.5rem;
+}
+#keyModal .modal-header .modal-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: white;
+    font-weight: 400;
+}
+#keyModal .modal-header .btn-close { filter: invert(1) brightness(2); opacity: .7; }
+#keyModal .modal-header .btn-close:hover { opacity: 1; }
+#keyModal .modal-body { padding: 1.25rem .5rem; background: white; }
+#keyModal .modal-footer {
+    background: #f8fffe;
+    border-top: 1px solid var(--border);
+    padding: 1rem 1.5rem;
+    gap: .6rem;
+}
+.modal-btn-cancel {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem; font-weight: 500;
+    padding: .6rem 1.25rem;
+    background: white;
+    border: 1.5px solid var(--border-2);
+    border-radius: 9px;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+.modal-btn-cancel:hover { background: var(--bg-page); border-color: #cbd5e1; }
+.modal-btn-save {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem; font-weight: 600;
+    padding: .6rem 1.35rem;
+    background: #e8920a;
+    border: none; border-radius: 9px;
+    color: white; cursor: pointer;
+    transition: background .2s, box-shadow .2s;
+}
+.modal-btn-save:hover { background: #d17e08; box-shadow: 0 4px 18px rgba(232,146,10,.4); }
+.modal-btn-danger {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem; font-weight: 600;
+    padding: .6rem 1.35rem;
+    background: var(--red);
+    border: none; border-radius: 9px;
+    color: white; cursor: pointer;
+    transition: background .2s, box-shadow .2s;
+}
+.modal-btn-danger:hover { background: var(--red-d); box-shadow: 0 4px 12px rgba(220,38,38,.25); }
+
+/* Date d'attribution dans la modal */
+#assignment-date {
+    padding: .6rem 1rem;
+    border: 1.5px solid var(--border-2);
+    border-radius: 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    transition: border-color .2s, box-shadow .2s;
+}
+#assignment-date:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(58,159,135,.12);
+    outline: none;
+}
+
+/* ── Contenu dynamique de la modal (injecté en JS) ── */
+.modal-xl { max-width: 90%; }
+.key-item .form-check-label { padding: 0; }
 .hover-highlight {
     position: relative;
-    transition: transform 0.2s;
-}
-.hover-highlight:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-/* Amélioration pour le modal d'attribution de clés */
-.modal-xl {
-    max-width: 90%; /* Augmenter encore plus la largeur sur grands écrans */
-}
-/* Amélioration des éléments clés dans le modal */
-.key-item .form-check-label {
-    padding: 0;
+    transition: transform .2s, box-shadow .2s, border-color .2s;
 }
 .key-item .hover-highlight {
     padding: 12px;
-    border-radius: 6px;
-    border-width: 2px !important;
+    border-radius: 9px;
+    border-width: 1.5px !important;
+    border-color: var(--border) !important;
 }
 .key-item .hover-highlight:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(58,159,135,.15);
+    border-color: var(--teal) !important;
 }
-.key-list {
-    padding-right: 10px;
+.key-item .location-badge {
+    position: absolute;
+    top: 8px; right: 8px;
+    font-size: 0.7rem;
 }
-/* Style pour le datepicker */
-#assignment-date {
-    padding: 8px;
-    border-radius: 4px;
-}
-/* Style pour le champ de recherche */
+.key-list { padding-right: 10px; }
 #keySearchInput {
-    padding: 10px;
-    border-radius: 20px;
-    border: 1px solid #ced4da;
-    padding-left: 40px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23adb5bd' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'%3E%3C/path%3E%3C/svg%3E");
+    padding: .65rem 1rem .65rem 2.4rem;
+    border-radius: 9px;
+    border: 1.5px solid var(--border-2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'%3E%3C/path%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: 12px center;
+    transition: border-color .2s, box-shadow .2s;
 }
-.page-header {
-    background-color: #f8f9fa;
-    padding: 30px 0;
-    margin-bottom: 30px;
-    border-bottom: 1px solid #e9ecef;
+#keySearchInput:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(58,159,135,.12);
+    outline: none;
 }
-.page-title {
-    color: var(--primary-color);
-    font-weight: 600;
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+    .attr-section { padding: .75rem; }
+    .attr-header { padding: 1rem; gap: .75rem; }
+    .attr-header h1 { font-size: 1.2rem; }
+    .btn-update-keys { margin-left: 0; width: 100%; justify-content: center; }
+    .attr-filters { padding: .85rem 1rem; gap: .85rem; }
+    .filter-group { min-width: 0; flex: 1 0 100%; }
+    .export-section { padding: 1.25rem .75rem 2rem; }
 }
-</style>
 {% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div class="container">
-        <h1 class="page-title">Gestion des clés attribuées</h1>
-        <p class="text-muted">Consultez et gérez les clés attribuées aux utilisateurs</p>
-    </div>
-</div>
-<div class="container mt-5">
-    <!-- Affichage des Messages d'alerte -->
+<div class="attr-section">
+
+    <!-- ══ MESSAGES ══ -->
     {% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <!-- Bouton pour fermer l'alerte -->
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+    <div class="attr-messages">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show mt-2" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
     {% endif %}
-    <!-- Formulaire pour sélectionner une équipe et un utilisateur -->
+
+    <!-- ══ HEADER vert ══ -->
+    <div class="attr-header">
+        <div class="attr-header-text">
+            <h1>Gestion des clés attribuées</h1>
+            <p>Consultez et gérez les clés attribuées aux utilisateurs</p>
+        </div>
+
+        <!-- Bouton Mise à jour des clés (activé dès qu'un utilisateur est choisi) -->
+        <button type="button" class="btn-update-keys" id="assign-key-btn"
+                data-bs-toggle="modal" data-bs-target="#keyModal" disabled>
+            <i class="fas fa-key" aria-hidden="true"></i> Mise à jour des clés
+        </button>
+    </div>
+
+    <!-- ══ FILTRES ══ -->
     <form method="get" action="{% url 'user_keys' %}">
-        <div class="row mb-4">
-            <!-- Conteneur flex pour aligner tous les éléments sur une ligne -->
-            <div class="d-flex align-items-end">
-                <!-- Dropdown pour sélectionner une Équipe -->
-                <div class="me-3 flex-grow-1">
-                    <label for="team-dropdown" class="form-label fw-bold">Sélectionner une Équipe :</label>
-                    <select id="team-dropdown" name="team_id" class="form-select">
-                        <option value="">-- Toutes les Équipes --</option>
-                        {% for team in teams %}
-                        <option value="{{ team.id }}" {% if team.id|stringformat:"s" == request.GET.team_id %}selected{% endif %}>
-                            {{ team.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <!-- Dropdown pour sélectionner un Utilisateur -->
-                <div class="me-3 flex-grow-1">
-                    <label for="user-dropdown" class="form-label fw-bold">Sélectionner un Utilisateur :</label>
-                    <select id="user-dropdown" name="user_id" class="form-select">
-                        <option value="">-- Tous les Utilisateurs --</option>
-                        {% for user in users %}
-                        <option value="{{ user.id }}" {% if user.id|stringformat:"s" == request.GET.user_id %}selected{% endif %}>
-                            {{ user.firstname }} {{ user.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <!-- Bouton pour Attribuer une Clé -->
-                <button type="button" class="btn btn-primary" id="assign-key-btn" data-bs-toggle="modal"
-                    data-bs-target="#keyModal" disabled>
-                    Mise à jour des clés
-                </button>
+        <div class="attr-filters">
+            <div class="filter-group">
+                <label for="team-dropdown" class="filter-label">Équipe</label>
+                <select id="team-dropdown" name="team_id" class="filter-select">
+                    <option value="">-- Toutes les équipes --</option>
+                    {% for team in teams %}
+                    <option value="{{ team.id }}" {% if team.id|stringformat:"s" == request.GET.team_id %}selected{% endif %}>
+                        {{ team.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="user-dropdown" class="filter-label">Utilisateur</label>
+                <select id="user-dropdown" name="user_id" class="filter-select">
+                    <option value="">-- Tous les utilisateurs --</option>
+                    {% for user in users %}
+                    <option value="{{ user.id }}" {% if user.id|stringformat:"s" == request.GET.user_id %}selected{% endif %}>
+                        {{ user.firstname }} {{ user.name }}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
     </form>
-    <!-- Message de confirmation caché pour les actions d'attribution -->
-    <div id="assignment-message" class="alert alert-success d-none" role="alert"></div>
-    <!-- Table pour afficher les clés attribuées à l'utilisateur sélectionné -->
-    <table class="table table-striped table-hover" id="assigned-keys-table">
-        <thead class="table-dark">
-            <tr>
-                <th scope="col">N°</th>
-                <th scope="col">Nom de la Clé</th>
-                <th scope="col">Emplacement</th>
-                <th scope="col">Location</th>
-                <th scope="col">Date d'attribution</th>
-                <th scope="col">Commentaires</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Si un utilisateur est sélectionné, afficher ses clés attribuées -->
-            {% if assigned_keys %}
-                {% for key in assigned_keys %}
+
+    <!-- Message de confirmation (affiché en JS) -->
+    <div id="assignment-message" class="alert d-none" role="alert"></div>
+
+    <!-- ══ TABLE des clés attribuées ══ -->
+    <div class="attr-table-wrap">
+        <table id="assigned-keys-table">
+            <thead>
                 <tr>
-                    <td>{{ key.key_type.number }}</td>
-                    <td>{{ key.key_type.name }}</td>
-                    <td>{{ key.key_type.place }}</td>
-                    <td>{{ key.location }}</td>
-                    <td>{{ key.assignment.assigned_date|date:"d-m-Y" }}</td>
-                    <td>{{ key.assignment.comments }}</td>
+                    <th scope="col">N°</th>
+                    <th scope="col">Nom de la clé</th>
+                    <th scope="col">Emplacement</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">Date d'attribution</th>
+                    <th scope="col">Commentaires</th>
                 </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="6" class="text-center">
-                        Veuillez sélectionner un utilisateur pour voir ses clés attribuées
-                    </td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
-    <!-- Boutons d'export -->
-    <div class="export-buttons" style="display: flex; justify-content: center; gap: 20px; margin: 40px 0; padding-bottom: 40px;">
-        <button id="generate-pdf-btn" class="btn btn-danger" style="min-width: 140px;" disabled>
-            <i class="fas fa-file-pdf"></i> Générer PDF
+            </thead>
+            <tbody>
+                {% if assigned_keys %}
+                    {% for key in assigned_keys %}
+                    <tr>
+                        <td>{{ key.key_type.number }}</td>
+                        <td>{{ key.key_type.name }}</td>
+                        <td>{{ key.key_type.place }}</td>
+                        <td>{{ key.location }}</td>
+                        <td>{{ key.assignment.assigned_date|date:"d-m-Y" }}</td>
+                        <td>{{ key.assignment.comments }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6">
+                            Veuillez sélectionner un utilisateur pour voir ses clés attribuées
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ══ EXPORT ══ -->
+<div class="export-section">
+    <p class="export-label">Exporter la fiche</p>
+    <div class="export-btns">
+        <button id="generate-pdf-btn" class="btn-export btn-export-pdf"
+                aria-label="Générer PDF de la fiche des clés attribuées" disabled>
+            <i class="fas fa-file-pdf" aria-hidden="true"></i> Générer PDF
         </button>
-        <button id="generate-xlsx-btn" class="btn btn-success" style="min-width: 140px;" disabled>
-            <i class="fas fa-file-excel"></i> Générer XLSX
+        <button id="generate-xlsx-btn" class="btn-export btn-export-xlsx"
+                aria-label="Générer XLSX de la fiche des clés attribuées" disabled>
+            <i class="fas fa-file-excel" aria-hidden="true"></i> Générer XLSX
         </button>
     </div>
 </div>
-<!-- Modal pour attribuer des clés -->
-<div class="modal fade bd-example-modal-lg" id="keyModal" role="dialog" tabindex="-1" aria-labelledby="assignKeyModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl"> <!-- Changé de modal-lg à modal-xl pour plus de largeur -->
+
+<!-- ══ MODAL — attribution des clés ══ -->
+<div class="modal fade" id="keyModal" role="dialog" tabindex="-1" aria-labelledby="assignKeyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <form method="post" action="{% url 'assign_keys' %}">
                 {% csrf_token %}
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-bold" id="assignKeyModalLabel">
-                        <i class="fas fa-key me-2"></i>Sélectionner les Clés à Attribuer
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assignKeyModalLabel">
+                        <i class="fas fa-key me-2" aria-hidden="true"></i>Sélectionner les clés à attribuer
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                 </div>
@@ -235,24 +497,23 @@
                     <!-- Le contenu sera chargé dynamiquement -->
                 </div>
                 <div class="form-group mb-3 px-3 text-center">
-                    <label for="assignment-date" class="form-label fw-bold mb-2">Date d'attribution:</label>
+                    <label for="assignment-date" class="form-label fw-bold mb-2">Date d'attribution :</label>
                     <div class="d-flex justify-content-center">
-                        <input 
-                            type="date" 
-                            id="assignment-date" 
-                            name="assignment_date" 
-                            class="form-control" 
+                        <input
+                            type="date"
+                            id="assignment-date"
+                            name="assignment_date"
                             style="width: 300px; margin: 0 auto;"
                         >
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger me-auto" id="remove-all-keys-btn">
-                        <i class="fas fa-trash"></i> Retirer toutes les clés
+                    <button type="button" class="modal-btn-danger me-auto" id="remove-all-keys-btn">
+                        <i class="fas fa-trash me-1" aria-hidden="true"></i> Retirer toutes les clés
                     </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i> Enregistrer les attributions
+                    <button type="button" class="modal-btn-cancel" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="modal-btn-save">
+                        <i class="fas fa-check me-1" aria-hidden="true"></i> Enregistrer les attributions
                     </button>
                 </div>
             </form>

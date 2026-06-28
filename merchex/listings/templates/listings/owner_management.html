@@ -1,148 +1,413 @@
 {% extends "listings/base.html" %}
 {% load static %}
 
-{% block title %}Gestion des Utilisateurs | Gestion des Clés{% endblock %}
+{% block title %}Gestion des utilisateurs | EERE{% endblock %}
+
+{% block extra_css %}
+/* ═══════════════════════════════════════════════════
+   PAGE GESTION DES UTILISATEURS — design system EERE
+   IMPORTANT : ce bloc est deja injecte a l'interieur de la
+   balise principale de base.html. Ne JAMAIS rouvrir de balise
+   ici (cela invaliderait la regle suivante). CSS brut uniquement.
+═══════════════════════════════════════════════════ */
+:root {
+  --teal:       #3a9f87;
+  --teal-dark:  #2a7562;
+  --teal-light: #edf7f5;
+  --grad:       linear-gradient(135deg, #0d3028 0%, #1a5040 100%);
+  --orange:     #FFA500;
+  --orange-d:   #e8920a;
+  --bg-page:    #f8fafc;
+  --bg-white:   #ffffff;
+  --border:     #e8f0ed;
+  --border-2:   #e2e8f0;
+  --text:       #0f172a;
+  --text-2:     #64748b;
+  --text-3:     #94a3b8;
+  --red:        #dc2626;
+  --red-d:      #b91c1c;
+}
+
+/* ── SECTION ── */
+.owner-section {
+    width: 100%;
+    padding: 1.25rem 2rem 1.5rem;
+    box-sizing: border-box;
+    background: var(--bg-page);
+}
+.owner-messages { padding: 0; }
+
+/* ── HEADER vert ── */
+.owner-header {
+    background: var(--grad);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    border-radius: 12px;
+}
+.owner-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: white;
+    font-weight: 400;
+    margin: 0;
+    white-space: nowrap;
+}
+.btn-add-owner {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: .55rem 1.1rem;
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background .2s, box-shadow .2s, transform .1s;
+}
+.btn-add-owner:hover {
+    background: var(--orange-d);
+    box-shadow: 0 4px 14px rgba(255,165,0,.35);
+    transform: translateY(-1px);
+    color: white;
+}
+.btn-add-owner:active { transform: scale(.98); }
+
+/* ── FILTRES ── */
+.owner-filters {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-top: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+.filter-group { display: flex; flex-direction: column; gap: .35rem; flex: 1; min-width: 200px; }
+.filter-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+}
+.owner-search-wrap { position: relative; }
+.owner-search-wrap i {
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-3);
+    font-size: .8rem;
+    pointer-events: none;
+}
+.owner-search-wrap input { padding-left: 2.2rem !important; }
+.filter-select, .filter-input {
+    width: 100%;
+    padding: .55rem 1rem;
+    border: 1.5px solid var(--border-2);
+    border-radius: 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    color: var(--text);
+    background: var(--bg-white);
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+}
+.filter-select:focus, .filter-input:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(58,159,135,.12);
+}
+
+/* ── TABLE — identique Clés / Détenteurs ── */
+.owner-table-wrap {
+    background: var(--bg-white);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    margin-top: 1rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
+}
+#usersTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 900px;
+    margin: 0;
+}
+#usersTable thead th {
+    background-color: var(--teal) !important;
+    color: #ffffff !important;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: .75rem 1rem;
+    text-align: left;
+    vertical-align: middle;
+    border: none !important;
+    white-space: nowrap;
+}
+#usersTable thead th:last-child { text-align: center; }
+#usersTable thead th:first-child { border-radius: 10px 0 0 0; }
+#usersTable thead th:last-child  { border-radius: 0 10px 0 0; }
+#usersTable tbody tr {
+    border-bottom: 1px solid #f1f5f4;
+    border-left: 3px solid transparent;
+    transition: background .15s, border-left-color .15s;
+}
+#usersTable tbody tr:last-child { border-bottom: none; }
+#usersTable tbody tr:nth-child(odd)  { background: #ffffff; }
+#usersTable tbody tr:nth-child(even) { background: #f8fffe; }
+#usersTable tbody tr:hover {
+    background: var(--teal-light);
+    border-left-color: var(--teal);
+}
+#usersTable tbody td {
+    padding: .72rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    color: var(--text);
+    vertical-align: middle;
+    border: none;
+    background: transparent !important;
+}
+#usersTable tbody td:first-child { font-weight: 600; color: #0d3028; }
+#usersTable tbody td[colspan] {
+    text-align: center !important;
+    color: var(--text-2);
+    padding: 2.5rem 1rem;
+}
+
+/* Badges (classes Bootstrap conservées pour le filtrage JS, look retravaillé) */
+#usersTable .badge {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: .74rem;
+    padding: .32rem .7rem;
+    border-radius: 50px;
+    letter-spacing: .01em;
+}
+#usersTable .badge.bg-danger    { background: #fef2f2 !important; color: #b91c1c !important; }
+#usersTable .badge.bg-warning   { background: #fff7ed !important; color: #b45309 !important; }
+#usersTable .badge.bg-info      { background: var(--teal-light) !important; color: var(--teal-dark) !important; }
+#usersTable .badge.bg-success   { background: #f0fdf4 !important; color: #16a34a !important; }
+#usersTable .badge.bg-secondary { background: #f1f5f9 !important; color: #64748b !important; }
+
+/* Actions */
+#usersTable td.cell-actions { text-align: center; }
+.owner-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.owner-act {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: 1.5px solid;
+    font-size: .82rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all .18s ease;
+}
+.owner-act-edit { background: var(--teal-light); border-color: rgba(58,159,135,.25); color: var(--teal-dark); }
+.owner-act-edit:hover { background: var(--teal); border-color: var(--teal); color: white; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(58,159,135,.3); }
+.owner-act-del { background: #fef2f2; border-color: rgba(220,38,38,.25); color: var(--red); }
+.owner-act-del:hover { background: var(--red); border-color: var(--red); color: white; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(220,38,38,.3); }
+.owner-act-self { background: #f1f5f9; border-color: var(--border-2); color: var(--text-3); cursor: not-allowed; }
+
+/* ── PAGINATION ── */
+.owner-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.25rem;
+}
+.page-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: .5rem 1rem;
+    border: 1.5px solid var(--border-2);
+    border-radius: 9px;
+    background: var(--bg-white);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all .18s ease;
+}
+.page-btn:hover { border-color: var(--teal); color: var(--teal-dark); background: var(--teal-light); }
+.page-btn.disabled { opacity: .4; pointer-events: none; }
+.page-info {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem;
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 768px) {
+    .owner-section { padding: .75rem; }
+    .owner-header { padding: 1rem; gap: .75rem; }
+    .owner-header h1 { font-size: 1.2rem; }
+    .btn-add-owner { margin-left: 0; width: 100%; justify-content: center; }
+    .owner-filters { padding: .85rem 1rem; }
+    .filter-group { min-width: 0; flex: 1 0 100%; }
+}
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="row">
-        <!-- Barre latérale (optionnelle) -->
-        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-            <div class="position-sticky pt-3">
-                <h5 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-3 mb-2 text-muted">
-                    <span>Administration</span>
-                </h5>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'owner_management' %}">
-                            <i class="fas fa-users me-2"></i> Utilisateurs
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'team_list' %}">
-                            <i class="fas fa-user-friends me-2"></i> Équipes
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'key_list' %}">
-                            <i class="fas fa-key me-2"></i> Gestion des clés
-                        </a>
-                    </li>
-                </ul>
+<div class="owner-section">
+
+    <!-- ══ MESSAGES ══ -->
+    {% if messages %}
+    <div class="owner-messages">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show mt-2" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ══ HEADER vert ══ -->
+    <div class="owner-header">
+        <h1>Gestion des utilisateurs</h1>
+        <a href="{% url 'add_owner' %}" class="btn-add-owner" aria-label="Ajouter un nouvel utilisateur">
+            <i class="fas fa-plus" aria-hidden="true"></i> Ajouter un utilisateur
+        </a>
+    </div>
+
+    <!-- ══ FILTRES ══ -->
+    <div class="owner-filters">
+        <div class="filter-group">
+            <label for="searchInput" class="filter-label">Rechercher</label>
+            <div class="owner-search-wrap">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input type="text" id="searchInput" class="filter-input"
+                       placeholder="Nom, prénom, identifiant ou email..." aria-label="Rechercher un utilisateur">
             </div>
         </div>
-
-        <!-- Contenu principal -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Gestion des utilisateurs de l'application</h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <a href="{% url 'add_owner' %}" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i> Ajouter un utilisateur
-                    </a>
-                </div>
-            </div>
-
-            <!-- Messages d'alerte -->
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-            <!-- Filtre et recherche -->
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text" id="search-addon">
-                            <i class="fas fa-search"></i>
-                        </span>
-                        <input type="text" id="searchInput" class="form-control" placeholder="Rechercher un utilisateur..." aria-label="Rechercher">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <select id="roleFilter" class="form-select">
-                        <option value="">Tous les rôles</option>
-                        <option value="admin">Administrateurs</option>
-                        <option value="editor">Éditeurs</option>
-                        <option value="visitor">Visiteurs</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <select id="statusFilter" class="form-select">
-                        <option value="">Tous les statuts</option>
-                        <option value="active">Actifs</option>
-                        <option value="inactive">Inactifs</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Tableau des utilisateurs -->
-            <div class="card shadow-sm">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0" id="usersTable">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Nom</th>
-                                    <th>Prénom</th>
-                                    <th>Identifiant</th>
-                                    <th>Email</th>
-                                    <th>Rôle</th>
-                                    <th>Statut</th>
-                                    <th class="text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for user_obj in owners %}
-                                <tr>
-                                    <td>{{ user_obj.last_name }}</td>
-                                    <td>{{ user_obj.first_name }}</td>
-                                    <td>{{ user_obj.username }}</td>
-                                    <td>{{ user_obj.email }}</td>
-                                    <td>
-                                        <span class="badge {% if user_obj.role == 'admin' %}bg-danger{% elif user_obj.role == 'editor' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
-                                            {{ user_obj.get_role_display }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge {% if user_obj.is_active %}bg-success{% else %}bg-secondary{% endif %}">
-                                            {% if user_obj.is_active %}Actif{% else %}Inactif{% endif %}
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <a href="{% url 'edit_owner' user_obj.id %}" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            
-                                            {% if user_obj.id != user.id %}
-                                            <a href="{% url 'delete_owner' user_obj.id %}" class="btn btn-sm btn-outline-danger">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                            {% else %}
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" disabled title="Vous ne pouvez pas supprimer votre propre compte">
-                                                <i class="fas fa-user-check"></i>
-                                            </button>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="7" class="text-center py-4">Aucun utilisateur trouvé.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </main>
+        <div class="filter-group">
+            <label for="roleFilter" class="filter-label">Rôle</label>
+            <select id="roleFilter" class="filter-select">
+                <option value="">Tous les rôles</option>
+                <option value="admin">Administrateurs</option>
+                <option value="editor">Éditeurs</option>
+                <option value="visitor">Visiteurs</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="statusFilter" class="filter-label">Statut</label>
+            <select id="statusFilter" class="filter-select">
+                <option value="">Tous les statuts</option>
+                <option value="active">Actifs</option>
+                <option value="inactive">Inactifs</option>
+            </select>
+        </div>
     </div>
+
+    <!-- ══ TABLE ══ -->
+    <div class="owner-table-wrap">
+        <table id="usersTable">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Identifiant</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user_obj in owners %}
+                <tr>
+                    <td>{{ user_obj.last_name }}</td>
+                    <td>{{ user_obj.first_name }}</td>
+                    <td>{{ user_obj.username }}</td>
+                    <td>{{ user_obj.email }}</td>
+                    <td>
+                        <span class="badge {% if user_obj.role == 'admin' %}bg-danger{% elif user_obj.role == 'editor' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
+                            {{ user_obj.get_role_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge {% if user_obj.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                            {% if user_obj.is_active %}Actif{% else %}Inactif{% endif %}
+                        </span>
+                    </td>
+                    <td class="cell-actions">
+                        <div class="owner-actions">
+                            <a href="{% url 'edit_owner' user_obj.id %}" class="owner-act owner-act-edit"
+                               aria-label="Modifier {{ user_obj.username }}" title="Modifier">
+                                <i class="fas fa-edit" aria-hidden="true"></i>
+                            </a>
+                            {% if user_obj.id != user.id %}
+                            <a href="{% url 'delete_owner' user_obj.id %}" class="owner-act owner-act-del"
+                               aria-label="Supprimer {{ user_obj.username }}" title="Supprimer">
+                                <i class="fas fa-trash" aria-hidden="true"></i>
+                            </a>
+                            {% else %}
+                            <button type="button" class="owner-act owner-act-self" disabled
+                                    title="Vous ne pouvez pas supprimer votre propre compte">
+                                <i class="fas fa-user-check" aria-hidden="true"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">Aucun utilisateur trouvé.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ══ PAGINATION ══ -->
+    {% if owners.paginator.num_pages > 1 %}
+    <nav class="owner-pagination" aria-label="Pagination des utilisateurs">
+        {% if owners.has_previous %}
+        <a href="?page={{ owners.previous_page_number }}" class="page-btn">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i> Précédent
+        </a>
+        {% else %}
+        <span class="page-btn disabled"><i class="fas fa-arrow-left" aria-hidden="true"></i> Précédent</span>
+        {% endif %}
+
+        <span class="page-info">Page {{ owners.number }} sur {{ owners.paginator.num_pages }}</span>
+
+        {% if owners.has_next %}
+        <a href="?page={{ owners.next_page_number }}" class="page-btn">
+            Suivant <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </a>
+        {% else %}
+        <span class="page-btn disabled">Suivant <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+        {% endif %}
+    </nav>
+    {% endif %}
 </div>
 
 <script>
@@ -151,32 +416,32 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('searchInput').addEventListener('keyup', function() {
         filterUsers();
     });
-    
+
     // Filtres par rôle et statut
     document.getElementById('roleFilter').addEventListener('change', function() {
         filterUsers();
     });
-    
+
     document.getElementById('statusFilter').addEventListener('change', function() {
         filterUsers();
     });
-    
+
     function filterUsers() {
         const searchValue = document.getElementById('searchInput').value.toLowerCase();
         const roleFilter = document.getElementById('roleFilter').value;
         const statusFilter = document.getElementById('statusFilter').value;
-        
+
         const table = document.getElementById('usersTable');
         const rows = table.getElementsByTagName('tr');
-        
+
         for (let i = 1; i < rows.length; i++) {
             let row = rows[i];
-            
+
             // Ignorer les lignes "Aucun utilisateur trouvé"
             if (row.cells.length === 1) continue;
-            
+
             let showRow = true;
-            
+
             // Filtrer par texte de recherche
             if (searchValue) {
                 let found = false;
@@ -188,12 +453,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 if (!found) showRow = false;
             }
-            
+
             // Filtrer par rôle
             if (roleFilter && showRow) {
                 const roleBadge = row.cells[4].querySelector('.badge');
                 let roleValue = '';
-                
+
                 if (roleBadge.classList.contains('bg-danger')) {
                     roleValue = 'admin';
                 } else if (roleBadge.classList.contains('bg-warning')) {
@@ -201,20 +466,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     roleValue = 'visitor';
                 }
-                
+
                 if (roleFilter !== roleValue) showRow = false;
             }
-            
+
             // Filtrer par statut
             if (statusFilter && showRow) {
                 const statusBadge = row.cells[5].querySelector('.badge');
                 const isActive = statusBadge.classList.contains('bg-success');
-                
+
                 if ((statusFilter === 'active' && !isActive) || (statusFilter === 'inactive' && isActive)) {
                     showRow = false;
                 }
             }
-            
+
             // Afficher ou masquer la ligne
             row.style.display = showRow ? '' : 'none';
         }

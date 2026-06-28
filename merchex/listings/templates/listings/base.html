@@ -14,9 +14,14 @@
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Polices de marque EERE : DM Serif Display (titres) + DM Sans (interface) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
     
     <!-- CSS personnalisé -->
     <style>
@@ -344,5 +349,141 @@
     
     <!-- Scripts supplémentaires par page -->
     {% block extra_js %}{% endblock %}
+
+    <!-- ══ CUBE LOADER ══ -->
+    <style>
+    #page-loader {
+        position: fixed;
+        inset: 0;
+        background: rgba(7, 28, 20, 0.93);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        z-index: 9999;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        opacity: 0;
+        transition: opacity .25s ease;
+    }
+    #page-loader.visible { opacity: 1; }
+
+    /* ── Scène 3D ── */
+    .cube-scene {
+        width: 64px; height: 64px;
+        perspective: 200px;
+    }
+    .cube {
+        width: 64px; height: 64px;
+        position: relative;
+        transform-style: preserve-3d;
+        animation: cubeRotate 2.4s cubic-bezier(.6,0,.4,1) infinite;
+    }
+    @keyframes cubeRotate {
+        0%   { transform: rotateX(-20deg) rotateY(0deg); }
+        25%  { transform: rotateX(-20deg) rotateY(90deg); }
+        50%  { transform: rotateX(-20deg) rotateY(180deg); }
+        75%  { transform: rotateX(-20deg) rotateY(270deg); }
+        100% { transform: rotateX(-20deg) rotateY(360deg); }
+    }
+    .cube-face {
+        position: absolute;
+        width: 64px; height: 64px;
+        border-radius: 6px;
+        border: 1.5px solid rgba(255,255,255,.18);
+    }
+    .cube-face-front  { background: rgba(58,159,135,.85);  transform: translateZ(32px); }
+    .cube-face-back   { background: rgba(13,48,40,.9);     transform: rotateY(180deg) translateZ(32px); }
+    .cube-face-right  { background: rgba(42,117,98,.85);   transform: rotateY(90deg)  translateZ(32px); }
+    .cube-face-left   { background: rgba(26,80,64,.85);    transform: rotateY(-90deg) translateZ(32px); }
+    .cube-face-top    { background: rgba(255,165,0,.75);   transform: rotateX(90deg)  translateZ(32px); }
+    .cube-face-bottom { background: rgba(58,159,135,.5);   transform: rotateX(-90deg) translateZ(32px); }
+
+    /* ── Texte ── */
+    .loader-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: .55rem;
+    }
+    .loader-text {
+        font-family: 'DM Sans', sans-serif;
+        font-size: .92rem;
+        font-weight: 500;
+        color: rgba(255,255,255,.9);
+        letter-spacing: .04em;
+    }
+    .loader-dots {
+        display: flex;
+        gap: 5px;
+    }
+    .loader-dots span {
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: #3a9f87;
+        animation: dotBounce 1.4s ease-in-out infinite;
+    }
+    .loader-dots span:nth-child(2) { animation-delay: .2s; background: #FFA500; }
+    .loader-dots span:nth-child(3) { animation-delay: .4s; }
+    @keyframes dotBounce {
+        0%, 80%, 100% { transform: translateY(0); opacity: .4; }
+        40%            { transform: translateY(-6px); opacity: 1; }
+    }
+    </style>
+
+    <!-- Overlay HTML -->
+    <div id="page-loader" role="status" aria-live="polite" aria-label="Chargement en cours">
+        <div class="cube-scene">
+            <div class="cube">
+                <div class="cube-face cube-face-front"></div>
+                <div class="cube-face cube-face-back"></div>
+                <div class="cube-face cube-face-right"></div>
+                <div class="cube-face cube-face-left"></div>
+                <div class="cube-face cube-face-top"></div>
+                <div class="cube-face cube-face-bottom"></div>
+            </div>
+        </div>
+        <div class="loader-label">
+            <span class="loader-text">Chargement de la page en cours</span>
+            <div class="loader-dots">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        const loader  = document.getElementById('page-loader');
+        const keyHref = document.getElementById('menu-key_list')?.href || '';
+
+        function showLoader() {
+            loader.style.display = 'flex';
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () { loader.classList.add('visible'); });
+            });
+        }
+
+        function hideLoader() {
+            loader.classList.remove('visible');
+            setTimeout(function () { loader.style.display = 'none'; }, 260);
+        }
+
+        // Déclenche UNIQUEMENT sur le lien "Gestion des clés" du menu de navigation
+        const keyNavLink = document.getElementById('menu-key_list');
+        if (keyNavLink) {
+            keyNavLink.addEventListener('click', function () {
+                showLoader();
+            });
+        }
+
+        // Cache le loader dès que la page est prête
+        window.addEventListener('pageshow', hideLoader);
+        window.addEventListener('load',     hideLoader);
+
+        // Cas où l'utilisateur revient en arrière (bouton Retour navigateur)
+        window.addEventListener('popstate', hideLoader);
+    })();
+    </script>
 </body>
 </html>
