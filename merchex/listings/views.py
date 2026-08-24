@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Case, When, Value, CharField, F, Count
+from django.db import IntegrityError
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from .models import KeyType, KeyInstance, KeyAssignment, User, Team, Owner
@@ -685,17 +686,32 @@ def assign_keys(request):
                 try:
                     key_instance = KeyInstance.objects.get(
                         id=key_instance_id, is_available=True)
+                except KeyInstance.DoesNotExist:
+                    # L'instance n'existe pas ou n'est pas disponible
+                    continue
 
-                    # Créer l'attribution - la méthode save() va maintenant gérer les compteurs
+                # key_instance est un OneToOneField : une clé rendue conserve sa
+                # ligne d'attribution (désactivée). En créer une seconde violerait
+                # la contrainte d'unicité, on réactive donc celle qui existe.
+                assignment = KeyAssignment.objects.filter(
+                    key_instance=key_instance).first()
+
+                if assignment is None:
+                    # La méthode save() du modèle gère les compteurs
                     KeyAssignment.objects.create(
                         key_instance=key_instance,
                         user=user,
                         assigned_date=assignment_date,  # Maintenant c'est un objet date
                         is_active=True
                     )
-                except KeyInstance.DoesNotExist:
-                    # L'instance n'existe pas ou n'est pas disponible
-                    continue
+                else:
+                    assignment.user = user
+                    assignment.assigned_date = assignment_date
+                    assignment.return_date = None
+                    assignment.is_active = True
+                    # Le commentaire visait le détenteur précédent
+                    assignment.comments = ''
+                    assignment.save()
 
         # Récupérer la liste mise à jour des clés
         updated_assignments = KeyAssignment.objects.filter(
@@ -729,14 +745,30 @@ def assign_keys(request):
             'success': False,
             'message': 'Format JSON invalide'
         }, status=400)
+    except IntegrityError as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Conflit d'intégrité dans assign_keys: {str(e)}",
+                     exc_info=True)
+
+        return JsonResponse({
+            'success': False,
+            'message': ("Cette clé est déjà rattachée à une attribution existante. "
+                        "Rechargez la page puis réessayez ; si le problème persiste, "
+                        "signalez-le à l'administrateur.")
+        }, status=409)
     except Exception as e:
         import logging
         logger = logging.getLogger(__name__)
         logger.error(f"Erreur dans assign_keys: {str(e)}", exc_info=True)
 
+        # Le détail technique reste dans les logs : l'interface reçoit un
+        # message compréhensible par un administrateur non technicien.
         return JsonResponse({
             'success': False,
-            'message': f'Erreur serveur: {str(e)}'
+            'message': ("L'enregistrement des attributions a échoué. "
+                        "Rechargez la page puis réessayez ; si le problème persiste, "
+                        "signalez-le à l'administrateur.")
         }, status=500)
 
 

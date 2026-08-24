@@ -143,6 +143,18 @@
     color: var(--teal-dark);
 }
 
+/* ── ERREUR d'attribution (dans la modale) ── */
+#assignment-error {
+    padding: .75rem 1rem;
+    border: 1px solid rgba(220,38,38,.2);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    line-height: 1.45;
+    background: #fef2f2;
+    color: #dc2626;
+}
+
 /* ── TABLE — identique Clés ── */
 .attr-table-wrap {
     background: var(--bg-white);
@@ -507,6 +519,7 @@
                         >
                     </div>
                 </div>
+                <div id="assignment-error" class="d-none mx-3 mb-3" role="alert"></div>
                 <div class="modal-footer">
                     <button type="button" class="modal-btn-danger me-auto" id="remove-all-keys-btn">
                         <i class="fas fa-trash me-1" aria-hidden="true"></i> Retirer toutes les clés
@@ -836,7 +849,12 @@
             const userId = parseInt(userDropdown.value);
             const assignmentDate = document.getElementById('assignment-date').value;
             const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
-        
+
+            // Repartir d'une modale sans erreur affichée
+            const errorElement = document.getElementById('assignment-error');
+            errorElement.textContent = '';
+            errorElement.classList.add('d-none');
+
             fetch('{% url "assign_keys" %}', {
                 method: 'POST',
                 headers: {
@@ -849,29 +867,34 @@
                     assignment_date: assignmentDate
                 })
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erreur de requête: ' + response.status);
+            .then(async response => {
+                // Toujours lire le corps : le serveur y place un message
+                // explicite, y compris quand le statut est en erreur.
+                const data = await response.json().catch(() => null);
+                if (!response.ok || !data || !data.success) {
+                    throw new Error(
+                        (data && data.message) ||
+                        `Le serveur a répondu une erreur (${response.status}).`
+                    );
                 }
-                return response.json();
+                return data;
             })
             .then(data => {
-                if (data.success) {
-                    bootstrap.Modal.getInstance(keyModal).hide();
-                    loadAssignedKeys(userId);
-                    const messageElement = document.getElementById('assignment-message');
-                    messageElement.textContent = data.message;
-                    messageElement.classList.remove('d-none');
-                    setTimeout(() => {
-                        messageElement.classList.add('d-none');
-                    }, 3000);
-                } else {
-                    alert(data.message || 'Une erreur est survenue');
-                }
+                bootstrap.Modal.getInstance(keyModal).hide();
+                loadAssignedKeys(userId);
+                const messageElement = document.getElementById('assignment-message');
+                messageElement.textContent = data.message;
+                messageElement.classList.remove('d-none');
+                setTimeout(() => {
+                    messageElement.classList.add('d-none');
+                }, 3000);
             })
             .catch(error => {
                 console.error('Erreur lors de la mise à jour des clés:', error);
-                alert('Une erreur est survenue lors de la mise à jour des clés: ' + error.message);
+                // La modale reste ouverte : le message s'affiche dedans,
+                // les sélections de l'utilisateur sont préservées.
+                errorElement.textContent = error.message;
+                errorElement.classList.remove('d-none');
             });
         });
         
@@ -1043,51 +1066,146 @@
             
             const doc = new jsPDF('p', 'mm', 'a4');
             const assignedKeysTable = document.getElementById('assigned-keys-table');
-            
+            const SCALE = 2;
+
+            // Frontières de découpe possibles : le bas de chaque ligne du
+            // tableau, pour ne jamais couper une clé en deux entre 2 pages.
+            const tableTopPx = assignedKeysTable.getBoundingClientRect().top;
+            const rowBounds = Array.from(assignedKeysTable.querySelectorAll('tr'))
+                .map(tr => (tr.getBoundingClientRect().bottom - tableTopPx) * SCALE);
+
             html2canvas(assignedKeysTable, {
-                scale: 2,
+                scale: SCALE,
                 useCORS: true
             }).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                
+                // ── Géométrie de la page ──────────────────────────────
+                // Chaque bloc a une hauteur réservée : le tableau ne peut
+                // plus déborder sur l'encadré, la signature ni le pied de
+                // page (ce qui faisait atterrir la mention légale au milieu
+                // de l'encadré commentaires).
                 const pageWidth = 210;
                 const pageHeight = 297;
-                
-                // En-tête avec équipe, utilisateur et date
-                doc.setFontSize(12);
-                doc.text(`Équipe: ${teamName}`, 10, 15);
-                doc.text(`Nom: ${userName}`, 10, 22);
-                doc.text(`Date: ${today}`, 10, 29);
-                
-                // Titre principal
-                doc.setFontSize(16);
-                doc.text('Récapitulatif des clés attribuées', pageWidth / 2, 40, { align: 'center' });
-                
-                const imgWidth = pageWidth - 20;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                
-                doc.addImage(imgData, 'PNG', 10, 50, imgWidth, imgHeight);
-                
-                // Encadré commentaires
-                const commentBoxY = 50 + imgHeight + 10;
+                const MARGIN = 10;
+                const TABLE_TOP = 50;   // haut du tableau, 1re page
+                const CONT_TOP = 25;    // haut du tableau, pages suivantes
+                const COMMENT_H = 45;   // encadré commentaires
+                const SIGN_H = 18;      // bande signature sous l'encadré
+                const FOOTER_H = 22;    // mentions légales en pied de page
+                const contentWidth = pageWidth - MARGIN * 2;
+                const pxPerMm = canvas.width / contentWidth;
+
+                const sliceCanvas = document.createElement('canvas');
+                const sliceCtx = sliceCanvas.getContext('2d');
+
+                function drawHeader(isFirstPage) {
+                    doc.setTextColor(0);
+                    doc.setFont('helvetica', 'normal');
+                    if (isFirstPage) {
+                        doc.setFontSize(12);
+                        doc.text(`Équipe: ${teamName}`, MARGIN, 15);
+                        doc.text(`Nom: ${userName}`, MARGIN, 22);
+                        doc.text(`Date: ${today}`, MARGIN, 29);
+                        doc.setFontSize(16);
+                        doc.text('Récapitulatif des clés attribuées',
+                                 pageWidth / 2, 40, { align: 'center' });
+                    } else {
+                        doc.setFontSize(11);
+                        doc.text(`Récapitulatif des clés attribuées — ${userName} (suite)`,
+                                 pageWidth / 2, 15, { align: 'center' });
+                    }
+                }
+
+                // Dessine une tranche du tableau (coordonnées source en px)
+                function drawSlice(sourceY, sourceH, destY) {
+                    sliceCanvas.width = canvas.width;
+                    sliceCanvas.height = sourceH;
+                    sliceCtx.clearRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+                    sliceCtx.drawImage(canvas, 0, sourceY, canvas.width, sourceH,
+                                       0, 0, canvas.width, sourceH);
+                    doc.addImage(sliceCanvas.toDataURL('image/png'), 'PNG',
+                                 MARGIN, destY, contentWidth, sourceH / pxPerMm);
+                }
+
+                // ── Tableau réparti sur autant de pages que nécessaire ──
+                // Le tableau garde sa taille réelle : un grand nombre de clés
+                // ajoute des pages au lieu de rendre le texte minuscule.
+                let sourceY = 0;
+                let pageIndex = 0;
+                let lastBottom = TABLE_TOP;
+
+                while (sourceY < canvas.height) {
+                    if (pageIndex > 0) doc.addPage();
+                    const top = pageIndex === 0 ? TABLE_TOP : CONT_TOP;
+                    drawHeader(pageIndex === 0);
+
+                    const availPx = Math.floor((pageHeight - top - FOOTER_H - 5) * pxPerMm);
+                    let sourceH = Math.min(canvas.height - sourceY, availPx);
+
+                    // S'il reste du tableau après cette page, couper au bas
+                    // de la dernière ligne entièrement visible.
+                    if (sourceH < canvas.height - sourceY) {
+                        const cut = rowBounds
+                            .filter(b => b > sourceY + 1 && b <= sourceY + availPx)
+                            .pop();
+                        if (cut) sourceH = Math.round(cut - sourceY);
+                    }
+
+                    drawSlice(sourceY, sourceH, top);
+                    lastBottom = top + sourceH / pxPerMm;
+                    sourceY += sourceH;
+                    pageIndex++;
+                }
+
+                // ── Encadré commentaires + signature, après le tableau ──
+                let trailerTop = lastBottom + 10;
+                if (trailerTop + COMMENT_H + SIGN_H > pageHeight - FOOTER_H) {
+                    doc.addPage();
+                    drawHeader(false);
+                    trailerTop = CONT_TOP;
+                }
+
                 doc.setDrawColor(0);
                 doc.setLineWidth(0.1);
-                doc.rect(10, commentBoxY, imgWidth, 50);
-                
+                doc.rect(MARGIN, trailerTop, contentWidth, COMMENT_H);
+
+                doc.setTextColor(0);
                 doc.setFontSize(10);
-                doc.text('Commentaires :', 15, commentBoxY + 10);
-                
-                // Signature
-                doc.setFontSize(10);
-                doc.text('Signature :', 140, commentBoxY + 80);
-                doc.line(160, commentBoxY + 80, 190, commentBoxY + 80);
-                
-                // Pied de page avec informations légales
-                doc.setFontSize(8);
-                doc.setTextColor(100);
-                doc.text('Ce document atteste de l\'attribution des clés ci-dessus à l\'utilisateur mentionné.', pageWidth/2, pageHeight - 20, { align: 'center' });
-                doc.text('Église Évangélique Rencontre Espérance - Document généré le ' + today, pageWidth/2, pageHeight - 15, { align: 'center' });
-                
+                doc.text('Commentaires :', MARGIN + 5, trailerTop + 8);
+
+                const signatureY = trailerTop + COMMENT_H + 12;
+                doc.text('Signature :', 140, signatureY);
+                doc.line(160, signatureY, 190, signatureY);
+
+                // ── Mentions légales, en pied de chaque page ───────────
+                const totalPages = doc.getNumberOfPages();
+                for (let p = 1; p <= totalPages; p++) {
+                    doc.setPage(p);
+                    doc.setTextColor(90);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(8);
+                    doc.text('Église Évangélique Rencontre Espérance - Document généré le ' + today,
+                             pageWidth / 2, pageHeight - 12, { align: 'center' });
+                    doc.text(`Page ${p}/${totalPages}`,
+                             pageWidth - MARGIN, pageHeight - 12, { align: 'right' });
+
+                    // Attestation : italique, plus petite que le corps du
+                    // document mais assez grande pour rester lisible à l'œil
+                    // nu. Elle accompagne la signature, donc sur la dernière
+                    // page uniquement.
+                    if (p === totalPages) {
+                        doc.setFont('helvetica', 'italic');
+                        doc.setFontSize(8.5);
+                        const attestation = doc.splitTextToSize(
+                            'Ce document atteste de l\'attribution des clés ci-dessus à l\'utilisateur mentionné.',
+                            contentWidth);
+                        doc.text(attestation, pageWidth / 2,
+                                 pageHeight - 18 - (attestation.length - 1) * 4,
+                                 { align: 'center' });
+                        doc.setFont('helvetica', 'normal');
+                    }
+                }
+                doc.setTextColor(0);
+
                 // Nom du fichier basé sur l'utilisateur et la date
                 const fileName = `Cles_${userName.replace(/\s+/g, '_')}_${today.replace(/\//g, '-')}.pdf`;
                 doc.save(fileName);

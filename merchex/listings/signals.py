@@ -299,8 +299,10 @@ def log_keyassignment_save(sender, instance, created, **kwargs):
         )
     else:
         old_values = _old_values.get(f"keyassignment_{instance.id}", {})
+        was_active = old_values.get('is_active')
+
         # Vérifier si l'attribution a été désactivée (retour de clé)
-        if old_values.get('is_active') and not instance.is_active and instance.return_date:
+        if was_active and not instance.is_active and instance.return_date:
             log_action(
                 user=current_user,
                 action_type='UNASSIGN',
@@ -308,6 +310,24 @@ def log_keyassignment_save(sender, instance, created, **kwargs):
                 object_id=instance.id,
                 object_name=f"Clé {get_object_representation(instance.key_instance)} ← {get_object_representation(instance.user)}",
                 description=f"Retour de la clé {get_object_representation(instance.key_instance)} par {get_object_representation(instance.user)} le {instance.return_date.strftime('%d/%m/%Y')}",
+                old_values=old_values,
+                new_values=get_model_fields_dict(instance),
+                affected_users=[get_object_representation(instance.user)]
+            )
+
+        # Réattribution d'une clé précédemment rendue : la ligne d'attribution
+        # est réutilisée (OneToOneField), donc created vaut False. Sans ce cas,
+        # l'attribution n'apparaîtrait pas dans l'historique.
+        elif was_active is False and instance.is_active:
+            assigned_date = instance.assigned_date.strftime(
+                '%d/%m/%Y') if instance.assigned_date else 'date inconnue'
+            log_action(
+                user=current_user,
+                action_type='ASSIGN',
+                object_type='KEYASSIGNMENT',
+                object_id=instance.id,
+                object_name=f"Clé {get_object_representation(instance.key_instance)} → {get_object_representation(instance.user)}",
+                description=f"Réattribution de la clé {get_object_representation(instance.key_instance)} à {get_object_representation(instance.user)} le {assigned_date}",
                 old_values=old_values,
                 new_values=get_model_fields_dict(instance),
                 affected_users=[get_object_representation(instance.user)]
