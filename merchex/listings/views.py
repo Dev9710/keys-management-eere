@@ -404,8 +404,9 @@ def user_keys_view(request):
     # Filtrer par équipe si une équipe est sélectionnée
     if team_id:
         team = get_object_or_404(Team, id=team_id)
-        # Filtrer les utilisateurs par équipe
-        users = User.objects.filter(team=team).order_by('name', 'firstname')
+        # Filtrer les utilisateurs par équipe, triés par prénom : c'est
+        # l'ordre d'affichage du menu déroulant (« Prénom NOM »).
+        users = User.objects.filter(team=team).order_by('firstname', 'name')
     else:
         # Si aucune équipe n'est sélectionnée, ne pas montrer d'utilisateurs
         users = []
@@ -414,13 +415,19 @@ def user_keys_view(request):
     if user_id:
         selected_user = get_object_or_404(User, id=user_id)
         # Récupérer les instances de clés attribuées à cet utilisateur
+        # Triées par numéro de clé : c'est l'ordre dans lequel se fait le
+        # contrôle physique du trousseau.
         assignments = KeyAssignment.objects.filter(
-            user=selected_user, is_active=True)
+            user=selected_user, is_active=True
+        ).select_related('key_instance__key_type').order_by(
+            'key_instance__key_type__number', 'key_instance__id')
         assigned_key_instances = [
             assignment.key_instance for assignment in assignments]
 
         # Récupérer les instances de clés disponibles (non attribuées)
-        available_key_instances = KeyInstance.objects.filter(is_available=True)
+        available_key_instances = KeyInstance.objects.filter(
+            is_available=True
+        ).select_related('key_type').order_by('key_type__number', 'id')
 
     context = {
         'teams': teams,
@@ -439,9 +446,10 @@ def user_keys_view(request):
 
 def get_users_by_team(request, team_id):
     try:
-        # Récupérer les membres de l'équipe avec les champs requis
+        # Récupérer les membres de l'équipe avec les champs requis,
+        # triés par prénom comme dans le menu déroulant Utilisateur
         team_members = User.objects.filter(team_id=team_id).order_by(
-            'name', 'firstname').values('id', 'firstname', 'name')
+            'firstname', 'name').values('id', 'firstname', 'name')
 
         # Formatter les données pour l'API
         users_list = [{
@@ -456,8 +464,11 @@ def get_users_by_team(request, team_id):
 
 def get_keys_by_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
-    # Récupérer les attributions actives
-    assignments = KeyAssignment.objects.filter(user=user, is_active=True)
+    # Récupérer les attributions actives, triées par numéro de clé
+    assignments = KeyAssignment.objects.filter(
+        user=user, is_active=True
+    ).select_related('key_instance__key_type').order_by(
+        'key_instance__key_type__number', 'key_instance__id')
     keys_list = [{
         'id': assignment.key_instance.id,
         'number': assignment.key_instance.key_type.number,
@@ -498,8 +509,11 @@ def get_assigned_keys(request, user_id):
 
     try:
         user = get_object_or_404(User, id=user_id)
-        # Récupérer les attributions actives
-        assignments = KeyAssignment.objects.filter(user=user, is_active=True)
+        # Récupérer les attributions actives, triées par numéro de clé
+        assignments = KeyAssignment.objects.filter(
+            user=user, is_active=True
+        ).select_related('key_instance__key_type').order_by(
+            'key_instance__key_type__number', 'key_instance__id')
         keys_data = [{
             "id": assignment.key_instance.id,
             "number": assignment.key_instance.key_type.number,
@@ -550,13 +564,19 @@ def get_modal_assigned_keys(request, user_id):
     user = get_object_or_404(User, id=user_id)
     current_date = timezone.now().date().isoformat()
 
-    # Récupérer les instances de clés assignées à l'utilisateur
-    assignments = KeyAssignment.objects.filter(user=user, is_active=True)
+    # Récupérer les instances de clés assignées à l'utilisateur,
+    # triées par numéro de clé comme dans le tableau de la page
+    assignments = KeyAssignment.objects.filter(
+        user=user, is_active=True
+    ).select_related('key_instance__key_type').order_by(
+        'key_instance__key_type__number', 'key_instance__id')
     assigned_key_instance_ids = [
         assignment.key_instance.id for assignment in assignments]
 
     # Récupérer les instances de clés disponibles (non assignées à aucun utilisateur)
-    available_key_instances = KeyInstance.objects.filter(is_available=True)
+    available_key_instances = KeyInstance.objects.filter(
+        is_available=True
+    ).select_related('key_type').order_by('key_type__number', 'id')
 
     return JsonResponse({
         'assigned_keys': [
@@ -713,9 +733,12 @@ def assign_keys(request):
                     assignment.comments = ''
                     assignment.save()
 
-        # Récupérer la liste mise à jour des clés
+        # Récupérer la liste mise à jour des clés, dans le même ordre que
+        # le tableau de la page (par numéro de clé)
         updated_assignments = KeyAssignment.objects.filter(
-            user=user, is_active=True)
+            user=user, is_active=True
+        ).select_related('key_instance__key_type').order_by(
+            'key_instance__key_type__number', 'key_instance__id')
         updated_keys = []
         for assignment in updated_assignments:
             # Assurer que assigned_date est bien un objet date
