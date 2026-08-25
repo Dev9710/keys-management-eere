@@ -1089,7 +1089,8 @@
                 const TABLE_TOP = 50;   // haut du tableau, 1re page
                 const CONT_TOP = 25;    // haut du tableau, pages suivantes
                 const COMMENT_H = 45;   // encadré commentaires
-                const SIGN_H = 18;      // bande signature sous l'encadré
+                const SIGN_GAP = 22;    // écart encadré → mention Signature
+                const SIGN_H = 30;      // bande signature sous l'encadré
                 const FOOTER_H = 22;    // mentions légales en pied de page
                 const contentWidth = pageWidth - MARGIN * 2;
                 const pxPerMm = canvas.width / contentWidth;
@@ -1172,7 +1173,9 @@
                 doc.setFontSize(10);
                 doc.text('Commentaires :', MARGIN + 5, trailerTop + 8);
 
-                const signatureY = trailerTop + COMMENT_H + 12;
+                // Deux lignes de respiration sous l'encadré avant la mention,
+                // pour laisser la place de signer.
+                const signatureY = trailerTop + COMMENT_H + SIGN_GAP;
                 doc.text('Signature :', 140, signatureY);
                 doc.line(160, signatureY, 190, signatureY);
 
@@ -1263,7 +1266,10 @@
             data.push(['']);
             data.push(['']);
             data.push(['']);
-            data.push([]); // Ligne vide
+            // Trois lignes vides avant la mention : de la place pour signer
+            data.push([]);
+            data.push([]);
+            data.push([]);
             data.push(['', '', '', '', 'Signature:', '_______________________']);
             data.push([]); // Ligne vide
             data.push(['Document généré le ' + today]);
