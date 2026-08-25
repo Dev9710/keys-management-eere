@@ -359,13 +359,33 @@
 
         /* alerts */
         .msg-block {
-            padding: .65rem .9rem;
+            padding: .8rem 1rem;
             border-radius: 8px;
-            font-size: .84rem;
+            font-size: .95rem;
+            line-height: 1.4;
+            font-weight: 600;
             margin-bottom: 1.1rem;
-            display: flex; align-items: flex-start; gap: 7px;
+            display: flex; align-items: flex-start; gap: 10px;
         }
-        .msg-block.alert-danger  { background:#fef2f2; border:1px solid #fecaca; color:#dc2626; }
+        .msg-block i { font-size: 1.05rem; line-height: 1.35; flex: 0 0 auto; }
+
+        /* Un échec de connexion doit sauter aux yeux : bordure d'accent à
+           gauche, fond rouge pâle, texte en gras et légère entrée animée. */
+        .msg-block.alert-danger {
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            border-left: 4px solid var(--error);
+            color: #b91c1c;
+            box-shadow: 0 2px 10px rgba(220,38,38,.12);
+            animation: msg-in .32s cubic-bezier(.22,.9,.3,1) both;
+        }
+        @keyframes msg-in {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: none; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .msg-block.alert-danger { animation-duration: .01ms; }
+        }
         .msg-block.alert-success { background:#f0fdf4; border:1px solid #bbf7d0; color:#16a34a; }
         .msg-block.alert-warning { background:#fffbeb; border:1px solid #fde68a; color:#d97706; }
         .msg-block.alert-info    { background:#eff6ff; border:1px solid #bfdbfe; color:#2563eb; }
@@ -472,8 +492,8 @@
 
             {% if messages %}
             {% for message in messages %}
-            <div class="msg-block alert-{{ message.tags }}" role="alert">
-                <i class="fas fa-{% if 'error' in message.tags %}exclamation-circle{% elif 'success' in message.tags %}check-circle{% elif 'warning' in message.tags %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+            <div class="msg-block alert-{{ message.tags }}" role="alert" aria-live="assertive">
+                <i class="fas fa-{% if 'danger' in message.tags %}exclamation-circle{% elif 'success' in message.tags %}check-circle{% elif 'warning' in message.tags %}exclamation-triangle{% else %}info-circle{% endif %}" aria-hidden="true"></i>
                 <span>{{ message }}</span>
             </div>
             {% endfor %}

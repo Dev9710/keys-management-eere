@@ -74,12 +74,15 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/home/'
 LOGOUT_REDIRECT_URL = '/login/'
 
+# Les gabarits écrivent déjà class="alert-{{ message.tags }}" : le préfixe
+# ne doit donc pas figurer ici, sous peine de produire « alert-alert-danger »
+# et de laisser les messages sans aucun style (erreur de connexion invisible).
 MESSAGE_TAGS = {
-    messages.DEBUG: 'alert-info',
-    messages.INFO: 'alert-info',
-    messages.SUCCESS: 'alert-success',
-    messages.WARNING: 'alert-warning',
-    messages.ERROR: 'alert-danger',
+    messages.DEBUG: 'info',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.ERROR: 'danger',
 }
 
 SESSION_COOKIE_AGE = 1209600
