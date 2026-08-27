@@ -1071,15 +1071,21 @@
             const today = new Date().toLocaleDateString('fr-FR');
             
             const doc = new jsPDF('p', 'mm', 'a4');
-            const assignedKeysTable = document.getElementById('assigned-keys-table');
+            const sourceTable = document.getElementById('assigned-keys-table');
             const SCALE = 2;
 
-            // Agrandir la police du tableau juste pour la capture. On mesure les
-            // lignes APRÈS l'avoir appliquée, pour que la pagination reste juste.
+            // On capture un CLONE hors écran avec la police agrandie, jamais la
+            // table visible : aucun « flash » de redimensionnement à l'écran.
+            const pdfHolder = document.createElement('div');
+            pdfHolder.style.cssText =
+                `position:absolute; left:-10000px; top:0; width:${sourceTable.offsetWidth}px;`;
+            const assignedKeysTable = sourceTable.cloneNode(true);
             assignedKeysTable.classList.add('pdf-export-boost');
+            pdfHolder.appendChild(assignedKeysTable);
+            document.body.appendChild(pdfHolder);
 
             // Frontières de découpe possibles : le bas de chaque ligne du
-            // tableau, pour ne jamais couper une clé en deux entre 2 pages.
+            // clone, pour ne jamais couper une clé en deux entre 2 pages.
             const tableTopPx = assignedKeysTable.getBoundingClientRect().top;
             const rowBounds = Array.from(assignedKeysTable.querySelectorAll('tr'))
                 .map(tr => (tr.getBoundingClientRect().bottom - tableTopPx) * SCALE);
@@ -1088,8 +1094,8 @@
                 scale: SCALE,
                 useCORS: true
             }).then(canvas => {
-                // Capture faite : on restaure l'affichage normal du tableau.
-                assignedKeysTable.classList.remove('pdf-export-boost');
+                // Capture faite : on retire le clone hors écran.
+                pdfHolder.remove();
                 // ── Géométrie de la page ──────────────────────────────
                 // Chaque bloc a une hauteur réservée : le tableau ne peut
                 // plus déborder sur l'encadré, la signature ni le pied de
@@ -1225,8 +1231,8 @@
                 const fileName = `Cles_${userName.replace(/\s+/g, '_')}_${today.replace(/\//g, '-')}.pdf`;
                 doc.save(fileName);
             }).catch(() => {
-                // Sécurité : ne jamais laisser la police agrandie sur l'affichage.
-                assignedKeysTable.classList.remove('pdf-export-boost');
+                // Sécurité : ne jamais laisser le clone hors écran dans le DOM.
+                pdfHolder.remove();
             });
         });
         
