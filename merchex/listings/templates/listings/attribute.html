@@ -209,6 +209,12 @@
     background: transparent !important;
 }
 #assigned-keys-table tbody td:first-child { text-align: center; font-weight: 700; color: #0d3028; }
+
+/* Police agrandie appliquée UNIQUEMENT le temps de la capture PDF (le texte
+   du tableau, mis à l'échelle sur la largeur de page, était trop petit).
+   La classe est retirée juste après la capture — l'affichage n'est pas touché. */
+#assigned-keys-table.pdf-export-boost thead th { font-size: 1rem; padding: .95rem 1.1rem; }
+#assigned-keys-table.pdf-export-boost tbody td { font-size: 1.18rem; padding: .95rem 1.1rem; }
 /* Ligne de message (placeholder / vide) */
 #assigned-keys-table tbody td[colspan] {
     text-align: center !important;
@@ -1068,6 +1074,10 @@
             const assignedKeysTable = document.getElementById('assigned-keys-table');
             const SCALE = 2;
 
+            // Agrandir la police du tableau juste pour la capture. On mesure les
+            // lignes APRÈS l'avoir appliquée, pour que la pagination reste juste.
+            assignedKeysTable.classList.add('pdf-export-boost');
+
             // Frontières de découpe possibles : le bas de chaque ligne du
             // tableau, pour ne jamais couper une clé en deux entre 2 pages.
             const tableTopPx = assignedKeysTable.getBoundingClientRect().top;
@@ -1078,6 +1088,8 @@
                 scale: SCALE,
                 useCORS: true
             }).then(canvas => {
+                // Capture faite : on restaure l'affichage normal du tableau.
+                assignedKeysTable.classList.remove('pdf-export-boost');
                 // ── Géométrie de la page ──────────────────────────────
                 // Chaque bloc a une hauteur réservée : le tableau ne peut
                 // plus déborder sur l'encadré, la signature ni le pied de
@@ -1212,6 +1224,9 @@
                 // Nom du fichier basé sur l'utilisateur et la date
                 const fileName = `Cles_${userName.replace(/\s+/g, '_')}_${today.replace(/\//g, '-')}.pdf`;
                 doc.save(fileName);
+            }).catch(() => {
+                // Sécurité : ne jamais laisser la police agrandie sur l'affichage.
+                assignedKeysTable.classList.remove('pdf-export-boost');
             });
         });
         
