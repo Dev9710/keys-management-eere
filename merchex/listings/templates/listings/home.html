@@ -144,14 +144,15 @@
 .hero-badge {
     display: inline-block;
     padding: .35rem 1.1rem;
-    background: rgba(255,165,0,.12);
-    border: 1px solid rgba(255,165,0,.35);
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.18);
     border-radius: 50px;
-    font-size: .7rem;
-    letter-spacing: .22em;
+    font-size: .66rem;
+    letter-spacing: .08em;
     text-transform: uppercase;
     color: rgba(255,255,255,.85);
     margin-bottom: 1.5rem;
+    white-space: nowrap;
     font-family: 'DM Sans', sans-serif;
     font-weight: 500;
     opacity: 0;
@@ -683,7 +684,7 @@
     </div>
 
     <div class="hero-content">
-        <div class="hero-badge" aria-hidden="true">Portail de gestion</div>
+        <div class="hero-badge" aria-hidden="true">Portail de gestion des clés · Église Évangélique Rencontre Espérance</div>
         <h1 class="hero-title">Bienvenue</h1>
         <p class="hero-description">Vous êtes sur le portail de gestion des clés de l'Église Évangélique Rencontre Espérance. Attribuez les clés, suivez qui détient quoi et gardez le trousseau à jour.</p>
         <button class="cta-button" onclick="window.location.href='{% url 'key_list' %}'">
