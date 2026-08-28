@@ -1,0 +1,6 @@
+{
+  "files": ["merchex/listings/templates/listings/base.html"],
+  "insertBefore": "</body>",
+  "commentSyntax": "html",
+  "cspChecked": true
+}

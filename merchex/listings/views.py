@@ -51,6 +51,49 @@ from django.db.models import Count, Q, Prefetch
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib.auth.decorators import user_passes_test
+from functools import wraps
+
+
+# ================================
+# CONTROLE D'ACCES PAR ROLE
+# ================================
+#
+# Le visiteur est en lecture seule : il ne cree, ne modifie, ne supprime
+# et n'attribue rien. Le masquage des boutons dans les gabarits n'est qu'un
+# confort d'affichage ; c'est ce decorateur qui fait autorite, parce qu'une
+# URL se tape a la main.
+
+
+def can_write(user):
+    """Seuls l'administrateur et l'editeur peuvent ecrire dans le portail."""
+    return (
+        user.is_authenticated
+        and getattr(user, 'role', None) in ('admin', 'editor')
+    )
+
+
+def _wants_json(request):
+    """Detecte les appels AJAX, pour repondre 403 JSON plutot qu'une redirection."""
+    return (
+        request.headers.get('x-requested-with') == 'XMLHttpRequest'
+        or 'application/json' in request.headers.get('accept', '')
+        or request.content_type == 'application/json'
+    )
+
+
+def write_required(view_func):
+    """Refuse l'acces aux visiteurs sur toute vue qui modifie des donnees."""
+    @wraps(view_func)
+    def _wrapped(request, *args, **kwargs):
+        if can_write(request.user):
+            return view_func(request, *args, **kwargs)
+
+        message = "Votre role ne vous permet pas de modifier les donnees du portail."
+        if _wants_json(request):
+            return JsonResponse({'success': False, 'error': message}, status=403)
+        messages.error(request, message)
+        return redirect('access_denied')
+    return _wrapped
 
 
 class CustomPasswordResetView(PasswordResetView):
@@ -215,6 +258,7 @@ def key_list(request):
     return render(request, 'listings/keys.html', context)
 
 
+@write_required
 def key_create(request):
     if request.method == 'POST':
         form = KeyForm(request.POST)
@@ -289,6 +333,7 @@ def key_create(request):
     return redirect('key_list')
 
 
+@write_required
 def key_update(request):
     if request.method == 'POST':
         key_id = request.POST.get('key_id')
@@ -386,6 +431,7 @@ def teams(request):
     return render(request, 'listings/teams.html', {'teams': teams})
 
 
+@write_required
 @login_required
 def user_keys_view(request):
     # Récupérer les paramètres depuis la requête
@@ -480,6 +526,7 @@ def get_keys_by_user(request, user_id):
     return JsonResponse({'keys': keys_list})
 
 
+@write_required
 @require_POST
 def key_delete(request, key_id):
     key_type = get_object_or_404(KeyType, id=key_id)
@@ -529,6 +576,7 @@ def get_assigned_keys(request, user_id):
         return JsonResponse({"error": str(e)}, status=400)
 
 
+@write_required
 def bulk_key_delete(request):
     if request.method == "POST":
         try:
@@ -604,6 +652,7 @@ def get_modal_assigned_keys(request, user_id):
     })
 
 
+@write_required
 def remove_all_keys(request, user_id):
     try:
         user = get_object_or_404(User, id=user_id)
@@ -620,7 +669,7 @@ def remove_all_keys(request, user_id):
         return JsonResponse({'success': False, 'message': str(e)})
 
 
-@csrf_exempt
+@write_required
 def assign_keys(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'message': 'Méthode non autorisée'}, status=405)
@@ -829,6 +878,7 @@ def user_list(request):
     return render(request, 'listings/users.html', context)
 
 
+@write_required
 @require_POST
 def user_delete(request, user_id):
     user = get_object_or_404(User, id=user_id)
@@ -887,6 +937,7 @@ def user_team(request):
     return JsonResponse({'users': user_list})
 
 
+@write_required
 def user_update(request):
     if request.method == 'POST':
         print("Données POST reçues:", request.POST)  # Debug log
@@ -926,6 +977,7 @@ def user_update(request):
     }, status=405)
 
 
+@write_required
 def user_create(request):
     if request.method == 'POST':
         form = UserForm(request.POST)  # Get the data from the form
@@ -963,6 +1015,7 @@ def team_list(request):
     return render(request, 'listings/teams.html', context)
 
 
+@write_required
 @require_POST
 def team_delete(request, team_id):
     team = get_object_or_404(Team, id=team_id)
@@ -981,6 +1034,7 @@ def team_delete(request, team_id):
     return redirect('team_list')
 
 
+@write_required
 def team_update(request):
     if request.method == 'POST':
         id = request.POST.get('id')
@@ -1016,6 +1070,7 @@ def team_update(request):
     }, status=405)
 
 
+@write_required
 def team_create(request):
     if request.method == 'POST':
         form = TeamForm(request.POST)  # Get the data from the form

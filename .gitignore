@@ -22,3 +22,6 @@ media/
 # OS
 .DS_Store
 Thumbs.db
+
+# Impeccable — reglages locaux (consentement du hook), propres a la machine
+.impeccable/config.local.json

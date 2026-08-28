@@ -1,0 +1,281 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-28T00:00:00Z",
+  "title": "Design System: Portail EERE — Gestion des clés",
+  "extensions": {
+    "colorMeta": {
+      "teal-esperance": {
+        "role": "primary",
+        "displayName": "Teal Espérance",
+        "canonical": "#3a9f87",
+        "tonalRamp": ["#0d2b24", "#134037", "#1b5849", "#25715e", "#2a7562", "#3a9f87", "#7cc4b1", "#edf7f5"]
+      },
+      "teal-esperance-dark": {
+        "role": "primary",
+        "displayName": "Teal Espérance sombre",
+        "canonical": "#2a7562",
+        "tonalRamp": ["#0a201b", "#113029", "#174138", "#1e5347", "#256656", "#2a7562", "#5aa593", "#d9ede8"]
+      },
+      "teal-esperance-light": {
+        "role": "primary",
+        "displayName": "Teal Espérance clair",
+        "canonical": "#edf7f5",
+        "tonalRamp": ["#243b36", "#35564f", "#487068", "#5f8b83", "#86aaa3", "#b3cbc6", "#d5e8e4", "#edf7f5"]
+      },
+      "vert-cantique-deep": {
+        "role": "secondary",
+        "displayName": "Vert Cantique profond",
+        "canonical": "#0d3028",
+        "tonalRamp": ["#061a15", "#0d3028", "#134037", "#1a5040", "#22664f", "#2f8368", "#63b09a", "#c9e6dd"]
+      },
+      "vert-cantique-mid": {
+        "role": "secondary",
+        "displayName": "Vert Cantique médian",
+        "canonical": "#1a5040",
+        "tonalRamp": ["#08201a", "#0d3028", "#144036", "#1a5040", "#22684f", "#2e8a6a", "#61b59a", "#c7e8dd"]
+      },
+      "orange-registre": {
+        "role": "tertiary",
+        "displayName": "Orange Registre",
+        "canonical": "#FFA500",
+        "tonalRamp": ["#3d2700", "#5c3b00", "#7a4f00", "#a36900", "#cc8400", "#e8920a", "#FFA500", "#fffbeb"]
+      },
+      "orange-registre-dark": {
+        "role": "tertiary",
+        "displayName": "Orange Registre sombre",
+        "canonical": "#e8920a",
+        "tonalRamp": ["#332002", "#4d3003", "#664005", "#8a5606", "#b06d08", "#e8920a", "#f5b942", "#fff4de"]
+      },
+      "rouge-retrait": {
+        "role": "tertiary",
+        "displayName": "Rouge Retrait",
+        "canonical": "#dc2626",
+        "tonalRamp": ["#3d0a0a", "#5c0f0f", "#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#fca5a5", "#fef2f2"]
+      },
+      "bg-page": {
+        "role": "neutral",
+        "displayName": "Fond page",
+        "canonical": "#f8fafc",
+        "tonalRamp": ["#0f172a", "#1e293b", "#334155", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f8fafc"]
+      },
+      "bg-surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#0f172a", "#334155", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f8fafc", "#ffffff"]
+      },
+      "bg-surface-tinted": {
+        "role": "neutral",
+        "displayName": "Surface teintée",
+        "canonical": "#f8fffe",
+        "tonalRamp": ["#0d3028", "#1a5040", "#2a7562", "#3a9f87", "#7cc4b1", "#c9e8e0", "#edf7f5", "#f8fffe"]
+      },
+      "border-soft": {
+        "role": "neutral",
+        "displayName": "Bordure douce",
+        "canonical": "#e8f0ed",
+        "tonalRamp": ["#1a2b27", "#2d443e", "#456058", "#617f76", "#8aa39b", "#b6cac3", "#e8f0ed", "#f4f9f7"]
+      },
+      "border-neutral": {
+        "role": "neutral",
+        "displayName": "Bordure neutre",
+        "canonical": "#e2e8f0",
+        "tonalRamp": ["#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0"]
+      },
+      "text-primary": {
+        "role": "neutral",
+        "displayName": "Texte principal",
+        "canonical": "#0f172a",
+        "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#e2e8f0"]
+      },
+      "text-secondary": {
+        "role": "neutral",
+        "displayName": "Texte secondaire",
+        "canonical": "#64748b",
+        "tonalRamp": ["#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#f1f5f9"]
+      },
+      "text-tertiary": {
+        "role": "neutral",
+        "displayName": "Texte tertiaire",
+        "canonical": "#94a3b8",
+        "tonalRamp": ["#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f8fafc"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display — DM Serif Display",
+        "purpose": "Titres de bandeau de page et de modale, uniquement sur le gradient Vert Cantique."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Titres de section et de carte à l'intérieur du contenu."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Intitulés de champ, en-têtes de bloc, noms de clé mis en évidence."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Corps de référence du portail : cellules de tableau, textes, aides. Calibré pour la densité sur 1366 px."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Labels de filtre et en-têtes de tableau : capitales espacées, jamais une donnée à lire pour décider."
+      }
+    },
+    "shadows": [
+      { "name": "repos-carte", "value": "0 1px 3px rgba(0,0,0,.04)", "purpose": "Panneaux de filtre et cartes de liste au repos." },
+      { "name": "repos-bloc", "value": "0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04)", "purpose": "Conteneurs principaux et tableau." },
+      { "name": "anneau-focus", "value": "0 0 0 3px rgba(58,159,135,.12)", "purpose": "Anneau de focus teal de tout champ. Ne se supprime jamais." },
+      { "name": "anneau-focus-fort", "value": "0 0 0 3px rgba(58,159,135,.25)", "purpose": "Variante renforcée sur les contrôles critiques." },
+      { "name": "lueur-ajout", "value": "0 4px 14px rgba(255,165,0,.35)", "purpose": "Survol du bouton Ajouter." },
+      { "name": "lueur-ajout-forte", "value": "0 4px 18px rgba(232,146,10,.4)", "purpose": "Survol soutenu des actions d'ajout." },
+      { "name": "lueur-retrait", "value": "0 4px 12px rgba(220,38,38,.25)", "purpose": "Survol des actions de suppression." },
+      { "name": "lueur-teal", "value": "0 2px 8px rgba(58,159,135,.35)", "purpose": "Survol des boutons teal." },
+      { "name": "modale", "value": "0 20px 60px rgba(0,0,0,.2)", "purpose": "La seule ombre franche du système : elle marque la rupture de plan." }
+    ],
+    "motion": [
+      { "name": "bouton", "value": "background .2s, box-shadow .2s, transform .1s", "purpose": "Transition standard de tous les boutons." },
+      { "name": "champ", "value": "border-color .2s, box-shadow .2s", "purpose": "Transition des champs de saisie vers l'état focus." },
+      { "name": "ligne-tableau", "value": "background .15s, border-left-color .15s", "purpose": "Survol de ligne : fond teal clair et liseré gauche." },
+      { "name": "nav-underline", "value": "transform .3s ease", "purpose": "Soulignement animé des liens de navigation, déployé depuis la gauche." },
+      { "name": "generique", "value": "all .18s ease", "purpose": "Transition courte par défaut sur les éléments secondaires." },
+      { "name": "reduced-motion", "value": "@media (prefers-reduced-motion: reduce)", "purpose": "Respecté dans tout le portail : les transformations sont neutralisées." }
+    ],
+    "breakpoints": [
+      { "name": "xs", "value": "480px" },
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "992px" },
+      { "name": "xl", "value": "1024px" },
+      { "name": "cible-reelle", "value": "1366px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Bouton Ajouter",
+      "kind": "button",
+      "refersTo": "button-add",
+      "description": "La seule action orange du portail : ajouter une clé, une équipe, un membre.",
+      "html": "<button class=\"ds-btn-add\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"><path d=\"M12 5v14M5 12h14\"/></svg>Ajouter une clé</button>",
+      "css": ".ds-btn-add { display: inline-flex; align-items: center; gap: 7px; padding: .6rem 1.2rem; background: #FFA500; color: #fff; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: .88rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .2s, box-shadow .2s, transform .1s; } .ds-btn-add:hover { background: #e8920a; box-shadow: 0 4px 14px rgba(255,165,0,.35); transform: translateY(-1px); } .ds-btn-add:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(58,159,135,.25); } .ds-btn-add:active { transform: scale(.98); }"
+    },
+    {
+      "name": "Bouton principal (teal)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Modifier, enregistrer, valider — l'action courante du portail.",
+      "html": "<button class=\"ds-btn-primary\">Enregistrer</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 7px; padding: .6rem 1.2rem; background: #3a9f87; color: #fff; border: none; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .88rem; font-weight: 600; cursor: pointer; transition: background .2s, box-shadow .2s, transform .1s; } .ds-btn-primary:hover { background: #2a7562; box-shadow: 0 2px 8px rgba(58,159,135,.35); transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(58,159,135,.25); } .ds-btn-primary:active { transform: scale(.98); } .ds-btn-primary:disabled { background: #cbd5e1; color: #f8fafc; cursor: not-allowed; transform: none; box-shadow: none; }"
+    },
+    {
+      "name": "Bouton Supprimer",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Suppression et retrait. Le rouge ne sert qu'à ça.",
+      "html": "<button class=\"ds-btn-danger\">Supprimer</button>",
+      "css": ".ds-btn-danger { display: inline-flex; align-items: center; gap: 7px; padding: .6rem 1.2rem; background: #dc2626; color: #fff; border: none; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .88rem; font-weight: 600; cursor: pointer; transition: background .2s, box-shadow .2s, transform .1s; } .ds-btn-danger:hover { background: #b91c1c; box-shadow: 0 4px 12px rgba(220,38,38,.25); transform: translateY(-1px); } .ds-btn-danger:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(220,38,38,.25); } .ds-btn-danger:active { transform: scale(.98); }"
+    },
+    {
+      "name": "Bouton Annuler",
+      "kind": "button",
+      "refersTo": "button-cancel",
+      "description": "Sortie de modale, toujours à gauche de l'action teal.",
+      "html": "<button class=\"ds-btn-cancel\">Annuler</button>",
+      "css": ".ds-btn-cancel { padding: .6rem 1.2rem; background: #fff; color: #64748b; border: 1px solid #e2e8f0; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .88rem; font-weight: 600; cursor: pointer; transition: background .2s, border-color .2s; } .ds-btn-cancel:hover { background: #f8fafc; border-color: #cbd5e1; } .ds-btn-cancel:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(58,159,135,.12); }"
+    },
+    {
+      "name": "Champ de filtre",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Champ ou select du panneau de filtres, avec son label en capitales espacées.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field-label\">Équipe</label><input class=\"ds-field-input\" type=\"text\" placeholder=\"Rechercher une équipe\" /></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: .35rem; min-width: 220px; font-family: 'DM Sans', sans-serif; } .ds-field-label { font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #94a3b8; } .ds-field-input { width: 100%; padding: .55rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .88rem; color: #0f172a; background: #fff; outline: none; transition: border-color .2s, box-shadow .2s; } .ds-field-input::placeholder { color: #94a3b8; } .ds-field-input:focus { border-color: #3a9f87; box-shadow: 0 0 0 3px rgba(58,159,135,.12); }"
+    },
+    {
+      "name": "Tableau du registre",
+      "kind": "custom",
+      "refersTo": "table-header",
+      "description": "Le composant central : en-tête teal plein, lignes alternées, liseré teal au survol, ligne en incohérence en ambre.",
+      "html": "<table class=\"ds-table\"><thead><tr><th>N°</th><th>Nom</th><th>Emplacement</th><th>Armoire</th><th>Coffre</th></tr></thead><tbody><tr><td>12</td><td>Porte principale</td><td>Entrée</td><td>3</td><td>1</td></tr><tr><td>13</td><td>Salle de louange</td><td>Étage 1</td><td>2</td><td>0</td></tr><tr class=\"ds-row-warning\"><td>14</td><td>Local technique</td><td>Sous-sol</td><td>1</td><td>0</td></tr></tbody></table>",
+      "css": ".ds-table { width: 100%; border-collapse: collapse; font-family: 'DM Sans', sans-serif; font-size: .88rem; color: #0f172a; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04); } .ds-table thead th { background: #3a9f87; color: #fff; font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: .75rem 1rem; text-align: left; white-space: nowrap; border: none; } .ds-table thead th:first-child { border-radius: 10px 0 0 0; } .ds-table thead th:last-child { border-radius: 0 10px 0 0; } .ds-table tbody tr { border-bottom: 1px solid #f1f5f4; border-left: 3px solid transparent; transition: background .15s, border-left-color .15s; } .ds-table tbody tr:nth-child(even) { background: #f8fffe; } .ds-table tbody tr:hover { background: #edf7f5; border-left-color: #3a9f87; } .ds-table tbody tr.ds-row-warning { background: #fffbeb; border-left-color: #FFA500; } .ds-table td { padding: .75rem 1rem; }"
+    },
+    {
+      "name": "Bandeau de page",
+      "kind": "custom",
+      "refersTo": "page-banner",
+      "description": "La reliure du registre : gradient Vert Cantique, titre sérif blanc, actions poussées à droite.",
+      "html": "<div class=\"ds-banner\"><div class=\"ds-banner-text\"><h1>Gestion des clés</h1><p>148 types · 890 exemplaires</p></div><button class=\"ds-banner-add\">Ajouter une clé</button></div>",
+      "css": ".ds-banner { background: linear-gradient(135deg, #0d3028 0%, #1a5040 100%); padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; border-radius: 12px; } .ds-banner-text { display: flex; flex-direction: column; gap: .15rem; } .ds-banner h1 { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.4rem; font-weight: 400; color: #fff; margin: 0; white-space: nowrap; } .ds-banner p { font-family: 'DM Sans', sans-serif; font-size: .82rem; color: rgba(255,255,255,.65); margin: 0; } .ds-banner-add { margin-left: auto; padding: .6rem 1.2rem; background: #FFA500; color: #fff; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: .88rem; font-weight: 600; cursor: pointer; transition: background .2s, box-shadow .2s, transform .1s; } .ds-banner-add:hover { background: #e8920a; box-shadow: 0 4px 14px rgba(255,165,0,.35); transform: translateY(-1px); }"
+    },
+    {
+      "name": "Carte / panneau",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "Panneau de filtres et cartes de liste : blanche, bordure verdie, légèrement soulevée, liseré teal au survol.",
+      "html": "<div class=\"ds-card\"><h3>Clés attribuées</h3><p>Marie Dupont · Équipe Accueil · 3 clés depuis le 12 mars</p></div>",
+      "css": ".ds-card { background: #fff; border: 1px solid #e8f0ed; border-left: 3px solid transparent; border-radius: 12px; padding: 1rem 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.04); font-family: 'DM Sans', sans-serif; transition: background .15s, border-left-color .15s, box-shadow .2s; } .ds-card:hover { background: #f8fffe; border-left-color: #3a9f87; box-shadow: 0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04); } .ds-card h3 { font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0 0 .35rem; } .ds-card p { font-size: .88rem; color: #64748b; margin: 0; }"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "Barre fixe avec logo texte EERE et liens à soulignement animé. Les entrées interdites à un rôle sont absentes, jamais grisées.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-nav-logo\">EERE</span><div class=\"ds-nav-menu\"><a href=\"#\" class=\"active\">Clés</a><a href=\"#\">Équipes</a><a href=\"#\">Attribution</a><a href=\"#\">Stock</a></div></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; gap: 2rem; background: #fff; padding: 1rem 2rem; border-bottom: 1px solid #e8f0ed; box-shadow: 0 1px 3px rgba(0,0,0,.04); font-family: 'DM Sans', sans-serif; } .ds-nav-logo { font-size: 24px; font-weight: 700; color: #0f172a; cursor: pointer; } .ds-nav-menu { display: flex; gap: 30px; } .ds-nav-menu a { position: relative; color: #3a9f87; text-decoration: none; font-weight: 500; padding: 10px 5px; transition: color .3s ease; } .ds-nav-menu a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: #3a9f87; transform: scaleX(0); transform-origin: bottom left; transition: transform .3s ease; } .ds-nav-menu a:hover { color: #2a7562; } .ds-nav-menu a:hover::after { transform: scaleX(1); } .ds-nav-menu a.active { color: #2a7562; font-weight: 700; } .ds-nav-menu a.active::after { transform: scaleX(1); } .ds-nav-menu a:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(58,159,135,.25); border-radius: 4px; }"
+    },
+    {
+      "name": "Modale",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Rupture de plan : coins 14 px, en-tête au gradient, pied teinté avec Annuler à gauche et l'action teal à droite.",
+      "html": "<div class=\"ds-modal\"><div class=\"ds-modal-head\"><h2>Attribuer une clé</h2></div><div class=\"ds-modal-body\"><p>Sélectionnez le membre qui recevra cet exemplaire.</p></div><div class=\"ds-modal-foot\"><button class=\"ds-modal-cancel\">Annuler</button><button class=\"ds-modal-ok\">Attribuer</button></div></div>",
+      "css": ".ds-modal { width: 420px; max-width: 100%; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.2); font-family: 'DM Sans', sans-serif; } .ds-modal-head { background: linear-gradient(135deg, #0d3028 0%, #1a5040 100%); padding: 1rem 1.5rem; } .ds-modal-head h2 { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.4rem; font-weight: 400; color: #fff; margin: 0; } .ds-modal-body { padding: 1.25rem 1.5rem; font-size: .88rem; color: #0f172a; } .ds-modal-body p { margin: 0; } .ds-modal-foot { display: flex; justify-content: space-between; gap: .6rem; padding: 1rem 1.5rem; background: #f8fffe; border-top: 1px solid #e8f0ed; } .ds-modal-cancel { padding: .6rem 1.2rem; background: #fff; color: #64748b; border: 1px solid #e2e8f0; border-radius: 9px; font-family: inherit; font-size: .88rem; font-weight: 600; cursor: pointer; } .ds-modal-cancel:hover { background: #f8fafc; } .ds-modal-ok { padding: .6rem 1.2rem; background: #3a9f87; color: #fff; border: none; border-radius: 9px; font-family: inherit; font-size: .88rem; font-weight: 600; cursor: pointer; transition: background .2s, box-shadow .2s; } .ds-modal-ok:hover { background: #2a7562; box-shadow: 0 2px 8px rgba(58,159,135,.35); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Le Registre de la Sacristie",
+    "overview": "Un grand livre tenu avec soin. Le portail hérite de la tenue d'un registre paroissial : une reliure vert profond en tête de page, une écriture de titre en sérif, et en dessous des colonnes ordonnées où chaque clé, chaque exemplaire, chaque détenteur occupe sa ligne. La rigueur vient de la table ; la chaleur vient du vert et de la sérif. Rien n'y est décoratif au sens gratuit : le bandeau vert n'est pas un hero marketing, c'est la couverture du registre qu'on ouvre.\n\nL'humeur est calme, ordonnée, chaleureuse. Le vert profond apaise, la structure rassure, la sérif humanise un outil qui pourrait n'être qu'une grille. La densité est réelle — 148 types de clés, 890 exemplaires — mais elle est tenue par la hiérarchie plutôt que par la compression : en-têtes de colonne en capitales espacées, lignes alternées, liseré teal au survol pour ne jamais perdre la ligne qu'on suit du doigt sur un écran de 1366 px.\n\nLe système est cohérent mais pas encore centralisé : base.html ne définit que trois variables CSS ; chaque page redéclare son propre bloc :root. Ce document est la source de vérité en attendant une centralisation. Les valeurs du frontmatter sont normatives — c'est vers elles qu'il faut converger, pas vers ce qu'une page a copié.",
+    "keyCharacteristics": [
+      "Bandeau au gradient vert en tête de chaque page, coins 12 px, titre sérif blanc",
+      "Tableaux à en-tête teal plein, capitales espacées, lignes alternées blanc / blanc-vert",
+      "Une seule couleur d'appel — l'orange — réservée à l'ajout",
+      "Arrondis doux et généreux (9-12 px), cibles de clic larges",
+      "Surfaces légèrement soulevées, jamais collées au fond",
+      "Zéro dépendance de build : CSS écrit à la main dans chaque page"
+    ],
+    "rules": [
+      { "name": "La Règle de l'Unique Orange", "body": "L'orange ne signifie qu'une chose : ajouter. Un second usage décoratif de l'orange dissout le seul repère d'action de l'interface. Test : sur n'importe quelle page, comptez les éléments orange — s'il y en a plus d'un par zone, il y en a un de trop.", "section": "colors" },
+      { "name": "La Règle de la Reliure", "body": "Le gradient Vert Cantique n'habille que ce qui ouvre une vue : bandeau de page, en-tête de modale. Jamais une carte, jamais une ligne, jamais un bouton.", "section": "colors" },
+      { "name": "La Règle du Rouge Rare", "body": "Le rouge est le vocabulaire du retrait — supprimer, retirer une clé, signaler une erreur bloquante. Il ne sert jamais à attirer l'attention sur autre chose.", "section": "colors" },
+      { "name": "La Règle de la Sérif Rare", "body": "DM Serif Display n'apparaît que sur le gradient vert : titre de page, titre de modale. Une sérif dans un tableau ou un bouton casse la lecture et l'identité d'un coup.", "section": "typography" },
+      { "name": "La Règle du Corps Unique", "body": "0.88rem est le corps de l'application. Descendre en dessous (0.78rem, 0.75rem) est réservé aux labels et métadonnées, jamais à une donnée que l'utilisateur doit lire pour décider.", "section": "typography" },
+      { "name": "La Règle des Trois Bandes", "body": "Bandeau, filtres, contenu — dans cet ordre, sur toute page de gestion. Un utilisateur qui change d'écran doit retrouver ses repères au même endroit.", "section": "layout" },
+      { "name": "La Règle de l'Ombre Colorée", "body": "Au survol, l'ombre porte la couleur du bouton, jamais du noir. Le noir est réservé au repos et aux modales.", "section": "elevation" },
+      { "name": "La Règle de l'Anneau Teal", "body": "Tout focus clavier se signale par l'anneau teal 3 px. Il ne se supprime jamais : c'est le seul repère de navigation au clavier du portail.", "section": "elevation" },
+      { "name": "La Règle de l'Échelle Fermée", "body": "Les rayons du système sont 2 / 8 / 9 / 10 / 12 / 14 / 50 px et 50 %. Une nouvelle valeur intermédiaire (11 px, 13 px) n'est jamais justifiée.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do ouvrir chaque page de gestion par le bandeau au gradient Vert Cantique, coins 12 px, titre DM Serif Display blanc — c'est le repère d'orientation du portail.",
+      "Do réserver l'orange (#FFA500) à l'action d'ajout, une occurrence par zone.",
+      "Do garder l'alternance #ffffff / #f8fffe et le liseré teal au survol sur tout tableau : à 890 exemplaires, c'est ce qui empêche de perdre sa ligne.",
+      "Do signaler les incohérences de stock par le fond #fffbeb et le liseré orange, jamais par du rouge : un écart n'est pas une faute.",
+      "Do conserver l'anneau de focus teal (0 0 0 3px rgba(58,159,135,.12)) sur tous les champs.",
+      "Do rester dans l'échelle de rayons 2 / 8 / 9 / 10 / 12 / 14 / 50 px.",
+      "Do écrire le CSS à la main dans la page, en réutilisant le bloc :root déjà présent.",
+      "Do masquer les entrées de menu interdites à un rôle plutôt que les griser.",
+      "Do vérifier chaque écran à 1366 px de large avant de le considérer terminé."
+    ],
+    "donts": [
+      "Don't ressembler à un SaaS générique : pas de bleu-violet, pas de dégradés décoratifs hors gradient signature, pas d'illustration 3D, pas de hero marketing. Le portail est adopté, il n'est pas à vendre.",
+      "Don't retomber dans le back-office brut : ni admin Django nu, ni Bootstrap par défaut, ni tableau gris sans hiérarchie.",
+      "Don't livrer un tableur déguisé : une grille sans bandeau, sans alternance de lignes et sans repère de survol n'est pas une page du portail.",
+      "Don't utiliser DM Serif Display ailleurs que sur le gradient vert.",
+      "Don't poser le gradient Vert Cantique sur une carte, une ligne ou un bouton.",
+      "Don't employer le rouge pour attirer l'attention sur autre chose qu'une suppression ou une erreur bloquante.",
+      "Don't introduire un rayon hors échelle, ni une ombre noire au survol (l'ombre de survol porte la couleur du bouton).",
+      "Don't vendre : bannir « gérez sereinement », « gagnez du temps », « notre application ». Dire où l'on est, ce qu'on peut faire, comment procéder.",
+      "Don't ajouter une dépendance de build, un framework JS ou un bundler."
+    ]
+  }
+}

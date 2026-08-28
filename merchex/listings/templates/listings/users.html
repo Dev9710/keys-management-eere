@@ -559,11 +559,13 @@
     <div class="users-header">
         <h1>Gestion des détenteurs de clés</h1>
 
+        {% if not request.user.is_visitor %}
         <button type="button" class="btn-add-user"
                 data-bs-toggle="modal" data-bs-target="#addUserModal"
                 aria-label="Ajouter un nouvel utilisateur">
             <i class="fas fa-plus" aria-hidden="true"></i> Ajouter un utilisateur
         </button>
+        {% endif %}
 
         <div class="user-search-wrap" role="search">
             <i class="fas fa-search" aria-hidden="true"></i>
@@ -628,6 +630,7 @@
                     <td class="td-comment" title="{{ user.comment }}">{{ user.comment }}</td>
                     <td class="cell-actions">
                         <div class="actions-wrap">
+                            {% if not request.user.is_visitor %}
                             <button type="button" class="btn-edit-card edit-btn"
                                 data-bs-toggle="modal" data-bs-target="#editUserModal" data-id="{{ user.id }}"
                                 data-name="{{ user.name }}" data-firstname="{{ user.firstname }}"
@@ -642,6 +645,7 @@
                                 aria-label="Supprimer {{ user.name }}">
                                 <i class="fas fa-trash" aria-hidden="true"></i> Supprimer
                             </button>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>
@@ -846,6 +850,8 @@
             .then(data => {
                 userTableBody.innerHTML = ''; // Vider le tableau
 
+                const canWrite = {% if request.user.is_visitor %}false{% else %}true{% endif %};
+
                 if (data.users.length > 0) {
                     data.users.forEach(user => {
                         const teamCell = user.team
@@ -859,6 +865,7 @@
                             <td class="td-comment" title="${escapeHtml(user.comment)}">${escapeHtml(user.comment)}</td>
                             <td class="cell-actions">
                                 <div class="actions-wrap">
+                                    ${canWrite ? `
                                     <button type="button" class="btn-edit-card edit-btn"
                                         data-bs-toggle="modal" data-bs-target="#editUserModal"
                                         data-id="${user.id}" data-name="${escapeHtml(user.name)}"
@@ -873,7 +880,7 @@
                                         data-user-name="${escapeHtml(user.name)}"
                                         aria-label="Supprimer ${escapeHtml(user.name)}">
                                         <i class="fas fa-trash" aria-hidden="true"></i> Supprimer
-                                    </button>
+                                    </button>` : ''}
                                 </div>
                             </td>`;
                         userTableBody.appendChild(row);

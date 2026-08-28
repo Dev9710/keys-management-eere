@@ -295,6 +295,14 @@
     perspective: 1200px;
 }
 
+/* Visiteur : 3 cartes au lieu de 4. Meme largeur de carte
+   ((1200 - 3 gouttieres) / 4 = 285px), conteneur retreci pour
+   que le bloc reste centre au lieu de pendre a gauche. */
+.features-grid.is-3 {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 895px;
+}
+
 /* ── Feature Card — dark glass on white section ── */
 .feature-card {
     position: relative;
@@ -634,7 +642,8 @@
    RESPONSIVE
 ═══════════════════════════════════════════ */
 @media (max-width: 1024px) {
-    .features-grid { grid-template-columns: repeat(2, 1fr); }
+    .features-grid,
+    .features-grid.is-3 { grid-template-columns: repeat(2, 1fr); max-width: 1200px; }
 }
 
 @media (max-width: 768px) {
@@ -649,7 +658,8 @@
 @media (max-width: 480px) {
     .hero-title { font-size: 2em; }
     .hero-description { font-size: 1em; }
-    .features-grid { grid-template-columns: 1fr; }
+    .features-grid,
+    .features-grid.is-3 { grid-template-columns: 1fr; }
     .features-section-head h2 { font-size: 1.75rem; }
     .cta-final-title { font-size: 1.6rem; }
 }
@@ -710,7 +720,7 @@
         <p>Choisissez l'espace dans lequel vous voulez travailler.</p>
     </div>
 
-    <div class="features-grid">
+    <div class="features-grid{% if request.user.is_visitor %} is-3{% endif %}">
 
         <!-- Card 1 — Gestion des clés -->
         <a class="feature-card" href="{% url 'key_list' %}" role="button"
@@ -763,7 +773,9 @@
             </div>
         </a>
 
+
         <!-- Card 4 — Clés attribuées -->
+        {% if not request.user.is_visitor %}
         <a class="feature-card" href="{% url 'user_keys' %}" role="button"
            aria-label="Gestion des clés attribuées" style="--delay:0.4s">
             <div class="card-visual cv-4">
@@ -780,6 +792,7 @@
                 <span class="feature-arrow">Accéder <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
             </div>
         </a>
+        {% endif %}
 
     </div>
 </section>
