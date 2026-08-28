@@ -10,6 +10,7 @@
 set -uo pipefail
 
 DEPOT=/volume1/keyapp/keys-management-eere
+CONTENEUR=django-keyapp-python-1
 BASE="$DEPOT/merchex/db.sqlite3"
 SAUVEGARDES=/volume1/keyapp/sauvegardes   # hors du dépôt, exprès :
                                           # une sauvegarde dedans serait
@@ -46,14 +47,23 @@ else
     echo "Avertissement : aucune base trouvée à $BASE"
 fi
 
-# ── 2. Mise à jour du code ───────────────────────────────────────────
+# ── 2. Arrêt du conteneur ────────────────────────────────────────────
+# Django tient la base ouverte. Sous Linux, git peut supprimer un fichier
+# ouvert : le conteneur continuerait alors d'écrire dans un fichier devenu
+# fantôme, et au redémarrage Django, ne trouvant plus rien, créerait une
+# base vide. Perte totale et silencieuse. On l'arrête donc avant le pull.
+docker stop "$CONTENEUR" >/dev/null 2>&1 && echo "Conteneur arrêté."
+
+# ── 3. Mise à jour du code ───────────────────────────────────────────
 if ! git pull; then
     echo "ERREUR : git pull a échoué. Le code n'a pas été mis à jour."
     echo "La base est intacte, sauvegarde disponible dans $SAUVEGARDES."
+    docker start "$CONTENEUR" >/dev/null 2>&1
+    echo "Conteneur redémarré sur l'ancienne version."
     exit 1
 fi
 
-# ── 3. Filet : la base doit toujours être là après le pull ───────────
+# ── 4. Filet : la base doit toujours être là après le pull ───────────
 if [ ! -f "$BASE" ] && [ -d "$SAUVEGARDES" ]; then
     DERNIERE=$(ls -1t "$SAUVEGARDES"/db-*.sqlite3 2>/dev/null | head -1)
     if [ -n "$DERNIERE" ]; then
@@ -62,5 +72,16 @@ if [ ! -f "$BASE" ] && [ -d "$SAUVEGARDES" ]; then
     fi
 fi
 
-# ── 4. Redémarrage ───────────────────────────────────────────────────
-docker restart django-keyapp-python-1
+# ── 5. Contrôle avant de laisser Django y toucher ────────────────────
+if command -v sqlite3 >/dev/null 2>&1 && [ -f "$BASE" ]; then
+    LIGNES=$(sqlite3 "$BASE" "select count(*) from listings_keyinstance;" 2>/dev/null)
+    if [ -z "$LIGNES" ] || [ "$LIGNES" -eq 0 ] 2>/dev/null; then
+        echo "ERREUR : la base est vide ou illisible. Conteneur laissé arrêté."
+        echo "Sauvegardes disponibles dans $SAUVEGARDES."
+        exit 1
+    fi
+    echo "Base vérifiée : $LIGNES exemplaires."
+fi
+
+# ── 6. Redémarrage ───────────────────────────────────────────────────
+docker start "$CONTENEUR"
