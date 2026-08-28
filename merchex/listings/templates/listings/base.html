@@ -199,7 +199,7 @@
         {% block extra_css %}{% endblock %}
     </style>
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
     <!-- En-tête / Barre de navigation -->
     <header class="top-header">
         <!-- Logo -->
@@ -235,7 +235,7 @@
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <a class="dropdown-item" href="{% url 'profile' %}">
-                        <i class="fas fa-user-circle me-2"></i> Gérer mon profile
+                        <i class="fas fa-user-circle me-2"></i> Gérer mon profil
                     </a>
                 </li>
               <!--   <li>
@@ -274,7 +274,7 @@
                 <!-- Synthese : consultation ouverte aux trois roles -->
                 <li>
                     <a class="dropdown-item" href="{% url 'synthesis_table' %}">
-                        <i class="fas fa-chart-bar me-2"></i> Synthèse global
+                        <i class="fas fa-chart-bar me-2"></i> Synthèse globale
                     </a>
                 </li>
                 
@@ -308,7 +308,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Récupérer le chemin actuel de la page
             const currentPath = window.location.pathname;
-            console.log("Chemin actuel:", currentPath);
             
             // Commencer par supprimer toutes les classes 'active' existantes
             document.querySelectorAll('.nav-menu a.active').forEach(item => {
@@ -318,35 +317,41 @@
             // Structure conditionnelle simple avec des vérifications précises
             if (currentPath === '/' || currentPath === '/home/') {
                 document.getElementById('menu-home')?.classList.add('active');
-                console.log("Menu Accueil activé");
             } 
             else if (currentPath.includes('/keys/')) {
                 document.getElementById('menu-key_list')?.classList.add('active');
-                console.log("Menu Gestion des clés activé");
             } 
             else if (currentPath.includes('/teams/')) {
                 document.getElementById('menu-team_list')?.classList.add('active');
-                console.log("Menu Gestion des équipes activé");
             } 
             else if (currentPath.includes('/attr/') || currentPath.includes('/user_keys/')) {
                 document.getElementById('menu-user_keys')?.classList.add('active');
-                console.log("Menu Attribuer des clés activé");
             }
             else if (currentPath.includes('/users') || currentPath === '/users/') {
                 document.getElementById('menu-user_list')?.classList.add('active');
-                console.log("Menu Gestion des utilisateurs activé");
             }
             // Fallback pour les sous-pages qui pourraient ne pas être capturées par les conditions ci-dessus
             else if (currentPath.includes('/owner/') || currentPath.includes('/owner/management/')) {
                 document.getElementById('menu-owner_management')?.classList.add('active');
-                console.log("Menu Gestion des utilisateurs activé (fallback)");
             }
             // Gestion des pages d'historique pour les admins
             else if (currentPath.includes('/admin/history/')) {
                 // Pas de menu principal à activer pour l'historique car c'est dans le dropdown
-                console.log("Page d'historique - pas de menu principal à activer");
             }
         });
+
+        /* Etat de defilement de l'en-tete. La classe est posee partout ; seule
+           l'accueil s'en sert pour l'instant (voir home.html). Passive : aucun
+           blocage du defilement. */
+        (function () {
+            const enTete = document.querySelector('.top-header');
+            if (!enTete) return;
+            const majEtat = () => {
+                enTete.classList.toggle('is-scrolled', window.scrollY > 12);
+            };
+            majEtat();
+            window.addEventListener('scroll', majEtat, { passive: true });
+        })();
     </script>
     
     <!-- Scripts supplémentaires par page -->

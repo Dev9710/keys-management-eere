@@ -129,7 +129,48 @@ def about(request):
 
 
 def home(request):
-    return render(request, 'listings/home.html')
+    """
+    Accueil : etat du parc en un coup d'oeil, puis les quatre espaces.
+
+    Les chiffres ne sont pas decoratifs. Un registre qui n'affiche jamais son
+    etat laisse l'ecart entre la base et l'armoire s'installer sans temoin.
+    """
+    # Exemplaires attribues, groupes par type, en une requete.
+    attribues_par_type = dict(
+        KeyAssignment.objects
+        .filter(is_active=True)
+        .values_list('key_instance__key_type_id')
+        .annotate(total=Count('id'))
+        .values_list('key_instance__key_type_id', 'total')
+    )
+
+    # Meme regle de coherence que la page Gestion des cles :
+    # attribuees + armoire + coffre doit egaler le total declare.
+    ecarts = 0
+    for key_type in KeyType.objects.all().only('id', 'total_quantity', 'in_cabinet', 'in_safe'):
+        calcule = (attribues_par_type.get(key_type.id, 0)
+                   + key_type.in_cabinet + key_type.in_safe)
+        if calcule != key_type.total_quantity:
+            ecarts += 1
+
+    nb_exemplaires = KeyInstance.objects.count()
+    nb_attributions = sum(attribues_par_type.values())
+
+    return render(request, 'listings/home.html', {
+        'nb_attributions': nb_attributions,
+        # Ce qui n'est pas sorti est en armoire ou au coffre.
+        'nb_en_stock': nb_exemplaires - nb_attributions,
+        # Modeles dont il ne reste rien a distribuer, ni en armoire ni au
+        # coffre : equiper un nouveau membre sur l'un d'eux suppose de
+        # rappeler une cle ou d'en faire faire une.
+        'nb_sans_dispo': KeyType.objects.filter(
+            in_cabinet=0, in_safe=0).count(),
+        # Les detenteurs qui ont effectivement une cle en main : c'est le
+        # nombre de personnes qui ont acces au batiment.
+        'nb_detenteurs': User.objects.filter(
+            key_assignments__is_active=True).distinct().count(),
+        'nb_ecarts': ecarts,
+    })
 
 
 def contact(request):

@@ -2,30 +2,115 @@
 {% load static %}
 
 {% block title %}Accueil | EERE - Gestion des Clés{% endblock %}
+{% block body_class %}accueil{% endblock %}
 
 {% block extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-<style>
+
+/* ═══════════════════════════════════════════
+   EN-TÊTE SANS COUTURE — accueil uniquement
+   ═══════════════════════════════════════════
+   En haut de page, la barre n'a aucun fond : le hero passe dessous, entier,
+   dégradé et étoiles comprises. Pas de voile — un aplat posé sur un dégradé
+   diagonal se verrait comme une bande plus sombre. Le texte blanc tient de
+   toute façon entre 9,27:1 et 14,28:1 sur toute la surface du hero.
+   Dès qu'on quitte le haut, la barre redevient celle du portail. */
+body.accueil .top-header {
+    position: fixed;
+    left: 0;
+    right: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #ffffff;
+    transition: background 180ms ease, box-shadow 240ms ease;
+}
+body.accueil .top-header .logo,
+body.accueil .top-header .nav-menu a,
+body.accueil .top-header .dropdown-toggle,
+body.accueil .top-header .dropdown-toggle span { color: #ffffff; }
+
+body.accueil .top-header .nav-menu a::after,
+body.accueil .top-header .nav-menu a.active::after {
+    background-color: #ffffff;
+    animation: none;
+    box-shadow: none;
+}
+body.accueil .top-header .nav-menu a:hover { color: rgba(255,255,255,.75); }
+body.accueil .top-header .user-initials {
+    background-color: rgba(255,255,255,.18);
+    color: #ffffff;
+}
+
+/* Retour à la barre du portail dès le premier défilement. */
+body.accueil .top-header.is-scrolled {
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    color: var(--primary-color);
+}
+body.accueil .top-header.is-scrolled .logo,
+body.accueil .top-header.is-scrolled .nav-menu a,
+body.accueil .top-header.is-scrolled .dropdown-toggle,
+body.accueil .top-header.is-scrolled .dropdown-toggle span { color: var(--primary-color); }
+body.accueil .top-header.is-scrolled .nav-menu a:hover,
+body.accueil .top-header.is-scrolled .nav-menu a.active { color: var(--primary-hover); }
+body.accueil .top-header.is-scrolled .nav-menu a::after { background-color: var(--primary-color); }
+body.accueil .top-header.is-scrolled .nav-menu a.active::after { animation: glow 2s infinite; }
+body.accueil .top-header.is-scrolled .user-initials {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+
+/* Le hero occupe le haut de page ; la barre flotte au-dessus. Le padding
+   compense sa hauteur pour que le contenu ne passe pas dessous. */
+body.accueil .hero-section { padding-top: calc(56px + 70px); }
+
+
+/* ── Entrée : la barre fait partie du hero ────────────────────────────
+   Mêmes durées, même courbe, même fenêtre que le contenu du hero — logo,
+   liens et compte arrivent dans la foulée du titre plutôt que d'être
+   déjà là, figés, pendant que le reste se met en place. */
+body.accueil .top-header .logo,
+body.accueil .top-header .nav-menu a,
+body.accueil .top-header .user-menu {
+    opacity: 0;
+    animation: enTeteEntree .5s cubic-bezier(.16,1,.3,1) forwards;
+}
+@keyframes enTeteEntree {
+    0%   { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+body.accueil .top-header .logo            { animation-delay: .05s; }
+body.accueil .top-header .nav-menu a:nth-child(1) { animation-delay: .12s; }
+body.accueil .top-header .nav-menu a:nth-child(2) { animation-delay: .17s; }
+body.accueil .top-header .nav-menu a:nth-child(3) { animation-delay: .22s; }
+body.accueil .top-header .nav-menu a:nth-child(4) { animation-delay: .27s; }
+body.accueil .top-header .nav-menu a:nth-child(5) { animation-delay: .32s; }
+body.accueil .top-header .user-menu       { animation-delay: .35s; }
 
 /* ═══════════════════════════════════════════
    HERO — conservé intégralement + amélioré
 ═══════════════════════════════════════════ */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+.hero-section *, .features-section * { margin: 0; padding: 0; box-sizing: border-box; }
 
 .hero-section {
-    background: linear-gradient(135deg, #000000, #3a9f87);
-    padding: 80px 20px;
+    /* Le gradient signature du systeme. L'ancien finissait sur #3a9f87,
+       ou le blanc tombe a 3.24:1 ; ici le point le plus clair est #1a5040
+       et le texte tient a 9.27:1 sur toute la surface. */
+    background: linear-gradient(135deg, #0d3028 0%, #1a5040 100%);
+    /* Présence assumée : le hero reprend de la hauteur, un cran en dessous
+       du plein écran d'origine (100dvh). Réglage sur une seule ligne —
+       min-height ci-dessous. */
+    padding: 56px 20px;
     text-align: center;
     color: white;
     position: relative;
     overflow: hidden;
-    min-height: 100dvh;
+    min-height: 75dvh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     opacity: 0;
-    animation: heroAppear 1.2s ease-out 0.3s forwards;
+    animation: heroAppear .5s cubic-bezier(.16,1,.3,1) forwards;
 }
 
 .stars-container {
@@ -137,7 +222,7 @@
     margin: 0 auto;
     opacity: 0;
     transform: translateY(50px);
-    animation: contentSlideUp 1s ease-out 0.8s forwards;
+    animation: contentSlideUp .5s cubic-bezier(.16,1,.3,1) .1s forwards;
 }
 
 /* Badge pill — nouveau */
@@ -156,33 +241,31 @@
     font-family: 'DM Sans', sans-serif;
     font-weight: 500;
     opacity: 0;
-    animation: descriptionAppear .8s ease-out 1s forwards;
+    animation: descriptionAppear .4s ease-out .15s forwards;
 }
 
 .hero-title {
-    font-family: 'Fraunces', 'DM Serif Display', serif;
-    font-optical-sizing: auto;
-    font-weight: 560;
-    font-size: 3.5em;
-    margin-bottom: 20px;
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-weight: 400;
+    font-size: 1.4rem;
+    margin-bottom: 10px;
     text-shadow:
         0 0 20px rgba(255,255,255,0.5),
         0 0 40px rgba(58,159,135,0.3),
         2px 2px 4px rgba(0,0,0,0.3);
     opacity: 0;
     transform: translateY(30px);
-    animation: titleAppear 0.8s ease-out 1.2s forwards;
+    animation: titleAppear .4s ease-out .2s forwards;
 }
 
 .hero-description {
     font-family: 'DM Sans', sans-serif;
-    font-size: 1.25em;
-    font-weight: 300;
-    margin-bottom: 30px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    font-size: .88rem;
+    font-weight: 400;
+    margin-bottom: 20px;
     opacity: 0;
     transform: translateY(20px);
-    animation: descriptionAppear 0.8s ease-out 1.6s forwards;
+    animation: descriptionAppear .4s ease-out .25s forwards;
     max-width: 580px;
     margin-left: auto;
     margin-right: auto;
@@ -190,9 +273,11 @@
 }
 
 .cta-button {
+    display: inline-block;
+    text-decoration: none;
     font-family: 'DM Sans', sans-serif;
-    padding: 15px 40px;
-    font-size: 1.1em;
+    padding: .7rem 1.6rem;
+    font-size: .88rem;
     font-weight: 500;
     background: rgba(255,255,255,0.1);
     color: white;
@@ -205,26 +290,18 @@
     backdrop-filter: blur(10px);
     opacity: 0;
     transform: translateY(20px) scale(0.8);
-    animation: buttonAppear 0.6s ease-out 2s forwards;
+    animation: buttonAppear .4s ease-out .3s forwards;
 }
 .cta-button:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(58,159,135,0.4), 0 0 60px rgba(255,255,255,0.2);
+    transform: translateY(-1px);
     background: rgba(255,255,255,0.2);
     border-color: white;
 }
-.cta-button::before {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 0; height: 0;
-    background: radial-gradient(circle, rgba(255,255,255,0.3), transparent);
-    transition: all 0.5s ease;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
+.cta-button:active { transform: scale(.98); }
+.cta-button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255,255,255,.5);
 }
-.cta-button:hover::before { width: 300px; height: 300px; }
-.cta-button span { position: relative; z-index: 1; }
 
 .wave {
     position: absolute;
@@ -236,54 +313,193 @@
 }
 
 /* ═══════════════════════════════════════════
-   WAVE TRANSITIONS
-═══════════════════════════════════════════ */
-.wave-transition {
-    display: block;
-    line-height: 0;
-    margin: -2px 0;
-    background: transparent;
-}
-.wave-transition svg { display: block; width: 100%; }
-
-/* ═══════════════════════════════════════════
    FEATURES SECTION — white / paper
 ═══════════════════════════════════════════ */
 .features-section {
     background: #ffffff;
-    padding: 96px 20px;
+    padding: 1.5rem 2rem 2.5rem;
     position: relative;
 }
 
 .features-section-head {
-    text-align: center;
-    margin-bottom: 56px;
-}
-
-.features-eyebrow {
-    font-family: 'DM Sans', sans-serif;
-    font-size: .72rem;
-    letter-spacing: .25em;
-    text-transform: uppercase;
-    color: #3a9f87;
-    font-weight: 600;
-    margin-bottom: .6rem;
+    max-width: 1200px;
+    margin: 0 auto 1rem;
 }
 
 .features-section-head h2 {
-    font-family: 'Fraunces', 'DM Serif Display', serif;
-    font-optical-sizing: auto;
-    color: #0d3028;
-    font-size: 2.4rem;
-    font-weight: 540;
-    margin-bottom: .5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #64748b;
 }
 
-.features-section-head p {
+/* ── Section 2 · Le parc en chiffres ──────────────────────────────────
+   Fond blanc. La jointure avec le hero est un fondu : le bas du hero se
+   dissout vers le blanc (voir .hero-section::after), donc aucune arête
+   entre le vert et la section. Contraste vérifié : #2a7562 sur blanc
+   donne 5,50:1 — au-dessus d'AA même pour du texte normal, alors que
+   #3a9f87 tombe à 3,24:1 et ne passerait que pour du gros texte. */
+.kpi-section {
+    /* La jointure est portée par la section claire, pas par le hero : une
+       bande de 56px teintée du vert de bordure du système, qui s'éclaircit
+       vers le blanc. Rien ne déborde sur le ciel étoilé. */
+    background: linear-gradient(180deg, #e8f0ed 0%, #ffffff 56px);
+    padding: 4rem 2rem;
+    min-height: 75dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #0f172a;
+    text-align: center;
+}
+.kpi-inner { max-width: 1200px; margin: 0 auto; width: 100%; }
+
+.kpi-titre {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-weight: 400;
+    font-size: 1.4rem;
+    color: #0d3028;
+    margin-bottom: 8px;
+}
+.kpi-sous-titre {
     font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    line-height: 1.6;
     color: #64748b;
-    font-size: .95rem;
-    font-weight: 300;
+    max-width: 62ch;
+    margin: 0 auto 2.5rem;
+}
+
+.kpi-rangee {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-items: start;
+}
+.kpi-item {
+    padding: 0 1.5rem;
+    border-left: 1px solid #e8f0ed;
+}
+.kpi-item:first-child { border-left: none; }
+
+.kpi-nombre {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: #2a7562;
+    /* Chiffres à chasse fixe : sans ça, le compteur ferait vibrer la
+       largeur à chaque image pendant l'animation. */
+    font-variant-numeric: tabular-nums;
+}
+.kpi-libelle {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 500;
+    color: #0f172a;
+    margin-top: .7rem;
+}
+
+/* La colonne avant son tour : absente, pas vide. Cet état n'est jamais posé
+   par le CSS — c'est le script qui l'ajoute, et seulement au moment où il
+   s'engage à le retirer. Sans JavaScript, tout est visible d'emblée. */
+.kpi-item.en-attente {
+    opacity: 0;
+    transform: translateY(12px);
+}
+.kpi-item.en-attente.arrive {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 420ms cubic-bezier(.16,1,.3,1),
+                transform 420ms cubic-bezier(.16,1,.3,1);
+}
+/* Le filet de séparation arrive avec sa colonne. */
+.kpi-item.en-attente { border-left-color: transparent; }
+.kpi-item.en-attente.arrive { transition: opacity 420ms cubic-bezier(.16,1,.3,1),
+                                          transform 420ms cubic-bezier(.16,1,.3,1),
+                                          border-left-color 420ms ease; }
+.kpi-item.en-attente.arrive:not(:first-child) { border-left-color: #e8f0ed; }
+
+/* Arrivée du compteur : une poussée courte, sur transform uniquement, donc
+   sans réagencement ni décalage de la colonne. */
+.kpi-nombre.est-arrive { animation: arriveeChiffre 320ms cubic-bezier(.16,1,.3,1); }
+@keyframes arriveeChiffre {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.06); }
+    100% { transform: scale(1); }
+}
+
+/* L'écart porte l'orange, mais pas celui du bandeau vert : sur blanc,
+   #FFA500 tombe à 1,97:1 et #e8920a à 2,46:1 — illisibles. #cc8400 est le
+   ton le plus clair de la rampe Orange Registre qui tienne encore le seuil
+   du gros texte (3,06:1 pour 3:1 requis) ; la marche suivante, #d18a00,
+   échoue à 2,86:1. Ne vaut QUE pour ce chiffre de 2,2rem en gras — en
+   dessous de 24px, il faudrait redescendre à #a36900. Le libellé
+   « à vérifier » dit de toute façon le sens : rien ne repose sur la
+   couleur seule. */
+.kpi-item-ecart .kpi-nombre { color: #cc8400; }
+
+/* ── Section 4 · Incitation à tenir le registre ───────────────────────
+   Même reliure que le hero : la page s'ouvre et se referme sur le vert
+   profond. Le bouton reprend le contour blanc du hero — l'orange reste
+   réservé à l'ajout. */
+.cta-section {
+    background: linear-gradient(135deg, #0d3028 0%, #1a5040 100%);
+    padding: 2.5rem 2rem;
+    color: #ffffff;
+}
+.cta-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+.cta-texte { max-width: 62ch; }
+.cta-titre {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-weight: 400;
+    font-size: 1.4rem;
+    margin-bottom: 8px;
+}
+.cta-sous-titre {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    color: rgba(255,255,255,.75);
+    line-height: 1.6;
+}
+.cta-bouton {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    flex-shrink: 0;
+    padding: .7rem 1.6rem;
+    background: rgba(255,255,255,0.1);
+    color: #ffffff;
+    border: 2px solid rgba(255,255,255,0.8);
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background .2s, border-color .2s, transform .1s;
+}
+.cta-bouton:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: #ffffff;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+.cta-bouton:active { transform: scale(.98); }
+.cta-bouton:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255,255,255,.5);
 }
 
 .features-grid {
@@ -303,281 +519,94 @@
     max-width: 895px;
 }
 
-/* ── Feature Card — dark glass on white section ── */
+/* ── Carte de destination — grammaire de carte du systeme ──
+   Blanche sur le fond papier, bordure verdie, legerement soulevee,
+   liseré gauche teal au survol : exactement les lignes de tableau
+   et les cartes de Gestion des cles. On traverse le portail sans
+   changer de produit. */
 .feature-card {
     position: relative;
-    background: linear-gradient(145deg, #0f3525 0%, #163d2c 60%, #1a5040 100%);
-    border: 1px solid rgba(58,159,135,.2);
-    border-radius: 20px;
+    background: #ffffff;
+    border: 1px solid #e8f0ed;
+    border-left: 3px solid transparent;
+    border-radius: 12px;
     overflow: hidden;
-    cursor: pointer;
-    opacity: 0;
-    transform: translateY(32px);
     display: flex;
     flex-direction: column;
     text-decoration: none;
     color: inherit;
-    transform-style: preserve-3d;
-    transition: box-shadow .35s ease, border-color .35s ease;
-    box-shadow: 0 4px 20px rgba(0,0,0,.12);
-    will-change: transform;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    transition: background .15s, border-left-color .15s, box-shadow .2s, transform .2s;
 }
-
-/* Shimmer sweep */
-.feature-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -120%;
-    width: 60%;
-    height: 100%;
-    background: linear-gradient(105deg, transparent, rgba(255,255,255,.07), transparent);
-    transform: skewX(-20deg);
-    transition: left .6s cubic-bezier(.16,1,.3,1);
-    pointer-events: none;
-    z-index: 2;
-}
-.feature-card:hover::after { left: 160%; }
 
 .feature-card:hover {
-    border-color: rgba(58,159,135,.55);
-    box-shadow:
-        0 20px 48px rgba(0,0,0,.25),
-        0 0 0 1px rgba(58,159,135,.4),
-        0 0 28px rgba(58,159,135,.15);
+    background: #f8fffe;
+    border-left-color: #3a9f87;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
+    transform: translateY(-2px);
 }
 
 .feature-card:focus-visible {
-    outline: 2px solid #3a9f87;
-    outline-offset: 3px;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(58,159,135,.25);
+    border-left-color: #3a9f87;
 }
 
-/* ── Card Visual Header ── */
-.card-visual {
-    height: 152px;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.cv-1 { background: linear-gradient(135deg, #071810 0%, #0d3028 55%, #163d2c 100%); }
-.cv-2 { background: linear-gradient(135deg, #0d2d1f 0%, #1a5040 55%, #2a7562 100%); }
-.cv-3 { background: linear-gradient(135deg, #0d3028 0%, #1e5c48 55%, #3a9f87 100%); }
-.cv-4 { background: linear-gradient(135deg, #0a1e14 0%, #163d2c 55%, #1a5040 100%); }
-
-/* Giant background icon */
-.cv-bg-icon {
-    position: absolute;
-    font-size: 130px;
-    color: rgba(255,255,255,.05);
-    right: -8px; bottom: -18px;
-    pointer-events: none;
-    transition: transform .5s cubic-bezier(.16,1,.3,1), color .4s;
-}
-.feature-card:hover .cv-bg-icon {
-    transform: scale(1.12) rotate(6deg);
-    color: rgba(255,255,255,.1);
-}
-
-/* Dot grid overlay */
-.cv-dots {
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(circle, rgba(255,255,255,.08) 1px, transparent 1px);
-    background-size: 18px 18px;
-    pointer-events: none;
-}
-
-/* Decorative circle corner */
-.cv-circle {
-    position: absolute;
-    top: -28px; left: -28px;
-    width: 110px; height: 110px;
-    border-radius: 50%;
-    background: rgba(255,255,255,.04);
-    pointer-events: none;
-}
-.cv-circle-sm {
-    position: absolute;
-    bottom: -16px; right: 30px;
-    width: 60px; height: 60px;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,.06);
-    pointer-events: none;
-}
-
-/* Central icon box — frosted glass */
+/* Pastille d'icone : le teal clair du systeme, pas un verre depoli */
 .cv-icon {
-    width: 64px; height: 64px;
-    background: rgba(255,255,255,.1);
-    border: 1px solid rgba(255,255,255,.22);
-    border-radius: 18px;
+    width: 44px; height: 44px;
+    background: #edf7f5;
+    border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
-    position: relative;
-    z-index: 1;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    transition: background .35s, border-color .35s, box-shadow .35s, transform .35s cubic-bezier(.16,1,.3,1);
+    flex-shrink: 0;
+    transition: background .2s;
 }
 .cv-icon i {
-    font-size: 26px;
-    color: rgba(255,255,255,.88);
-    transition: transform .35s, color .35s, text-shadow .35s;
+    font-size: 18px;
+    color: #3a9f87;
+    transition: color .2s;
 }
-.feature-card:hover .cv-icon {
-    background: rgba(58,159,135,.28);
-    border-color: rgba(77,191,163,.6);
-    box-shadow: 0 0 28px rgba(58,159,135,.4), 0 0 8px rgba(77,191,163,.3);
-    transform: scale(1.1) translateY(-2px);
-}
-.feature-card:hover .cv-icon i {
-    color: #a8edda;
-    text-shadow: 0 0 14px rgba(58,159,135,.9);
-    transform: scale(1.08);
-}
-
-/* Accent dot (card 4) */
-.cv-accent { position: absolute; top: 14px; right: 14px; width: 8px; height: 8px; border-radius: 50%; background: #FFA500; opacity: .65; }
-
-.feature-card.visible {
-    animation: featureCardIn .55s cubic-bezier(.16,1,.3,1) var(--delay, 0s) forwards;
-}
-@keyframes featureCardIn {
-    to { opacity: 1; transform: translateY(0); }
-}
+.feature-card:hover .cv-icon { background: #3a9f87; }
+.feature-card:hover .cv-icon i { color: #ffffff; }
 
 .feature-card-body {
-    padding: 1.75rem 1.5rem 1.5rem;
+    padding: 1rem 1.25rem 1.1rem;
     flex: 1;
     display: flex;
     flex-direction: column;
-    position: relative;
-    z-index: 1;
+    gap: .35rem;
 }
-
 
 .feature-card h3 {
-    font-family: 'Fraunces', 'DM Serif Display', serif;
-    font-optical-sizing: auto;
+    font-family: 'DM Sans', sans-serif;
     font-weight: 600;
-    font-size: 1.1rem;
-    color: rgba(255,255,255,.92);
-    margin-bottom: .5rem;
+    font-size: .9rem;
+    color: #0f172a;
     line-height: 1.3;
-    transition: color .2s;
 }
-.feature-card:hover h3 { color: #ffffff; }
 
 .feature-card p {
     font-family: 'DM Sans', sans-serif;
-    font-size: .84rem;
-    color: rgba(255,255,255,.5);
-    line-height: 1.7;
+    font-size: .88rem;
+    color: #64748b;
+    line-height: 1.5;
     flex: 1;
-    transition: color .2s;
 }
-.feature-card:hover p { color: rgba(255,255,255,.72); }
 
 .feature-arrow {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-family: 'DM Sans', sans-serif;
-    font-size: .8rem;
-    font-weight: 600;
-    color: #4dbfa3;
-    margin-top: 1.2rem;
-    opacity: 0;
-    transform: translateX(-8px);
-    transition: opacity .25s, transform .25s;
-}
-.feature-card:hover .feature-arrow { opacity: 1; transform: translateX(0); }
-
-/* ═══════════════════════════════════════════
-   CTA FINAL SECTION
-═══════════════════════════════════════════ */
-.cta-final-section {
-    background: linear-gradient(160deg, #1a5040 0%, #0f3525 50%, #0d3028 100%);
-    padding: 96px 20px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.cta-final-section::before {
-    content: '';
-    position: absolute;
-    top: -80px; right: -80px;
-    width: 300px; height: 300px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,165,0,.08) 0%, transparent 65%);
-    pointer-events: none;
-}
-
-.cta-final-inner {
-    position: relative;
-    z-index: 1;
-    max-width: 560px;
-    margin: 0 auto;
-}
-
-.cta-eyebrow {
-    font-family: 'DM Sans', sans-serif;
-    font-size: .72rem;
-    letter-spacing: .25em;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .08em;
     text-transform: uppercase;
-    color: #FFA500;
-    font-weight: 600;
-    margin-bottom: .75rem;
+    color: #64748b;
+    margin-top: .75rem;
+    transition: color .2s, gap .2s;
 }
-
-.cta-final-title {
-    font-family: 'Fraunces', 'DM Serif Display', serif;
-    font-optical-sizing: auto;
-    font-size: 2.2rem;
-    color: white;
-    font-weight: 540;
-    margin-bottom: .75rem;
-    line-height: 1.2;
-}
-
-.cta-final-sub {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 1rem;
-    color: rgba(255,255,255,.65);
-    font-weight: 300;
-    margin-bottom: 2rem;
-    line-height: 1.6;
-}
-
-.cta-final-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: .85rem 2rem;
-    background: #e8920a;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: .95rem;
-    font-weight: 600;
-    letter-spacing: .02em;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background .2s, box-shadow .2s, transform .1s;
-    text-shadow: 0 1px 2px rgba(0,0,0,.15);
-}
-.cta-final-btn:hover {
-    background: #d17e08;
-    box-shadow: 0 4px 18px rgba(232,146,10,.4);
-    color: white;
-    transform: translateY(-2px);
-}
-.cta-final-btn:active { transform: scale(.98); }
+.feature-card:hover .feature-arrow { color: #2a7562; gap: 10px; }
 
 /* ═══════════════════════════════════════════
    KEYFRAMES — hero (inchangés)
@@ -647,36 +676,46 @@
 }
 
 @media (max-width: 768px) {
-    .hero-section { padding: 60px 15px; min-height: 90dvh; }
-    .hero-title   { font-size: 2.5em; }
-    .hero-description { font-size: 1.1em; }
-    .features-section { padding: 60px 15px; }
-    .cta-final-section { padding: 72px 20px; }
-    .cta-final-title { font-size: 1.8rem; }
+    .hero-section { padding: 40px 15px; min-height: 60dvh; }
+    .hero-title   { font-size: 1.15rem; }
+    .features-section { padding: 1.25rem 1rem 2rem; }
+    .kpi-section { padding: 2rem 1rem; }
+    .kpi-section { min-height: 0; padding: 2.5rem 1rem; }
+    .kpi-rangee { grid-template-columns: repeat(2, 1fr); row-gap: 1.75rem; }
+    .kpi-item:nth-child(odd) { border-left: none; }
+    .kpi-nombre { font-size: 1.4rem; }
+    .cta-section { padding: 2rem 1rem; }
+    .cta-inner { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
 }
 
 @media (max-width: 480px) {
-    .hero-title { font-size: 2em; }
-    .hero-description { font-size: 1em; }
     .features-grid,
     .features-grid.is-3 { grid-template-columns: 1fr; }
-    .features-section-head h2 { font-size: 1.75rem; }
-    .cta-final-title { font-size: 1.6rem; }
+    .kpi-rangee { grid-template-columns: 1fr; }
+    .kpi-item { border-left: none; }
+    .kpi-titre, .cta-titre { font-size: 1.15rem; }
 }
 
+/* Mouvement réduit : plus d'étoiles injectées du tout (le script sort avant),
+   plus d'entrée, plus de transitions. Le contenu reste visible — c'était le
+   piège de la version précédente, où couper les animations laissait les
+   cartes à opacity: 0. */
 @media (prefers-reduced-motion: reduce) {
     .hero-section, .hero-content, .hero-title, .hero-description,
     .cta-button, .hero-badge,
     .stars-layer-1, .stars-layer-2, .stars-layer-3,
-    .star, .star-dot, .sparkle, .shooting-star {
+    body.accueil .top-header,
+    body.accueil .top-header .logo,
+    body.accueil .top-header .nav-menu a,
+    body.accueil .top-header .user-menu,
+    .feature-card, .kpi-item, .cta-bouton {
         animation: none !important;
+        transition: none !important;
         opacity: 1 !important;
         transform: none !important;
     }
-    .feature-card { animation: none !important; opacity: 1 !important; transform: none !important; }
 }
 
-</style>
 {% endblock %}
 
 {% block content %}
@@ -694,45 +733,88 @@
     </div>
 
     <div class="hero-content">
-        <div class="hero-badge" aria-hidden="true">Portail de gestion des clés · Église Évangélique Rencontre Espérance</div>
-        <h1 class="hero-title">Bienvenue</h1>
-        <p class="hero-description">Vous êtes sur le portail de gestion des clés de l'Église Évangélique Rencontre Espérance. Attribuez les clés, suivez qui détient quoi et gardez le trousseau à jour.</p>
-        <button class="cta-button" onclick="window.location.href='{% url 'key_list' %}'">
-            <span>Commencer le suivi</span>
-        </button>
+        <!-- Pas d'aria-hidden : c'est le seul texte qui nomme le portail
+             et l'église, et le seul contexte d'un h1 par ailleurs court. -->
+        <div class="hero-badge">Portail de gestion des clés · Église Évangélique Rencontre Espérance</div>
+        <h1 class="hero-title">Bonjour {{ request.user.first_name|default:"" }}</h1>
+        <p class="hero-description">
+            {% if request.user.is_visitor %}
+            Vous consultez le registre des clés en lecture seule.
+            {% else %}
+            Le registre des clés de l'église : qui détient quoi, et où se trouve le reste.
+            {% endif %}
+        </p>
+        <a class="cta-button" href="{% url 'key_list' %}">Ouvrir le parc de clés</a>
     </div>
 </section>
-
-<!-- Wave hero → features (white) -->
-<div class="wave-transition" aria-hidden="true" style="background:transparent">
-    <svg viewBox="0 0 1440 64" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0,32 C240,64 480,0 720,32 C960,64 1200,0 1440,32 L1440,64 L0,64 Z" fill="#ffffff"/>
-    </svg>
-</div>
 
 <!-- ══════════════════════════════════
      FEATURES
 ══════════════════════════════════ -->
+<!-- ══════════════════════════════════
+     2 · ÉTAT DU PARC
+══════════════════════════════════ -->
+<section class="kpi-section" id="etat">
+    <div class="kpi-inner">
+
+        {% if messages %}
+        <div class="home-messages">
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <h2 class="kpi-titre">Le parc en chiffres</h2>
+        <p class="kpi-sous-titre">
+            Relevé sur le registre au moment où vous ouvrez cette page.
+        </p>
+
+        <div class="kpi-rangee">
+            <div class="kpi-item">
+                <span class="kpi-nombre" data-compteur="{{ nb_attributions }}">{{ nb_attributions }}</span>
+                <span class="kpi-libelle">Clés attribuées</span>
+            </div>
+            <div class="kpi-item">
+                <span class="kpi-nombre" data-compteur="{{ nb_en_stock }}">{{ nb_en_stock }}</span>
+                <span class="kpi-libelle">Clés en stock</span>
+            </div>
+            <div class="kpi-item">
+                <span class="kpi-nombre" data-compteur="{{ nb_sans_dispo }}">{{ nb_sans_dispo }}</span>
+                <span class="kpi-libelle">Sans exemplaire disponible</span>
+            </div>
+            <div class="kpi-item">
+                <span class="kpi-nombre" data-compteur="{{ nb_detenteurs }}">{{ nb_detenteurs }}</span>
+                <span class="kpi-libelle">Détenteurs</span>
+            </div>
+            <div class="kpi-item kpi-item-ecart">
+                <span class="kpi-nombre" data-compteur="{{ nb_ecarts }}">{{ nb_ecarts }}</span>
+                <span class="kpi-libelle">Clé{{ nb_ecarts|pluralize }} à vérifier</span>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ══════════════════════════════════
+     3 · NAVIGATION RAPIDE
+══════════════════════════════════ -->
 <section class="features-section" id="features">
+
     <div class="features-section-head">
-        <p class="features-eyebrow">Navigation rapide</p>
-        <h2>Que souhaitez-vous faire ?</h2>
-        <p>Choisissez l'espace dans lequel vous voulez travailler.</p>
+        <h2>Navigation rapide</h2>
     </div>
 
     <div class="features-grid{% if request.user.is_visitor %} is-3{% endif %}">
 
         <!-- Card 1 — Gestion des clés -->
-        <a class="feature-card" href="{% url 'key_list' %}" role="button"
-           aria-label="Gestion des clés" style="--delay:0.1s">
-            <div class="card-visual cv-1">
-                <i class="fas fa-key cv-bg-icon" aria-hidden="true"></i>
-                <div class="cv-dots"></div>
-                <div class="cv-circle"></div>
-                <div class="cv-circle-sm"></div>
-                <div class="cv-icon"><i class="fas fa-key" aria-hidden="true"></i></div>
-            </div>
+        <a class="feature-card" href="{% url 'key_list' %}"
+           aria-label="Gestion des clés">
             <div class="feature-card-body">
+                <div class="cv-icon"><i class="fas fa-key" aria-hidden="true"></i></div>
                 <h3>Gestion des clés</h3>
                 <p>Ajouter, modifier et consulter la liste complète des clés disponibles.</p>
                 <span class="feature-arrow">Accéder <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
@@ -740,16 +822,10 @@
         </a>
 
         <!-- Card 2 — Gestion des équipes -->
-        <a class="feature-card" href="{% url 'team_list' %}" role="button"
-           aria-label="Gestion des équipes" style="--delay:0.2s">
-            <div class="card-visual cv-2">
-                <i class="fas fa-users cv-bg-icon" aria-hidden="true"></i>
-                <div class="cv-dots"></div>
-                <div class="cv-circle"></div>
-                <div class="cv-circle-sm"></div>
-                <div class="cv-icon"><i class="fas fa-users" aria-hidden="true"></i></div>
-            </div>
+        <a class="feature-card" href="{% url 'team_list' %}"
+           aria-label="Gestion des équipes">
             <div class="feature-card-body">
+                <div class="cv-icon"><i class="fas fa-users" aria-hidden="true"></i></div>
                 <h3>Gestion des équipes</h3>
                 <p>Ajouter, supprimer ou modifier le nom d'une équipe.</p>
                 <span class="feature-arrow">Accéder <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
@@ -757,16 +833,10 @@
         </a>
 
         <!-- Card 3 — Gestion des détenteurs -->
-        <a class="feature-card" href="{% url 'user_list' %}" role="button"
-           aria-label="Gestion des détenteurs de clés" style="--delay:0.3s">
-            <div class="card-visual cv-3">
-                <i class="fas fa-user cv-bg-icon" aria-hidden="true"></i>
-                <div class="cv-dots"></div>
-                <div class="cv-circle"></div>
-                <div class="cv-circle-sm"></div>
-                <div class="cv-icon"><i class="fas fa-user" aria-hidden="true"></i></div>
-            </div>
+        <a class="feature-card" href="{% url 'user_list' %}"
+           aria-label="Gestion des détenteurs de clés">
             <div class="feature-card-body">
+                <div class="cv-icon"><i class="fas fa-user" aria-hidden="true"></i></div>
                 <h3>Gestion des détenteurs</h3>
                 <p>Administrer les détenteurs de clés par équipe.</p>
                 <span class="feature-arrow">Accéder <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
@@ -776,17 +846,10 @@
 
         <!-- Card 4 — Clés attribuées -->
         {% if not request.user.is_visitor %}
-        <a class="feature-card" href="{% url 'user_keys' %}" role="button"
-           aria-label="Gestion des clés attribuées" style="--delay:0.4s">
-            <div class="card-visual cv-4">
-                <i class="fas fa-id-badge cv-bg-icon" aria-hidden="true"></i>
-                <div class="cv-dots"></div>
-                <div class="cv-circle"></div>
-                <div class="cv-circle-sm"></div>
-                <div class="cv-accent"></div>
-                <div class="cv-icon"><i class="fas fa-id-badge" aria-hidden="true"></i></div>
-            </div>
+        <a class="feature-card" href="{% url 'user_keys' %}"
+           aria-label="Gestion des clés attribuées">
             <div class="feature-card-body">
+                <div class="cv-icon"><i class="fas fa-id-badge" aria-hidden="true"></i></div>
                 <h3>Clés attribuées</h3>
                 <p>Attribuer une ou plusieurs clés aux détenteurs de clés.</p>
                 <span class="feature-arrow">Accéder <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
@@ -797,36 +860,52 @@
     </div>
 </section>
 
-<!-- Wave features (white) → CTA (dark teal) -->
-<div class="wave-transition" aria-hidden="true" style="background:#ffffff">
-    <svg viewBox="0 0 1440 64" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0,32 C240,0 480,64 720,32 C960,0 1200,64 1440,32 L1440,64 L0,64 Z" fill="#0d3028"/>
-    </svg>
-</div>
-
 <!-- ══════════════════════════════════
-     CTA FINAL
+     4 · TENIR LE REGISTRE À JOUR
 ══════════════════════════════════ -->
-<section class="cta-final-section" id="about">
-    <div class="cta-final-inner">
-        <p class="cta-eyebrow">Accès direct</p>
-        <h2 class="cta-final-title">Rendez-vous sur vos clés</h2>
-        <p class="cta-final-sub">Retrouvez la liste complète des clés et leurs attributions.</p>
-        <a href="{% url 'key_list' %}" class="cta-final-btn">
-            Accéder aux clés
-            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+<section class="cta-section" id="suivi">
+    <div class="cta-inner">
+        <div class="cta-texte">
+            {% if request.user.is_visitor %}
+            <h2 class="cta-titre">Besoin de retrouver une clé ?</h2>
+            <p class="cta-sous-titre">
+                Le parc complet, ses détenteurs et leurs équipes sont consultables,
+                et exportables au format de votre choix.
+            </p>
+            {% else %}
+            <h2 class="cta-titre">Une clé remise ou rendue ?</h2>
+            <p class="cta-sous-titre">
+                Enregistrez le mouvement pendant qu'il est frais. C'est ce qui garde
+                l'écart entre le registre et l'armoire à zéro.
+            </p>
+            {% endif %}
+        </div>
+
+        {% if request.user.is_visitor %}
+        <a class="cta-bouton" href="{% url 'key_list' %}">
+            <i class="fas fa-key" aria-hidden="true"></i> Consulter le parc de clés
         </a>
+        {% else %}
+        <a class="cta-bouton" href="{% url 'user_keys' %}">
+            <i class="fas fa-id-badge" aria-hidden="true"></i> Attribuer ou retirer une clé
+        </a>
+        {% endif %}
     </div>
 </section>
 
 <!-- ══════════════════════════════════
-     SCRIPTS — étoiles (inchangé) + IntersectionObserver
+     SCRIPT — ciel étoilé (décor, non bloquant)
 ══════════════════════════════════ -->
 <script>
+/* Le ciel etoile est du decor : il ne doit jamais conditionner l'affichage
+   du contenu. Les cartes sont visibles sans JavaScript ; si ce bloc echoue,
+   la page reste utilisable. */
 document.addEventListener('DOMContentLoaded', function () {
-
-    /* ── Stars JS (inchangé) ── */
     const container = document.getElementById('starsContainer');
+    if (!container) return;
+
+    const sobre = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (sobre) return;   // pas d'etoiles injectees du tout
 
     function createStar(className, count) {
         for (let i = 0; i < count; i++) {
@@ -855,85 +934,111 @@ document.addEventListener('DOMContentLoaded', function () {
     createStar('sparkle', 15);
 
     function createShootingStar() {
+        if (document.hidden) return;          // rien pendant que l'onglet dort
         const shooting = document.createElement('div');
         shooting.className = 'shooting-star';
         shooting.style.top = Math.random() * 60 + '%';
         shooting.style.left = '-100px';
-        shooting.style.animationDelay = '0s';
         shooting.style.animationDuration = (Math.random() * 2 + 2) + 's';
         container.appendChild(shooting);
         setTimeout(() => shooting.remove(), 4000);
     }
 
+    setTimeout(createShootingStar, 2000);
     setInterval(createShootingStar, 8000);
-    setTimeout(() => createShootingStar(), 2000);
-    setTimeout(() => createShootingStar(), 5000);
+});
 
-    let mouseX = 0, mouseY = 0, currentX = 0, currentY = 0;
-    const speed = 0.05;
+/* Comptage des chiffres du parc.
 
-    document.addEventListener('mousemove', (e) => {
-        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-        mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-    });
+   Ni « 0 » ni case vide : la colonne n'existe pas encore, puis elle arrive
+   et compte en arrivant. Zéro serait une valeur mensongère — c'en est une
+   vraie pour la colonne des écarts — et une case blanche sous un libellé se
+   lit comme un chargement raté, pas comme une animation.
 
-    function animate() {
-        currentX += (mouseX - currentX) * speed;
-        currentY += (mouseY - currentY) * speed;
-        container.querySelectorAll('.star, .star-dot, .sparkle').forEach((star, index) => {
-            const depth = (index % 3 + 1) * 0.5;
-            star.style.transform = `translate(${currentX * depth * 20}px, ${currentY * depth * 20}px)`;
-        });
-        requestAnimationFrame(animate);
-    }
-    animate();
+   Les valeurs finales sont dans le HTML. Le script n'escamote une colonne
+   qu'au moment où il s'engage à la ramener, et il le fait avant que la
+   section n'entre dans le champ : jamais d'état masqué sans animation en
+   cours. Sous prefers-reduced-motion, rien de tout ceci ne s'exécute. */
+document.addEventListener('DOMContentLoaded', function () {
+    const compteurs = document.querySelectorAll('[data-compteur]');
+    if (!compteurs.length) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!('IntersectionObserver' in window)) return;
 
-    const heroTitle = document.querySelector('.hero-title');
-    if (heroTitle) {
-        heroTitle.addEventListener('mouseenter', function () {
-            this.style.textShadow = '0 0 30px rgba(255,255,255,0.8), 0 0 60px rgba(58,159,135,0.5), 2px 2px 4px rgba(0,0,0,0.3)';
-        });
-        heroTitle.addEventListener('mouseleave', function () {
-            this.style.textShadow = '0 0 20px rgba(255,255,255,0.5), 0 0 40px rgba(58,159,135,0.3), 2px 2px 4px rgba(0,0,0,0.3)';
-        });
-    }
+    /* Relais de gauche à droite : chaque colonne se pose avant que la
+       suivante n'arrive. La dernière atterrit à 3,5 s. */
+    const DUREE = 1500;                            // montée d'un compteur, en ms
+    const CASCADE = 500;                           // écart entre deux arrivées
+    const sortie = t => 1 - Math.pow(1 - t, 3);    // ease-out cubique
 
-    /* ── IntersectionObserver — cartes ── */
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                observer.unobserve(entry.target);
+    const compter = (element) => {
+        const cible = parseInt(element.dataset.compteur, 10);
+        if (!Number.isFinite(cible)) return;
+        element.textContent = '0';
+        const depart = performance.now();
+        const pas = maintenant => {
+            const avance = Math.min(1, Math.max(0, (maintenant - depart) / DUREE));
+            element.textContent = Math.round(sortie(avance) * cible);
+            if (avance < 1) {
+                requestAnimationFrame(pas);
+            } else {
+                // Le chiffre se cale : une brève poussée signale l'arrivée
+                // et rend le passage de relais lisible.
+                element.classList.add('est-arrive');
             }
-        });
-    }, { threshold: 0.12 });
+        };
+        requestAnimationFrame(pas);
+    };
 
-    document.querySelectorAll('.feature-card').forEach(card => observer.observe(card));
+    /* Deux moments distincts, et c'est tout l'enjeu :
 
-    /* ── 3D Tilt on cards ── */
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+       — PRÉPARER : escamoter les colonnes. Ne se fait que si la rangée est
+         encore hors du champ, parce qu'on n'escamote jamais quelque chose
+         que l'utilisateur est en train de regarder.
 
-    document.querySelectorAll('.feature-card').forEach(card => {
-        if (!prefersReducedMotion) {
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width  - 0.5;
-                const y = (e.clientY - rect.top)  / rect.height - 0.5;
-                card.style.transform = `perspective(900px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg) translateZ(8px)`;
-            });
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = '';
-            });
+       — JOUER : lancer la chorégraphie, au moment où la rangée de chiffres
+         est réellement à l'écran. C'est la rangée qui est observée, pas la
+         section : celle-ci fait 75 dvh et centre son contenu, donc « la
+         section entre dans le champ » arrive bien avant que les chiffres
+         soient visibles. */
+
+    const rangee = document.querySelector('.kpi-rangee');
+    if (!rangee) return;
+
+    const horsChamp = rangee.getBoundingClientRect().top > window.innerHeight;
+
+    compteurs.forEach(chiffre => {
+        // Largeur figée sur la valeur finale : sans ça la colonne
+        // s'élargirait en passant de « 0 » à « 478 ».
+        chiffre.style.minWidth = chiffre.offsetWidth + 'px';
+        if (horsChamp) {
+            const colonne = chiffre.closest('.kpi-item');
+            if (colonne) colonne.classList.add('en-attente');
         }
-
-        /* keyboard navigation */
-        card.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                window.location.href = card.href;
-            }
-        });
     });
+
+    const orchestrer = () => {
+        compteurs.forEach((chiffre, rang) => {
+            const colonne = chiffre.closest('.kpi-item');
+            setTimeout(() => {
+                if (colonne) colonne.classList.add('arrive');
+                compter(chiffre);
+            }, rang * CASCADE);
+        });
+    };
+
+    const observateur = new IntersectionObserver((entrees) => {
+        entrees.forEach(entree => {
+            if (!entree.isIntersecting) return;
+            observateur.unobserve(entree.target);
+            orchestrer();
+        });
+    }, {
+        // 60 % de la rangée à l'écran : les chiffres sont sous les yeux,
+        // pas encore sous le pli.
+        threshold: 0.6
+    });
+    observateur.observe(rangee);
 });
 </script>
 

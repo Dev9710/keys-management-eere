@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-28T00:00:00Z",
+  "generatedAt": "2026-08-28T02:00:00Z",
   "title": "Design System: Portail EERE — Gestion des clés",
   "extensions": {
     "colorMeta": {
@@ -8,97 +8,271 @@
         "role": "primary",
         "displayName": "Teal Espérance",
         "canonical": "#3a9f87",
-        "tonalRamp": ["#0d2b24", "#134037", "#1b5849", "#25715e", "#2a7562", "#3a9f87", "#7cc4b1", "#edf7f5"]
+        "tonalRamp": [
+          "#0d2b24",
+          "#134037",
+          "#1b5849",
+          "#25715e",
+          "#2a7562",
+          "#3a9f87",
+          "#7cc4b1",
+          "#edf7f5"
+        ]
       },
       "teal-esperance-dark": {
         "role": "primary",
         "displayName": "Teal Espérance sombre",
         "canonical": "#2a7562",
-        "tonalRamp": ["#0a201b", "#113029", "#174138", "#1e5347", "#256656", "#2a7562", "#5aa593", "#d9ede8"]
+        "tonalRamp": [
+          "#0a201b",
+          "#113029",
+          "#174138",
+          "#1e5347",
+          "#256656",
+          "#2a7562",
+          "#5aa593",
+          "#d9ede8"
+        ]
       },
       "teal-esperance-light": {
         "role": "primary",
         "displayName": "Teal Espérance clair",
         "canonical": "#edf7f5",
-        "tonalRamp": ["#243b36", "#35564f", "#487068", "#5f8b83", "#86aaa3", "#b3cbc6", "#d5e8e4", "#edf7f5"]
+        "tonalRamp": [
+          "#243b36",
+          "#35564f",
+          "#487068",
+          "#5f8b83",
+          "#86aaa3",
+          "#b3cbc6",
+          "#d5e8e4",
+          "#edf7f5"
+        ]
       },
       "vert-cantique-deep": {
         "role": "secondary",
         "displayName": "Vert Cantique profond",
         "canonical": "#0d3028",
-        "tonalRamp": ["#061a15", "#0d3028", "#134037", "#1a5040", "#22664f", "#2f8368", "#63b09a", "#c9e6dd"]
+        "tonalRamp": [
+          "#061a15",
+          "#0d3028",
+          "#134037",
+          "#1a5040",
+          "#22664f",
+          "#2f8368",
+          "#63b09a",
+          "#c9e6dd"
+        ]
       },
       "vert-cantique-mid": {
         "role": "secondary",
         "displayName": "Vert Cantique médian",
         "canonical": "#1a5040",
-        "tonalRamp": ["#08201a", "#0d3028", "#144036", "#1a5040", "#22684f", "#2e8a6a", "#61b59a", "#c7e8dd"]
+        "tonalRamp": [
+          "#08201a",
+          "#0d3028",
+          "#144036",
+          "#1a5040",
+          "#22684f",
+          "#2e8a6a",
+          "#61b59a",
+          "#c7e8dd"
+        ]
       },
       "orange-registre": {
         "role": "tertiary",
         "displayName": "Orange Registre",
         "canonical": "#FFA500",
-        "tonalRamp": ["#3d2700", "#5c3b00", "#7a4f00", "#a36900", "#cc8400", "#e8920a", "#FFA500", "#fffbeb"]
+        "tonalRamp": [
+          "#3d2700",
+          "#5c3b00",
+          "#7a4f00",
+          "#a36900",
+          "#cc8400",
+          "#e8920a",
+          "#FFA500",
+          "#fffbeb"
+        ]
       },
       "orange-registre-dark": {
         "role": "tertiary",
         "displayName": "Orange Registre sombre",
         "canonical": "#e8920a",
-        "tonalRamp": ["#332002", "#4d3003", "#664005", "#8a5606", "#b06d08", "#e8920a", "#f5b942", "#fff4de"]
+        "tonalRamp": [
+          "#332002",
+          "#4d3003",
+          "#664005",
+          "#8a5606",
+          "#b06d08",
+          "#e8920a",
+          "#f5b942",
+          "#fff4de"
+        ]
       },
       "rouge-retrait": {
         "role": "tertiary",
         "displayName": "Rouge Retrait",
         "canonical": "#dc2626",
-        "tonalRamp": ["#3d0a0a", "#5c0f0f", "#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#fca5a5", "#fef2f2"]
+        "tonalRamp": [
+          "#3d0a0a",
+          "#5c0f0f",
+          "#7f1d1d",
+          "#991b1b",
+          "#b91c1c",
+          "#dc2626",
+          "#fca5a5",
+          "#fef2f2"
+        ]
       },
       "bg-page": {
         "role": "neutral",
         "displayName": "Fond page",
         "canonical": "#f8fafc",
-        "tonalRamp": ["#0f172a", "#1e293b", "#334155", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f8fafc"]
+        "tonalRamp": [
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#94a3b8",
+          "#cbd5e1",
+          "#e2e8f0",
+          "#f8fafc"
+        ]
       },
       "bg-surface": {
         "role": "neutral",
         "displayName": "Surface",
         "canonical": "#ffffff",
-        "tonalRamp": ["#0f172a", "#334155", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f8fafc", "#ffffff"]
+        "tonalRamp": [
+          "#0f172a",
+          "#334155",
+          "#64748b",
+          "#94a3b8",
+          "#cbd5e1",
+          "#e2e8f0",
+          "#f8fafc",
+          "#ffffff"
+        ]
       },
       "bg-surface-tinted": {
         "role": "neutral",
         "displayName": "Surface teintée",
         "canonical": "#f8fffe",
-        "tonalRamp": ["#0d3028", "#1a5040", "#2a7562", "#3a9f87", "#7cc4b1", "#c9e8e0", "#edf7f5", "#f8fffe"]
+        "tonalRamp": [
+          "#0d3028",
+          "#1a5040",
+          "#2a7562",
+          "#3a9f87",
+          "#7cc4b1",
+          "#c9e8e0",
+          "#edf7f5",
+          "#f8fffe"
+        ]
       },
       "border-soft": {
         "role": "neutral",
         "displayName": "Bordure douce",
         "canonical": "#e8f0ed",
-        "tonalRamp": ["#1a2b27", "#2d443e", "#456058", "#617f76", "#8aa39b", "#b6cac3", "#e8f0ed", "#f4f9f7"]
+        "tonalRamp": [
+          "#1a2b27",
+          "#2d443e",
+          "#456058",
+          "#617f76",
+          "#8aa39b",
+          "#b6cac3",
+          "#e8f0ed",
+          "#f4f9f7"
+        ]
       },
       "border-neutral": {
         "role": "neutral",
         "displayName": "Bordure neutre",
         "canonical": "#e2e8f0",
-        "tonalRamp": ["#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0"]
+        "tonalRamp": [
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#475569",
+          "#64748b",
+          "#94a3b8",
+          "#cbd5e1",
+          "#e2e8f0"
+        ]
       },
       "text-primary": {
         "role": "neutral",
         "displayName": "Texte principal",
         "canonical": "#0f172a",
-        "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#e2e8f0"]
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#475569",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0"
+        ]
       },
       "text-secondary": {
         "role": "neutral",
         "displayName": "Texte secondaire",
         "canonical": "#64748b",
-        "tonalRamp": ["#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#f1f5f9"]
+        "tonalRamp": [
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#475569",
+          "#64748b",
+          "#94a3b8",
+          "#cbd5e1",
+          "#f1f5f9"
+        ]
       },
       "text-tertiary": {
         "role": "neutral",
         "displayName": "Texte tertiaire",
         "canonical": "#94a3b8",
-        "tonalRamp": ["#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f8fafc"]
+        "tonalRamp": [
+          "#1e293b",
+          "#334155",
+          "#475569",
+          "#64748b",
+          "#94a3b8",
+          "#cbd5e1",
+          "#e2e8f0",
+          "#f8fafc"
+        ]
+      },
+      "orange-registre-lisible": {
+        "role": "tertiary",
+        "displayName": "Orange Registre lisible",
+        "canonical": "#a36900",
+        "tonalRamp": [
+          "#241700",
+          "#3d2700",
+          "#5c3b00",
+          "#7a4f00",
+          "#a36900",
+          "#cc8400",
+          "#e8920a",
+          "#FFA500"
+        ]
+      },
+      "orange-registre-gros-texte": {
+        "role": "tertiary",
+        "displayName": "Orange Registre gros texte",
+        "canonical": "#cc8400",
+        "tonalRamp": [
+          "#241700",
+          "#3d2700",
+          "#5c3b00",
+          "#7a4f00",
+          "#a36900",
+          "#cc8400",
+          "#e8920a",
+          "#FFA500"
+        ]
       }
     },
     "typographyMeta": {
@@ -121,34 +295,125 @@
       "label": {
         "displayName": "Label",
         "purpose": "Labels de filtre et en-têtes de tableau : capitales espacées, jamais une donnée à lire pour décider."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Précisions tertiaires sous un chiffre ou un intitulé : explique sans jamais porter la donnée."
+      },
+      "metric": {
+        "displayName": "Metric",
+        "purpose": "Les chiffres d'état du parc, et eux seuls. Seule échappée hors de l'échelle courante ; elle se paie par sa rareté."
       }
     },
     "shadows": [
-      { "name": "repos-carte", "value": "0 1px 3px rgba(0,0,0,.04)", "purpose": "Panneaux de filtre et cartes de liste au repos." },
-      { "name": "repos-bloc", "value": "0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04)", "purpose": "Conteneurs principaux et tableau." },
-      { "name": "anneau-focus", "value": "0 0 0 3px rgba(58,159,135,.12)", "purpose": "Anneau de focus teal de tout champ. Ne se supprime jamais." },
-      { "name": "anneau-focus-fort", "value": "0 0 0 3px rgba(58,159,135,.25)", "purpose": "Variante renforcée sur les contrôles critiques." },
-      { "name": "lueur-ajout", "value": "0 4px 14px rgba(255,165,0,.35)", "purpose": "Survol du bouton Ajouter." },
-      { "name": "lueur-ajout-forte", "value": "0 4px 18px rgba(232,146,10,.4)", "purpose": "Survol soutenu des actions d'ajout." },
-      { "name": "lueur-retrait", "value": "0 4px 12px rgba(220,38,38,.25)", "purpose": "Survol des actions de suppression." },
-      { "name": "lueur-teal", "value": "0 2px 8px rgba(58,159,135,.35)", "purpose": "Survol des boutons teal." },
-      { "name": "modale", "value": "0 20px 60px rgba(0,0,0,.2)", "purpose": "La seule ombre franche du système : elle marque la rupture de plan." }
+      {
+        "name": "barre-de-navigation",
+        "value": "0 2px 10px rgba(0,0,0,.1)",
+        "purpose": "Ombre portée de l'en-tête collant, sur les 19 pages. N'appartient qu'à lui."
+      },
+      {
+        "name": "repos-carte",
+        "value": "0 1px 3px rgba(0,0,0,.04)",
+        "purpose": "Panneaux de filtre et cartes de liste au repos."
+      },
+      {
+        "name": "repos-bloc",
+        "value": "0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04)",
+        "purpose": "Conteneurs principaux et tableau."
+      },
+      {
+        "name": "anneau-focus",
+        "value": "0 0 0 3px rgba(58,159,135,.12)",
+        "purpose": "Anneau de focus teal de tout champ. Ne se supprime jamais."
+      },
+      {
+        "name": "anneau-focus-fort",
+        "value": "0 0 0 3px rgba(58,159,135,.25)",
+        "purpose": "Variante renforcée sur les contrôles critiques."
+      },
+      {
+        "name": "lueur-ajout",
+        "value": "0 4px 14px rgba(255,165,0,.35)",
+        "purpose": "Survol du bouton Ajouter."
+      },
+      {
+        "name": "lueur-ajout-forte",
+        "value": "0 4px 18px rgba(232,146,10,.4)",
+        "purpose": "Survol soutenu des actions d'ajout."
+      },
+      {
+        "name": "lueur-retrait",
+        "value": "0 4px 12px rgba(220,38,38,.25)",
+        "purpose": "Survol des actions de suppression."
+      },
+      {
+        "name": "lueur-teal",
+        "value": "0 2px 8px rgba(58,159,135,.35)",
+        "purpose": "Survol des boutons teal."
+      },
+      {
+        "name": "modale",
+        "value": "0 20px 60px rgba(0,0,0,.2)",
+        "purpose": "La seule ombre franche du système : elle marque la rupture de plan."
+      }
     ],
     "motion": [
-      { "name": "bouton", "value": "background .2s, box-shadow .2s, transform .1s", "purpose": "Transition standard de tous les boutons." },
-      { "name": "champ", "value": "border-color .2s, box-shadow .2s", "purpose": "Transition des champs de saisie vers l'état focus." },
-      { "name": "ligne-tableau", "value": "background .15s, border-left-color .15s", "purpose": "Survol de ligne : fond teal clair et liseré gauche." },
-      { "name": "nav-underline", "value": "transform .3s ease", "purpose": "Soulignement animé des liens de navigation, déployé depuis la gauche." },
-      { "name": "generique", "value": "all .18s ease", "purpose": "Transition courte par défaut sur les éléments secondaires." },
-      { "name": "reduced-motion", "value": "@media (prefers-reduced-motion: reduce)", "purpose": "Respecté dans tout le portail : les transformations sont neutralisées." }
+      {
+        "name": "bouton",
+        "value": "background .2s, box-shadow .2s, transform .1s",
+        "purpose": "Transition standard de tous les boutons."
+      },
+      {
+        "name": "champ",
+        "value": "border-color .2s, box-shadow .2s",
+        "purpose": "Transition des champs de saisie vers l'état focus."
+      },
+      {
+        "name": "ligne-tableau",
+        "value": "background .15s, border-left-color .15s",
+        "purpose": "Survol de ligne : fond teal clair et liseré gauche."
+      },
+      {
+        "name": "nav-underline",
+        "value": "transform .3s ease",
+        "purpose": "Soulignement animé des liens de navigation, déployé depuis la gauche."
+      },
+      {
+        "name": "generique",
+        "value": "all .18s ease",
+        "purpose": "Transition courte par défaut sur les éléments secondaires."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "@media (prefers-reduced-motion: reduce)",
+        "purpose": "Respecté dans tout le portail : les transformations sont neutralisées."
+      }
     ],
     "breakpoints": [
-      { "name": "xs", "value": "480px" },
-      { "name": "sm", "value": "640px" },
-      { "name": "md", "value": "768px" },
-      { "name": "lg", "value": "992px" },
-      { "name": "xl", "value": "1024px" },
-      { "name": "cible-reelle", "value": "1366px" }
+      {
+        "name": "xs",
+        "value": "480px"
+      },
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "992px"
+      },
+      {
+        "name": "xl",
+        "value": "1024px"
+      },
+      {
+        "name": "cible-reelle",
+        "value": "1366px"
+      }
     ]
   },
   "components": [
@@ -245,15 +510,51 @@
       "Zéro dépendance de build : CSS écrit à la main dans chaque page"
     ],
     "rules": [
-      { "name": "La Règle de l'Unique Orange", "body": "L'orange ne signifie qu'une chose : ajouter. Un second usage décoratif de l'orange dissout le seul repère d'action de l'interface. Test : sur n'importe quelle page, comptez les éléments orange — s'il y en a plus d'un par zone, il y en a un de trop.", "section": "colors" },
-      { "name": "La Règle de la Reliure", "body": "Le gradient Vert Cantique n'habille que ce qui ouvre une vue : bandeau de page, en-tête de modale. Jamais une carte, jamais une ligne, jamais un bouton.", "section": "colors" },
-      { "name": "La Règle du Rouge Rare", "body": "Le rouge est le vocabulaire du retrait — supprimer, retirer une clé, signaler une erreur bloquante. Il ne sert jamais à attirer l'attention sur autre chose.", "section": "colors" },
-      { "name": "La Règle de la Sérif Rare", "body": "DM Serif Display n'apparaît que sur le gradient vert : titre de page, titre de modale. Une sérif dans un tableau ou un bouton casse la lecture et l'identité d'un coup.", "section": "typography" },
-      { "name": "La Règle du Corps Unique", "body": "0.88rem est le corps de l'application. Descendre en dessous (0.78rem, 0.75rem) est réservé aux labels et métadonnées, jamais à une donnée que l'utilisateur doit lire pour décider.", "section": "typography" },
-      { "name": "La Règle des Trois Bandes", "body": "Bandeau, filtres, contenu — dans cet ordre, sur toute page de gestion. Un utilisateur qui change d'écran doit retrouver ses repères au même endroit.", "section": "layout" },
-      { "name": "La Règle de l'Ombre Colorée", "body": "Au survol, l'ombre porte la couleur du bouton, jamais du noir. Le noir est réservé au repos et aux modales.", "section": "elevation" },
-      { "name": "La Règle de l'Anneau Teal", "body": "Tout focus clavier se signale par l'anneau teal 3 px. Il ne se supprime jamais : c'est le seul repère de navigation au clavier du portail.", "section": "elevation" },
-      { "name": "La Règle de l'Échelle Fermée", "body": "Les rayons du système sont 2 / 8 / 9 / 10 / 12 / 14 / 50 px et 50 %. Une nouvelle valeur intermédiaire (11 px, 13 px) n'est jamais justifiée.", "section": "shapes" }
+      {
+        "name": "La Règle de l'Unique Orange",
+        "body": "L'orange ne signifie qu'une chose : ajouter. Un second usage décoratif de l'orange dissout le seul repère d'action de l'interface. Test : sur n'importe quelle page, comptez les éléments orange — s'il y en a plus d'un par zone, il y en a un de trop.",
+        "section": "colors"
+      },
+      {
+        "name": "La Règle de la Reliure",
+        "body": "Le gradient Vert Cantique n'habille que ce qui ouvre une vue : bandeau de page, en-tête de modale. Jamais une carte, jamais une ligne, jamais un bouton.",
+        "section": "colors"
+      },
+      {
+        "name": "La Règle du Rouge Rare",
+        "body": "Le rouge est le vocabulaire du retrait — supprimer, retirer une clé, signaler une erreur bloquante. Il ne sert jamais à attirer l'attention sur autre chose.",
+        "section": "colors"
+      },
+      {
+        "name": "La Règle de la Sérif Rare",
+        "body": "DM Serif Display n'apparaît que sur le gradient vert : titre de page, titre de modale. Une sérif dans un tableau ou un bouton casse la lecture et l'identité d'un coup.",
+        "section": "typography"
+      },
+      {
+        "name": "La Règle du Corps Unique",
+        "body": "0.88rem est le corps de l'application. Descendre en dessous (0.78rem, 0.75rem) est réservé aux labels et métadonnées, jamais à une donnée que l'utilisateur doit lire pour décider.",
+        "section": "typography"
+      },
+      {
+        "name": "La Règle des Trois Bandes",
+        "body": "Bandeau, filtres, contenu — dans cet ordre, sur toute page de gestion. Un utilisateur qui change d'écran doit retrouver ses repères au même endroit.",
+        "section": "layout"
+      },
+      {
+        "name": "La Règle de l'Ombre Colorée",
+        "body": "Au survol, l'ombre porte la couleur du bouton, jamais du noir. Le noir est réservé au repos et aux modales.",
+        "section": "elevation"
+      },
+      {
+        "name": "La Règle de l'Anneau Teal",
+        "body": "Tout focus clavier se signale par l'anneau teal 3 px. Il ne se supprime jamais : c'est le seul repère de navigation au clavier du portail.",
+        "section": "elevation"
+      },
+      {
+        "name": "La Règle de l'Échelle Fermée",
+        "body": "Les rayons du système sont 2 / 8 / 9 / 10 / 12 / 14 / 50 px et 50 %. Une nouvelle valeur intermédiaire (11 px, 13 px) n'est jamais justifiée.",
+        "section": "shapes"
+      }
     ],
     "dos": [
       "Do ouvrir chaque page de gestion par le bandeau au gradient Vert Cantique, coins 12 px, titre DM Serif Display blanc — c'est le repère d'orientation du portail.",

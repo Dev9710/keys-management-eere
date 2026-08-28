@@ -95,7 +95,7 @@ class VisiteurLectureSeuleTests(TestCase):
     def test_le_visiteur_garde_son_profil(self):
         self.client.login(username='visiteur', password='motdepasse-test')
         contenu = self.client.get(reverse('home')).content.decode()
-        self.assertIn('Gérer mon profile', contenu)
+        self.assertIn('Gérer mon profil', contenu)
         self.assertEqual(self.client.get(reverse('profile')).status_code, 200)
 
     def test_les_boutons_daction_sont_masques_au_visiteur(self):
@@ -282,3 +282,197 @@ class JournalisationTests(TestCase):
         self.assertTrue(all(isinstance(cle, str) for cle in valeurs))
         self.assertEqual(valeurs[str(cle_paresseuse)], 'admin')
         self.assertEqual(valeurs['role'], 'editor')
+
+
+class AccueilTests(TestCase):
+    """
+    L'accueil du registre doit montrer le registre : sans chiffres, l'ecart
+    entre la base et l'armoire s'installe sans temoin.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.compte = Owner.objects.create_user(
+            username='accueil', password='motdepasse-test', role='editor',
+            first_name='Marie', last_name='Dupont')
+        cls.equipe = Team.objects.create(name='Accueil')
+        User.objects.create(name='Dupont', firstname='Marie', team=cls.equipe)
+        # Une cle coherente : 2 declarees = 2 en armoire.
+        KeyType.objects.create(number=1, name='Porte principale', place='Entree',
+                               total_quantity=2, in_cabinet=2, in_safe=0)
+        # Une cle incoherente : 5 declarees, 1 seule localisee.
+        KeyType.objects.create(number=2, name='Local technique', place='Sous-sol',
+                               total_quantity=5, in_cabinet=1, in_safe=0)
+
+    def setUp(self):
+        self.client.login(username='accueil', password='motdepasse-test')
+
+    def test_laccueil_affiche_les_chiffres_du_parc(self):
+        reponse = self.client.get(reverse('home'))
+        self.assertEqual(reponse.status_code, 200)
+        # Les cinq indicateurs du bandeau, et eux seuls.
+        for cle in ('nb_attributions', 'nb_en_stock', 'nb_sans_dispo',
+                    'nb_detenteurs', 'nb_ecarts'):
+            self.assertIn(cle, reponse.context)
+        # Le total n'est plus affiche : il valait la somme de ses voisines.
+        self.assertNotIn('nb_exemplaires', reponse.context)
+
+    def test_les_cles_sans_exemplaire_disponible_sont_comptees(self):
+        """Ni en armoire ni au coffre : rien a donner a un nouveau membre."""
+        KeyType.objects.create(number=10, name='Epuisee', place='Hall',
+                               total_quantity=2, in_cabinet=0, in_safe=0)
+        KeyType.objects.create(number=11, name='Au coffre', place='Bureau',
+                               total_quantity=2, in_cabinet=0, in_safe=2)
+        reponse = self.client.get(reverse('home'))
+        self.assertEqual(reponse.context['nb_sans_dispo'], 1)
+
+    def test_les_detenteurs_comptes_ont_au_moins_une_cle(self):
+        """Un membre suivi sans cle en main n'est pas un detenteur."""
+        User.objects.create(name='SansCle', firstname='Jean', team=self.equipe)
+        reponse = self.client.get(reverse('home'))
+        self.assertEqual(User.objects.count(), 2)
+        self.assertEqual(reponse.context['nb_detenteurs'], 0)
+
+    def test_laccueil_compte_les_ecarts_de_stock(self):
+        reponse = self.client.get(reverse('home'))
+        self.assertEqual(reponse.context['nb_ecarts'], 1)
+        # Texte litteral du gabarit : Django n'echappe que les variables.
+        self.assertIn('à vérifier', reponse.content.decode())
+
+    def test_laccueil_salue_par_le_prenom(self):
+        contenu = self.client.get(reverse('home')).content.decode()
+        self.assertIn('Bonjour Marie', contenu)
+
+    def test_laccueil_affiche_les_messages(self):
+        """Un message posé avant une redirection vers l'accueil doit survivre."""
+        self.client.logout()
+        reponse = self.client.post(reverse('login'), {
+            'username': 'accueil', 'password': 'motdepasse-test',
+        }, follow=True)
+        self.assertContains(reponse, 'Bienvenue, Marie Dupont')
+
+
+class SectionsAccueilTests(TestCase):
+    """
+    L'accueil enchaine quatre sections : hero, etat du parc, navigation,
+    incitation. La derniere s'adapte au role — proposer d'attribuer une cle
+    a quelqu'un qui ne peut rien ecrire serait une impasse.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        for nom, role in (('adm', 'admin'), ('edi', 'editor'), ('vis', 'visitor')):
+            Owner.objects.create_user(username=nom, password='motdepasse-test',
+                                      role=role, first_name=nom.title())
+
+    def contenu(self, qui):
+        self.client.login(username=qui, password='motdepasse-test')
+        return self.client.get(reverse('home')).content.decode()
+
+    def test_les_quatre_sections_sont_presentes(self):
+        page = self.contenu('adm')
+        for section in ('hero-section', 'kpi-section', 'features-section', 'cta-section'):
+            self.assertIn(section, page)
+
+    def test_lincitation_propose_dattribuer_a_qui_peut_ecrire(self):
+        for qui in ('adm', 'edi'):
+            page = self.contenu(qui)
+            self.assertIn('Attribuer ou retirer une clé', page)
+            self.assertIn('href="%s"' % reverse('user_keys'), page)
+
+    def test_lincitation_propose_de_consulter_au_visiteur(self):
+        page = self.contenu('vis')
+        self.assertIn('Consulter le parc de clés', page)
+        self.assertNotIn('Attribuer ou retirer une clé', page)
+        # Le visiteur n'a pas acces a la page d'attribution : l'y envoyer
+        # serait une impasse. On teste le lien, pas la chaine « /attr/ »,
+        # qui apparait aussi dans le JS de detection du menu actif.
+        self.assertNotIn('href="%s"' % reverse('user_keys'), page)
+
+
+class TuileEcartTests(TestCase):
+    """
+    L'écart de stock est une donnée comme les autres : une colonne du
+    bandeau, chiffre vert compris, sans lien ni traitement à part. Seul son
+    pictogramme le distingue — l'information ne repose pas sur la couleur.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        Owner.objects.create_user(username='k', password='motdepasse-test',
+                                  role='admin', first_name='Marie')
+        cls.equipe = Team.objects.create(name='Accueil')
+
+    def setUp(self):
+        self.client.login(username='k', password='motdepasse-test')
+
+    def test_la_colonne_ecart_affiche_le_compte(self):
+        # 3 déclarées, 1 seule localisée : un écart.
+        KeyType.objects.create(number=1, name='Local', place='Sous-sol',
+                               total_quantity=3, in_cabinet=1, in_safe=0)
+        reponse = self.client.get(reverse('home'))
+        page = reponse.content.decode()
+        self.assertEqual(reponse.context['nb_ecarts'], 1)
+        self.assertIn('class="kpi-item kpi-item-ecart"', page)
+        self.assertIn('à vérifier', page)
+
+    def test_la_colonne_reste_a_zero_ecart(self):
+        KeyType.objects.create(number=2, name='Porte', place='Entrée',
+                               total_quantity=2, in_cabinet=2, in_safe=0)
+        reponse = self.client.get(reverse('home'))
+        page = reponse.content.decode()
+        self.assertEqual(reponse.context['nb_ecarts'], 0)
+        # La colonne existe toujours : la grille ne change pas de forme.
+        self.assertIn('class="kpi-item kpi-item-ecart"', page)
+        self.assertEqual(page.count('class="kpi-item'), 5)
+
+    def test_la_colonne_ecart_ne_porte_aucun_lien(self):
+        KeyType.objects.create(number=3, name='Cave', place='Bas',
+                               total_quantity=4, in_cabinet=1, in_safe=0)
+        page = self.client.get(reverse('home')).content.decode()
+        bloc = page[page.index('kpi-item-ecart"'):]
+        bloc = bloc[:bloc.index('</div>')]
+        self.assertNotIn('<a ', bloc)
+        self.assertNotIn('Voir la liste', page)
+
+    def test_les_mentions_sous_les_libelles_ont_disparu(self):
+        page = self.client.get(reverse('home')).content.decode()
+        for mention in ('en 148 modèles', "sorties de l'armoire",
+                        'en armoire ou au coffre', 'kpi-precision'):
+            self.assertNotIn(mention, page)
+
+    def test_les_chiffres_sont_animables_et_lisibles_sans_javascript(self):
+        """La valeur finale est dans le HTML ; le script ne fait que l'animer."""
+        KeyType.objects.create(number=4, name='Grille', place='Cour',
+                               total_quantity=1, in_cabinet=1, in_safe=0)
+        page = self.client.get(reverse('home')).content.decode()
+        self.assertIn('data-compteur=', page)
+        self.assertEqual(page.count('data-compteur='), 5)
+
+
+
+class EnTeteSansCoutureTests(TestCase):
+    """
+    En haut de l'accueil, la barre de navigation porte un voile du vert du
+    hero au lieu de son fond blanc : le ciel passe dessous sans rupture.
+    L'effet doit rester circonscrit a l'accueil — les 18 autres pages n'ont
+    pas de hero sombre sous leur en-tete.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        Owner.objects.create_user(username='h', password='motdepasse-test',
+                                  role='admin', first_name='Marie')
+
+    def setUp(self):
+        self.client.login(username='h', password='motdepasse-test')
+
+    def test_laccueil_porte_la_classe_de_page(self):
+        page = self.client.get(reverse('home')).content.decode()
+        self.assertIn('<body class="accueil">', page)
+        self.assertIn('body.accueil .top-header', page)
+
+    def test_les_autres_pages_gardent_lentete_blanc(self):
+        page = self.client.get(reverse('key_list')).content.decode()
+        self.assertIn('<body class="">', page)
+        self.assertNotIn('body.accueil .top-header', page)

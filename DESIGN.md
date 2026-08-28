@@ -9,6 +9,8 @@ colors:
   vert-cantique-mid: "#1a5040"
   orange-registre: "#FFA500"
   orange-registre-dark: "#e8920a"
+  orange-registre-gros-texte: "#cc8400"
+  orange-registre-lisible: "#a36900"
   rouge-retrait: "#dc2626"
   rouge-retrait-dark: "#b91c1c"
   bg-page: "#f8fafc"
@@ -48,6 +50,17 @@ typography:
     fontWeight: 700
     lineHeight: 1.2
     letterSpacing: "0.08em"
+  caption:
+    fontFamily: "DM Sans, sans-serif"
+    fontSize: "0.75rem"
+    fontWeight: 400
+    lineHeight: 1.4
+  metric:
+    fontFamily: "DM Sans, sans-serif"
+    fontSize: "2.2rem"
+    fontWeight: 700
+    lineHeight: 1
+    letterSpacing: "-0.02em"
 rounded:
   xs: "2px"
   sm: "8px"
@@ -172,6 +185,12 @@ orange, un rouge strictement réservé au retrait, et des neutres froids qui lai
 
 ### Tertiary
 
+- **Orange Registre gros texte** (`#cc8400`) : le ton le plus clair de la rampe qui tienne
+  encore sur blanc — 3,06:1, pour 3:1 requis. Valable **uniquement** au-delà de 24 px, ou de
+  18,7 px en gras. La marche suivante (`#d18a00`) échoue à 2,86:1.
+- **Orange Registre lisible** (`#a36900`) : le ton à employer dès que l'orange porte du texte
+  courant sur surface claire — 4,59:1, au-dessus d'AA. `#FFA500` n'y tient que 1,97:1 et
+  `#e8920a` 2,46:1. Les aplats et liserés, eux, gardent `#FFA500`.
 - **Orange Registre** (`#FFA500`) : la seule couleur d'appel. Bouton « Ajouter », accent des lignes
   en incohérence. Survol **Orange Registre sombre** (`#e8920a`).
 - **Rouge Retrait** (`#dc2626`) : suppression et danger uniquement. Survol `#b91c1c`, fonds
@@ -219,8 +238,13 @@ reste, y compris les chiffres du parc, où sa lisibilité en petit corps compte 
 - **Body** (DM Sans, 400, 0.88rem) : le corps de l'application — cellules de tableau, textes, aides.
   C'est la taille de référence du portail, calibrée pour la densité sur 1366 px.
 - **Label** (DM Sans, 700, 0.68rem, `letter-spacing: .08em`, capitales) : labels de filtre.
+- **Caption** (DM Sans, 400, 0.75rem) : précisions tertiaires sous un chiffre ou un intitulé —
+  ce qui explique sans jamais porter la donnée elle-même.
+- **Metric** (DM Sans, 700, 2.2rem, `letter-spacing: -0.02em`, `line-height: 1`) : les chiffres
+  d'état du parc, et eux seuls. C'est la seule échappée hors de l'échelle courante ; elle se paie
+  par sa rareté — une occurrence par page, sur le bandeau de chiffres.
 - **En-tête de tableau** (DM Sans, 700, 0.75rem, `letter-spacing: .06em`, capitales) : la variante
-  du label sur fond teal plein.
+  du label sur fond teal plein, en capitales.
 
 ### Named Rules
 
@@ -275,6 +299,8 @@ une lueur de sa propre couleur, un champ focalisé s'entoure d'un anneau teal.
 - **Lueur d'ajout** (`box-shadow: 0 4px 14px rgba(255,165,0,.35)`) : survol du bouton Ajouter.
 - **Lueur de retrait** (`box-shadow: 0 4px 12px rgba(220,38,38,.25)`) : survol des actions de
   suppression.
+- **Barre de navigation** (`box-shadow: 0 2px 10px rgba(0,0,0,.1)`) : l'ombre portée de l'en-tête
+  collant, sur les 19 pages. Elle n'appartient qu'à lui.
 - **Modale** (`box-shadow: 0 20px 60px rgba(0,0,0,.2)`) : la seule ombre franche du système ; elle
   marque la rupture de plan.
 
