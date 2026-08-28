@@ -1,7 +1,10 @@
+import json
+
 from django.test import TestCase
 from django.urls import reverse
 
-from listings.models import Owner, Team, User, KeyType
+from listings.models import ActionLog, Owner, Team, User, KeyType
+from listings.utils import _en_json
 
 
 class VisiteurLectureSeuleTests(TestCase):
@@ -227,3 +230,55 @@ class ProtectionCsrfTests(TestCase):
             data='{"user_id": 1, "selected_keys": []}',
             content_type='application/json')
         self.assertEqual(reponse.status_code, 403)
+
+
+class JournalisationTests(TestCase):
+    """
+    Toute action laisse une trace. Les champs herites d'AbstractUser ont des
+    verbose_name traduits paresseusement : utilises comme cles de dictionnaire,
+    ils faisaient echouer la serialisation JSON, et l'action sur un compte
+    n'etait jamais enregistree — en silence, l'exception etant avalee.
+    """
+
+    def test_la_creation_dun_compte_est_journalisee(self):
+        avant = ActionLog.objects.filter(object_type='OWNER').count()
+        compte = Owner.objects.create_user(
+            username='journalise', password='motdepasse-test', role='editor',
+            first_name='Jour', last_name='Nal')
+
+        traces = ActionLog.objects.filter(object_type='OWNER', action_type='CREATE')
+        self.assertEqual(traces.count(), avant + 1)
+
+        trace = traces.latest('timestamp')
+        self.assertEqual(trace.object_id, compte.id)
+
+        # Les valeurs sont relues telles quelles par la page Historique.
+        # Les libelles de champ sont traduits par Django : on verifie que les
+        # cles sont bien du texte et que le contenu du compte y figure.
+        valeurs = json.loads(trace.new_values)
+        self.assertTrue(all(isinstance(cle, str) for cle in valeurs))
+        self.assertIn('journalise', valeurs.values())
+
+    def test_la_modification_dun_compte_est_journalisee(self):
+        compte = Owner.objects.create_user(
+            username='modifie', password='motdepasse-test', role='visitor')
+        avant = ActionLog.objects.filter(
+            object_type='OWNER', action_type='UPDATE').count()
+
+        compte.role = 'editor'
+        compte.save()
+
+        self.assertEqual(
+            ActionLog.objects.filter(
+                object_type='OWNER', action_type='UPDATE').count(),
+            avant + 1)
+
+    def test_les_cles_non_textuelles_ne_font_plus_echouer_la_serialisation(self):
+        from django.utils.translation import gettext_lazy as _
+        cle_paresseuse = _('username')
+        # Sans le correctif, json.dumps levait :
+        # "keys must be str, int, float, bool or None, not __proxy__"
+        valeurs = json.loads(_en_json({cle_paresseuse: 'admin', 'role': 'editor'}))
+        self.assertTrue(all(isinstance(cle, str) for cle in valeurs))
+        self.assertEqual(valeurs[str(cle_paresseuse)], 'admin')
+        self.assertEqual(valeurs['role'], 'editor')

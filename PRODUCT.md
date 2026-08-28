@@ -133,18 +133,38 @@ Règles de rôle appliquées (2026-08-28) :
 - Couvert par `listings/tests.py` (13 tests) : le masquage est un confort d'affichage, ce sont les
   tests serveur qui font foi.
 
-Écarts restants entre l'intention et le code (à traiter comme dette, pas comme spécification) :
+Matrice des rôles, telle qu'appliquée :
 
-- Les restrictions propres à l'**éditeur** ne sont pas encore posées : historique des actions,
-  statistiques et synthèse globale devraient lui être masqués et refusés. Aujourd'hui l'historique
-  et les statistiques sont déjà admin-only par décorateur, mais `synthesis_table_view` et
-  `synthesis_export` n'exigent qu'une simple authentification.
-- `assign_keys` est encore `@csrf_exempt` alors que son seul appelant réel
-  (`attribute.html`) envoie bien l'en-tête `X-CSRFToken` : l'exemption n'est plus nécessaire et
-  ouvre l'endpoint d'attribution aux requêtes forgées.
+| | Comptes | Historique + Statistiques | Synthèse globale | Écriture |
+|---|---|---|---|---|
+| **Administrateur** | ✓ | ✓ | ✓ | ✓ |
+| **Éditeur** | ✗ | ✗ | ✓ | ✓ |
+| **Visiteur** | ✗ | ✗ | ✓ lecture + export | ✗ |
+
+L'éditeur fait tout sauf administrer les comptes et consulter le journal des actions ; la synthèse
+globale est de la consultation, ouverte aux trois rôles.
+
+Défauts corrigés le 2026-08-28 :
+
+- `assign_keys` n'est plus `@csrf_exempt`. L'exemption ouvrait l'endpoint le plus sensible du
+  portail aux requêtes forgées, alors que ses deux appelants réels envoyaient déjà le jeton.
+- **L'historique ne perdait plus seulement des lignes : il perdait toutes les actions sur les
+  comptes.** `get_model_fields_dict` employait `field.verbose_name` comme clé de dictionnaire ; sur
+  `Owner`, qui hérite d'`AbstractUser`, dix de ces libellés sont des traductions paresseuses
+  (`__proxy__`). `json.dumps` échouait, l'exception était avalée par un `except` muet, et la ligne
+  `ActionLog` n'était jamais créée. Les clés sont désormais forcées en texte, et l'échec de
+  journalisation est tracé avec sa pile complète.
+- `utils.py` contenait une seconde définition de `log_action`, une seconde de
+  `get_model_fields_dict` et une classe `HistoryMiddleware` morte (le middleware réellement branché
+  est `listings.middleware.HistoryMiddleware`). Corriger la mauvaise copie n'aurait rien changé.
+
+Écarts restants (à traiter comme dette, pas comme spécification) :
+
 - Le contrôle de rôle dans `LoginRequiredMiddleware` porte sur le préfixe `/owners/`, qui
   n'existe dans aucune route : c'est du code mort.
 - `users copy.html` est un gabarit orphelin qui contient encore un formulaire vers `assign_keys`.
+- `merchex/db.sqlite3` est suivi par git alors que `.gitignore` déclare `*.sqlite3` : le fichier a
+  été committé avant la règle. Un `git add -A` embarque donc la base de production.
 
 **Rien n'est décidé** au-delà de la consolidation de l'existant : pas de notifications ou rappels
 email, pas de QR codes ou étiquettes, pas d'ouverture de comptes aux membres détenteurs. Ne rien
