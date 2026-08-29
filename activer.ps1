@@ -17,6 +17,7 @@ if ($MyInvocation.InvocationName -ne '.') {
 
 # Le venv est cherché à côté de ce fichier : le script marche depuis
 # n'importe quel répertoire courant.
+# Un autre environnement déjà actif fausse tout : on le signale.
 $Racine = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Venv = Join-Path $Racine '.venv-eere'
 $Activation = Join-Path $Venv 'Scripts\Activate.ps1'
@@ -32,7 +33,30 @@ if (-not (Test-Path $Activation)) {
     return
 }
 
+if ($env:VIRTUAL_ENV -and $env:VIRTUAL_ENV -ne $Venv) {
+    Write-Host ""
+    Write-Host "  Attention : un autre environnement est actif" -ForegroundColor Yellow
+    Write-Host "     $env:VIRTUAL_ENV"
+    Write-Host "  Il est remplace. En cas de doute : deactivate, puis on recommence."
+}
+
 . $Activation
+
+# « manage » appelle l'interpréteur du venv et manage.py par leur chemin
+# absolu : ni le répertoire courant ni l'ordre du PATH ne peuvent le
+# détourner. manage.py vit dans merchex/, pas à la racine.
+$global:EerePython = Join-Path $Venv 'Scripts\python.exe'
+$global:EereManage = Join-Path $Racine 'merchex\manage.py'
+
+function global:manage {
+    if (-not (Test-Path $global:EereManage)) {
+        Write-Host "manage.py introuvable : $($global:EereManage)" -ForegroundColor Red
+        return
+    }
+    Push-Location (Split-Path -Parent $global:EereManage)
+    try   { & $global:EerePython 'manage.py' @args }
+    finally { Pop-Location }
+}
 
 # manage.py pose déjà ce réglage par défaut, mais pas les scripts lancés
 # directement par python : on l'aligne pour que tout parte du même endroit.
@@ -46,11 +70,10 @@ Write-Host "  Portail EERE - environnement actif" -ForegroundColor Green
 Write-Host "     $VersionPython  |  Django $VersionDjango"
 Write-Host "     reglages : $env:DJANGO_SETTINGS_MODULE"
 Write-Host ""
-Write-Host "  Commandes courantes, depuis le dossier merchex :"
-Write-Host "     cd merchex"
-Write-Host "     python manage.py runserver"
-Write-Host "     python manage.py test listings.tests"
-Write-Host "     python manage.py makemigrations ; python manage.py migrate"
+Write-Host "  Commandes, depuis n'importe quel dossier :"
+Write-Host "     manage runserver"
+Write-Host "     manage test listings.tests"
+Write-Host "     manage makemigrations ; manage migrate"
 Write-Host ""
 Write-Host "  Pour sortir : deactivate"
 Write-Host ""

@@ -34,8 +34,21 @@ else
     return 1
 fi
 
+# Un autre environnement déjà actif fausse tout : on le signale.
+if [ -n "${VIRTUAL_ENV:-}" ] && [ "$VIRTUAL_ENV" != "$_venv" ]; then
+    echo ""
+    echo "  Attention : un autre environnement est actif"
+    echo "     $VIRTUAL_ENV"
+    echo "  Il est remplacé. En cas de doute : deactivate, puis on recommence."
+fi
+
 # shellcheck disable=SC1090
 . "$_activation"
+
+# bash retient le chemin des commandes déjà appelées. Sans ce vidage, un
+# « python » lancé avant l'activation continue de pointer sur l'interpréteur
+# système, alors que le prompt affiche (.venv-eere).
+hash -r 2>/dev/null || true
 
 # manage.py pose déjà ce réglage par défaut, mais pas les scripts lancés
 # directement par python : on l'aligne pour que tout parte du même endroit.
@@ -49,13 +62,28 @@ echo "  Portail EERE — environnement actif"
 echo "     $_py  |  Django ${_dj:-absent}"
 echo "     réglages : $DJANGO_SETTINGS_MODULE"
 echo ""
-echo "  Commandes courantes, depuis le dossier merchex :"
-echo "     cd merchex"
-echo "     python manage.py runserver"
-echo "     python manage.py test listings.tests"
-echo "     python manage.py makemigrations && python manage.py migrate"
+echo "  Commandes, depuis n'importe quel dossier :"
+echo "     manage runserver"
+echo "     manage test listings.tests"
+echo "     manage makemigrations && manage migrate"
 echo ""
 echo "  Pour sortir : deactivate"
 echo ""
+
+# « manage » appelle l'interpréteur du venv et manage.py par leur chemin
+# absolu : ni le répertoire courant ni l'ordre du PATH ne peuvent le
+# détourner. manage.py vit dans merchex/, pas à la racine.
+EERE_PYTHON="${_venv}/Scripts/python.exe"
+[ -x "$EERE_PYTHON" ] || EERE_PYTHON="${_venv}/bin/python"
+EERE_MANAGE="$_racine/merchex/manage.py"
+export EERE_PYTHON EERE_MANAGE
+
+manage() {
+    if [ ! -f "$EERE_MANAGE" ]; then
+        echo "manage.py introuvable : $EERE_MANAGE" >&2
+        return 1
+    fi
+    ( cd "$(dirname "$EERE_MANAGE")" && "$EERE_PYTHON" manage.py "$@" )
+}
 
 unset _racine _venv _activation _py _dj
