@@ -65,6 +65,12 @@ $env:DJANGO_SETTINGS_MODULE = 'merchex.settings_local'
 $VersionPython = (python --version) 2>&1
 $VersionDjango = (python -c "import django; print(django.get_version())" 2>$null)
 
+# Le script verifie son propre travail : « python » doit desormais etre
+# celui du venv. Sinon on le dit, au lieu de laisser croire que tout va
+# bien parce que le prompt affiche (.venv-eere).
+$PythonReel = (python -c "import sys; print(sys.executable)" 2>$null)
+$Aligne = $PythonReel -like "*.venv-eere*"
+
 Write-Host ""
 Write-Host "  Portail EERE - environnement actif" -ForegroundColor Green
 Write-Host "     $VersionPython  |  Django $VersionDjango"
@@ -77,3 +83,13 @@ Write-Host "     manage makemigrations ; manage migrate"
 Write-Host ""
 Write-Host "  Pour sortir : deactivate"
 Write-Host ""
+
+if (-not $Aligne) {
+    Write-Host "  ATTENTION : « python » ne pointe pas sur cet environnement" -ForegroundColor Yellow
+    Write-Host "     python  -> $PythonReel"
+    Write-Host "     attendu -> $Venv"
+    Write-Host ""
+    Write-Host "  Utilisez « manage », qui appelle le bon interpreteur par son"
+    Write-Host "  chemin absolu. Pour pip :  & `$EerePython -m pip install ..."
+    Write-Host ""
+}

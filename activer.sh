@@ -57,6 +57,16 @@ export DJANGO_SETTINGS_MODULE=merchex.settings_local
 _py="$(python --version 2>&1)"
 _dj="$(python -c 'import django; print(django.get_version())' 2>/dev/null)"
 
+# Le script vérifie son propre travail : « python » doit désormais être
+# celui du venv. Si ce n'est pas le cas — hachage bash récalcitrant, PATH
+# détourné, autre venv — on le dit au lieu de laisser croire que tout va
+# bien parce que le prompt affiche (.venv-eere).
+_reel="$(python -c 'import sys; print(sys.executable)' 2>/dev/null)"
+case "$_reel" in
+    *".venv-eere"*) _ok=1 ;;
+    *)              _ok=0 ;;
+esac
+
 echo ""
 echo "  Portail EERE — environnement actif"
 echo "     $_py  |  Django ${_dj:-absent}"
@@ -69,6 +79,17 @@ echo "     manage makemigrations && manage migrate"
 echo ""
 echo "  Pour sortir : deactivate"
 echo ""
+
+if [ "$_ok" -ne 1 ]; then
+    echo "  ATTENTION : « python » ne pointe pas sur cet environnement"
+    echo "     python  -> ${_reel:-introuvable}"
+    echo "     attendu -> $_venv"
+    echo ""
+    echo "  Utilisez « manage », qui appelle le bon interpréteur par son"
+    echo "  chemin absolu et ne peut pas être détourné. Pour « pip »,"
+    echo "  passez par :  \$EERE_PYTHON -m pip install ..."
+    echo ""
+fi
 
 # « manage » appelle l'interpréteur du venv et manage.py par leur chemin
 # absolu : ni le répertoire courant ni l'ordre du PATH ne peuvent le
@@ -86,4 +107,4 @@ manage() {
     ( cd "$(dirname "$EERE_MANAGE")" && "$EERE_PYTHON" manage.py "$@" )
 }
 
-unset _racine _venv _activation _py _dj
+unset _racine _venv _activation _py _dj _reel _ok
