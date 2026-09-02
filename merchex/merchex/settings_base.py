@@ -88,8 +88,28 @@ MESSAGE_TAGS = {
 SESSION_COOKIE_AGE = 1209600
 SESSION_SAVE_EVERY_REQUEST = True
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = "noreply@eere.com"
+# ── Envoi des courriels ───────────────────────────────────────────────
+# Réglages pilotés par variables d'environnement, comme les identifiants
+# MySQL. Sans EMAIL_HOST, on retombe volontairement sur la console :
+# pratique en développement, mais aucun courriel ne part réellement —
+# c'est ce qui empêche la réinitialisation de mot de passe d'aboutir.
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
+EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "0") == "1"
+EMAIL_TIMEOUT = 20
+
+EMAIL_BACKEND = (
+    "django.core.mail.backends.smtp.EmailBackend" if EMAIL_HOST
+    else "django.core.mail.backends.console.EmailBackend"
+)
+
+# Expéditeur : doit appartenir au domaine authentifié auprès du SMTP,
+# sinon le message part en indésirable ou est rejeté.
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@eere.com")
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 HISTORY_RETENTION_DAYS = 365
 ROBOTS_META_TAG = "noindex, nofollow, noarchive"
