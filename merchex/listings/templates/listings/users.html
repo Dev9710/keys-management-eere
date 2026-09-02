@@ -167,41 +167,6 @@
 }
 
 /* Interrupteur "détenteurs de clé" */
-.filter-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: .6rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: .85rem;
-    font-weight: 500;
-    color: var(--text);
-    cursor: pointer;
-    padding-bottom: .15rem;
-    user-select: none;
-}
-.filter-toggle input { position: absolute; opacity: 0; pointer-events: none; }
-.filter-toggle .track {
-    width: 38px; height: 22px;
-    border-radius: 50px;
-    background: #cbd5e1;
-    position: relative;
-    transition: background .2s ease;
-    flex-shrink: 0;
-}
-.filter-toggle .track::after {
-    content: '';
-    position: absolute;
-    top: 2px; left: 2px;
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    background: white;
-    box-shadow: 0 1px 3px rgba(0,0,0,.2);
-    transition: transform .2s ease;
-}
-.filter-toggle input:checked + .track { background: var(--teal); }
-.filter-toggle input:checked + .track::after { transform: translateX(16px); }
-.filter-toggle input:focus-visible + .track { box-shadow: 0 0 0 3px rgba(58,159,135,.25); }
-
 /* ═══════════════════════════════════════════════════
    TABLE — identique Clés
 ═══════════════════════════════════════════════════ */
@@ -575,8 +540,8 @@
         </div>
 
         <div class="users-count-wrap">
-            <strong>Total des utilisateurs :</strong>
-            <span>{{ users_count }}</span>
+            <strong>Détenteurs affichés :</strong>
+            <span id="usersCount">{{ users_count }}</span>
         </div>
     </div>
 
@@ -595,11 +560,6 @@
                 </select>
             </div>
 
-            <label class="filter-toggle" for="hasKeysFilter">
-                <input type="checkbox" id="hasKeysFilter">
-                <span class="track"></span>
-                <span>Afficher les détenteurs de clé</span>
-            </label>
         </div>
     </form>
 
@@ -818,7 +778,6 @@
 <script>
     const teamDropdown = document.getElementById('team-dropdown'); // Liste déroulante des équipes
     const userTableBody = document.querySelector('#user_tab tbody'); // Corps du tableau des utilisateurs
-    const hasKeysFilter = document.getElementById('hasKeysFilter'); // Checkbox pour filtrer les détenteurs de clés
 
     function attachDeleteButtonEvents() {
         var deleteButtons = document.querySelectorAll('[data-bs-target="#deleteUserModal"]');
@@ -839,8 +798,7 @@
 
     function loadUserbyTeam(teamId) {
         const baseUrl = teamDropdown.getAttribute('data-url'); // URL de base
-        const hasKeys = hasKeysFilter.checked;
-        const url = `${baseUrl}?team_id=${teamId}${hasKeys ? '&has_keys=true' : ''}`; // URL complète
+        const url = `${baseUrl}?team_id=${teamId}`; // URL complète
 
         fetch(url)
             .then(response => {
@@ -901,6 +859,9 @@
                 // Réattacher les événements aux boutons dynamiques
                 attachEditButtonEvents();
                 attachDeleteButtonEvents();
+                // Le tableau vient d'etre reconstruit : la recherche en cours
+                // doit etre rejouee dessus, et le compteur remis a jour.
+                appliquerRecherche();
             })
             .catch(error => {
                 console.error('Erreur lors du chargement des utilisateurs :', error);
@@ -909,9 +870,6 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         teamDropdown.addEventListener('change', function () {
-            loadUserbyTeam(teamDropdown.value);
-        });
-        hasKeysFilter.addEventListener('change', function () {
             loadUserbyTeam(teamDropdown.value);
         });
         // Charger la liste initiale
@@ -984,24 +942,48 @@
     }
 </script>
 <script>
-    // Recherche dans le tableau
+    /* Recherche texte et compteur. La liste se filtre en deux temps : par
+       equipe cote serveur (loadUserbyTeam repeuple le tableau), puis par
+       texte cote client. Les deux repassent par appliquerRecherche() pour
+       que le compteur affiche toujours ce qui est reellement a l'ecran et
+       que la recherche survive a un changement d'equipe. */
+
+    // La ligne « aucun utilisateur » porte un colspan et n'a qu'une cellule :
+    // ni filtree, ni comptee.
+    function estLigneDeDonnees(row) {
+        return row.querySelectorAll('td').length >= 5;
+    }
+
+    function appliquerRecherche() {
+        const searchInput = document.getElementById('searchInput');
+        const filtre = (searchInput ? searchInput.value : '').toLowerCase();
+
+        document.querySelectorAll('#user_tab tbody tr').forEach(function (row) {
+            if (!estLigneDeDonnees(row)) return;
+            const cells = row.querySelectorAll('td');
+            let match = false;
+            // La derniere cellule est celle des boutons : la fouiller ferait
+            // matcher « modifier » ou « supprimer » sur toutes les lignes.
+            for (let i = 0; i < cells.length - 1; i++) {
+                if (cells[i].textContent.toLowerCase().includes(filtre)) { match = true; break; }
+            }
+            row.style.display = match ? '' : 'none';
+        });
+
+        majCompteurDetenteurs();
+    }
+
+    function majCompteurDetenteurs() {
+        const cible = document.getElementById('usersCount');
+        if (!cible) return;
+        cible.textContent = Array.from(document.querySelectorAll('#user_tab tbody tr'))
+            .filter(row => estLigneDeDonnees(row) && row.style.display !== 'none')
+            .length;
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const searchInput = document.getElementById('searchInput');
-        const table = document.getElementById('user_tab');
-
-        searchInput.addEventListener('keyup', function () {
-            const filter = searchInput.value.toLowerCase();
-            const rows = table.querySelectorAll('tbody tr');
-
-            rows.forEach(function (row) {
-                const cells = row.getElementsByTagName('td');
-                let match = false;
-                for (let cell of cells) {
-                    if (cell.textContent.toLowerCase().includes(filter)) { match = true; break; }
-                }
-                row.style.display = match ? '' : 'none';
-            });
-        });
+        if (searchInput) searchInput.addEventListener('keyup', appliquerRecherche);
     });
 </script>
 <script>
@@ -1048,12 +1030,20 @@
                 const doc = new jsPDF('l', 'mm', 'a4');
                 const teamName = document.getElementById('team-dropdown').options[document.getElementById('team-dropdown').selectedIndex].text;
                 const today = new Date().toLocaleDateString('fr-FR');
+                // L'export ne reprend que les lignes visibles : la recherche
+                // en cours doit figurer sur le document, sinon deux fichiers
+                // de la meme equipe et du meme jour different sans le dire.
+                const recherche = (document.getElementById('searchInput').value || '').trim();
 
                 doc.setFontSize(18);
                 doc.text('Liste des utilisateurs', doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
                 doc.setFontSize(12);
                 doc.text(`Équipe: ${teamName}`, 15, 25);
                 doc.text(`Date: ${today}`, doc.internal.pageSize.getWidth() - 15, 25, { align: 'right' });
+                if (recherche) {
+                    doc.setFontSize(10);
+                    doc.text(`Recherche : « ${recherche} »`, 15, 31);
+                }
 
                 const table = document.getElementById('user_tab');
                 const headers = [];
@@ -1116,11 +1106,34 @@
                     data.push(rowData);
                 });
 
-                const worksheet = XLSX.utils.aoa_to_sheet(data);
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, "Utilisateurs");
-
                 const teamName = document.getElementById('team-dropdown').options[document.getElementById('team-dropdown').selectedIndex].text;
+                const date = new Date().toLocaleDateString('fr-FR');
+                const recherche = (document.getElementById('searchInput').value || '').trim();
+                const mentionRecherche = recherche ? ` — recherche « ${recherche} »` : '';
+
+                /* Meme ossature que l'export des cles : titre fusionne, ligne
+                   vide de respiration, puis en-tetes et donnees. Les couleurs
+                   ne sont pas posees ici, la build communautaire de SheetJS
+                   ignore cell.s a l'ecriture. */
+                const lignes = data.slice(1);
+                const worksheet = XLSX.utils.aoa_to_sheet([
+                    [`Détenteurs de clés — ${teamName}${mentionRecherche} — Générée le ${date}`],
+                    [],
+                    headers,
+                    ...lignes
+                ]);
+
+                worksheet['!cols'] = [
+                    { wch: 24 }, { wch: 20 }, { wch: 26 }, { wch: 45 }
+                ];
+                worksheet['!rows'] = [{ hpt: 28 }, { hpt: 6 }, { hpt: 22 }]
+                    .concat(lignes.map(() => ({ hpt: 18 })));
+                worksheet['!merges'] = [
+                    { s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } }
+                ];
+
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Détenteurs");
 
                 XLSX.writeFile(workbook, `Liste_utilisateurs_${teamName.replace(/\s+/g, '_')}_${dateFichier()}.xlsx`);
             } catch (e) {

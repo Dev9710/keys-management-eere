@@ -1554,6 +1554,11 @@ document.addEventListener('DOMContentLoaded', function () {
         ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }];
 
         // ── Styles ──────────────────────────────────────────────
+        /* ATTENTION : sans effet avec la build communautaire de SheetJS
+           chargee plus haut, qui ignore cell.s a l'ecriture (le styles.xml
+           produit ne contient aucune de ces couleurs). Seuls !cols, !rows et
+           !merges ci-dessus arrivent reellement dans le fichier. Conserve tel
+           quel : un passage a xlsx-js-style les activerait sans reecriture. */
         const COLS = ['A','B','C','D','E','F','G','H'];
 
         // Couleurs design system

@@ -153,6 +153,9 @@
 }
 
 .teams-list {
+    /* Largeur de la colonne des actions : le seul chiffre a bouger pour
+       rapprocher ou eloigner le bloc du bord droit. */
+    --col-actions: 240px;
     background: white;
     border-radius: 12px;
     border: 1px solid #e8f0ed;
@@ -165,6 +168,10 @@
 }
 
 /* ═══ GRILLE — 1fr | 100px centre | 1fr ══ */
+/* Grille symetrique : les deux 1fr identiques posent la colonne Membres au
+   centre exact de la ligne. Le decalage des actions vers la droite se joue
+   donc a l'interieur de la troisieme cellule (voir --col-actions), sans
+   deformer la grille. */
 .teams-list-header,
 .team-row {
     display: grid;
@@ -175,6 +182,7 @@
 /* ── Header ── */
 .teams-list-header {
     padding: .6rem 1.5rem;
+    border-left: 3px solid transparent;
     background: #f8fafc;
     border-bottom: 1px solid #e8f0ed;
     font-family: 'DM Sans', sans-serif;
@@ -186,7 +194,17 @@
 }
 .teams-list-header .th-equipe  { padding-left: calc(36px + .75rem); }
 .teams-list-header .th-membres { display: flex; justify-content: center; }
-.teams-list-header .th-actions { display: flex; justify-content: flex-end; }
+/* Le libelle et les boutons occupent une meme boite de largeur fixe, calee
+   contre le bord droit de leur cellule ; chacun se centre dans cette boite,
+   donc les deux partagent le meme axe. La largeur doit etre identique dans
+   l'en-tete et dans les lignes, qui sont des grilles distinctes : un auto
+   les dimensionnerait separement et les desalignerait. */
+.teams-list-header .th-actions,
+.team-actions {
+    width: var(--col-actions);
+    justify-self: end;
+}
+.teams-list-header .th-actions { display: flex; justify-content: center; }
 
 /* ── Row ── */
 .team-row {
@@ -262,7 +280,7 @@
 /* Col 3 — actions */
 .team-actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 6px;
 }
 
@@ -565,6 +583,8 @@
     .ab-count { order: 2; margin-left: auto; }
     .teams-section { padding: .75rem; }
     .team-row { padding: .7rem .9rem; }
+    .teams-list-header { padding: .6rem .9rem; }
+    .teams-list { --col-actions: 210px; }
     .btn-edit-card, .btn-del-card { padding: .3rem .55rem; font-size: .74rem; }
     .export-section { padding: 0 .75rem 2rem; }
 }
@@ -622,7 +642,7 @@
     <table id="team_tab" style="display:none" aria-hidden="true">
         <tbody>
             {% for team in teams %}
-            <tr><td>{{ team.name }}</td><td></td></tr>
+            <tr><td>{{ team.name }}</td><td>{{ team.members.count }}</td></tr>
             {% endfor %}
         </tbody>
     </table>
@@ -805,7 +825,20 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.18.5/package/dist/xlsx.full.min.js"></script>
 
 <script>
-// ── Existing functions (unchanged) ──────────────────
+/* Lignes a exporter, lues dans la table cachee #team_tab que la recherche
+   tient synchronisee avec la liste visible. Partagee par le PDF et le XLSX
+   pour qu'ils ne puissent pas diverger. */
+function lignesEquipes() {
+    const lignes = [];
+    document.querySelectorAll('#team_tab tbody tr').forEach((row) => {
+        if (row.style.display === 'none' || !row.cells[0]) return;
+        const nom = row.cells[0].textContent.trim();
+        if (!nom || nom === 'Aucune équipe') return;
+        lignes.push({ nom: nom, membres: parseInt(row.cells[1].textContent.trim(), 10) || 0 });
+    });
+    return lignes;
+}
+
 function generatePDF() {
     const doc = new jsPDF();
     doc.setFontSize(18);
@@ -814,20 +847,13 @@ function generatePDF() {
     doc.setFontSize(11);
     doc.text(`Généré le: ${date}`, 14, 30);
     doc.text(`Total des équipes: ${document.getElementById('teamsCount').textContent}`, 14, 35);
-    const tableData = [];
-    const table = document.getElementById('team_tab');
-    const rows = table.querySelectorAll('tbody tr');
-    rows.forEach((row) => {
-        if (row.style.display !== 'none' && row.cells[0]) {
-            const name = row.cells[0].textContent.trim();
-            if (name && name !== 'Aucune équipe') { tableData.push([name]); }
-        }
-    });
+    const tableData = lignesEquipes().map(e => [e.nom, e.membres]);
     if (tableData.length > 0) {
         doc.autoTable({
-            head: [['Nom']], body: tableData, startY: 40,
+            head: [['Nom', 'Membres']], body: tableData, startY: 40,
             styles: { fontSize: 10, cellPadding: 3 },
-            headStyles: { fillColor: [58, 159, 135] }, margin: { top: 40 }
+            headStyles: { fillColor: [58, 159, 135] }, margin: { top: 40 },
+            columnStyles: { 1: { cellWidth: 25, halign: 'center' } }
         });
     }
     doc.setFontSize(10);
@@ -836,21 +862,29 @@ function generatePDF() {
 }
 
 function generateXLSX() {
+    const lignes = lignesEquipes();
+    if (lignes.length === 0) { alert("Aucune équipe à exporter"); return; }
+
     const wb = XLSX.utils.book_new();
-    const tableData = [];
-    const table = document.getElementById('team_tab');
-    const rows = table.querySelectorAll('tbody tr');
-    rows.forEach((row) => {
-        if (row.style.display !== 'none' && row.cells[0]) {
-            const name = row.cells[0].textContent.trim();
-            if (name && name !== 'Aucune équipe') { tableData.push({ "Nom": name }); }
-        }
-    });
-    if (tableData.length > 0) {
-        const ws = XLSX.utils.json_to_sheet(tableData);
-        XLSX.utils.book_append_sheet(wb, ws, "Équipes");
-        XLSX.writeFile(wb, 'liste_equipes_' + dateFichier() + '.xlsx');
-    } else { alert("Aucune équipe à exporter"); }
+    const date = new Date().toLocaleDateString('fr-FR');
+
+    /* Meme ossature que l'export des cles : titre fusionne, ligne vide de
+       respiration, puis en-tetes et donnees. Les couleurs ne sont pas posees
+       ici : la build communautaire de SheetJS ignore cell.s a l'ecriture. */
+    const ws = XLSX.utils.aoa_to_sheet([
+        ["Liste des équipes EERE — Générée le " + date],
+        [],
+        ["Nom", "Membres"],
+        ...lignes.map(e => [e.nom, e.membres])
+    ]);
+
+    ws['!cols'] = [{ wch: 45 }, { wch: 12 }];
+    ws['!rows'] = [{ hpt: 28 }, { hpt: 6 }, { hpt: 22 }]
+        .concat(lignes.map(() => ({ hpt: 18 })));
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }];
+
+    XLSX.utils.book_append_sheet(wb, ws, "Équipes");
+    XLSX.writeFile(wb, 'liste_equipes_' + dateFichier() + '.xlsx');
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -924,8 +958,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const filter = this.value.toLowerCase();
             // Sync hidden table rows for export
             document.querySelectorAll('#team_tab tbody tr').forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(filter) ? '' : 'none';
+                const nom = row.cells[0].textContent.toLowerCase();
+                row.style.display = nom.includes(filter) ? '' : 'none';
             });
         });
     }

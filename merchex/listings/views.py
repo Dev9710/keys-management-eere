@@ -913,7 +913,6 @@ def user_list(request):
     users = User.objects.select_related(
         'team').all().order_by('name', 'firstname')
     teams = Team.objects.all().order_by('name')
-    users_count = users.count()
 
     # Récupérer les paramètres GET
     user_id = request.GET.get('user_id', None)
@@ -923,6 +922,10 @@ def user_list(request):
     if team_id:
         team = get_object_or_404(Team, id=team_id)
         users = users.filter(team=team)
+
+    # Compte apres filtrage : l'en-tete annonce ce que la page affiche, pas le
+    # registre entier. Le JS le reajuste ensuite a chaque recherche.
+    users_count = users.count()
 
     # Récupérer un utilisateur spécifique si `user_id` est passé
     selected_user = None
@@ -969,7 +972,6 @@ def user_delete(request, user_id):
 
 def user_team(request):
     team_id = request.GET.get('team_id', None)
-    has_keys = request.GET.get('has_keys') == 'true'
 
     # Commencer avec tous les utilisateurs
     users = User.objects.all().order_by('name', 'firstname')
@@ -978,11 +980,6 @@ def user_team(request):
     if team_id:
         team = get_object_or_404(Team, id=team_id)
         users = users.filter(team=team)
-
-    # Filtrer les utilisateurs qui ont des clés si le filtre est activé
-    if has_keys:
-        # Utilisateurs qui ont au moins une attribution de clé active
-        users = users.filter(key_assignments__is_active=True).distinct()
 
     # Créer une liste d'utilisateurs sous forme de dictionnaire
     user_list = [
