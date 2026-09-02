@@ -1088,7 +1088,7 @@
                     doc.internal.pageSize.getHeight() - 10,
                     { align: 'center' });
 
-                doc.save(`Liste_utilisateurs_${teamName.replace(/\s+/g, '_')}_${today.replace(/\//g, '-')}.pdf`);
+                doc.save(`Liste_utilisateurs_${teamName.replace(/\s+/g, '_')}_${dateFichier()}.pdf`);
             } catch (e) {
                 console.error("Erreur lors de la génération du PDF:", e);
                 alert("Une erreur s'est produite lors de la génération du PDF: " + e.message);
@@ -1121,9 +1121,8 @@
                 XLSX.utils.book_append_sheet(workbook, worksheet, "Utilisateurs");
 
                 const teamName = document.getElementById('team-dropdown').options[document.getElementById('team-dropdown').selectedIndex].text;
-                const today = new Date().toLocaleDateString('fr-FR');
 
-                XLSX.writeFile(workbook, `Liste_utilisateurs_${teamName.replace(/\s+/g, '_')}_${today.replace(/\//g, '-')}.xlsx`);
+                XLSX.writeFile(workbook, `Liste_utilisateurs_${teamName.replace(/\s+/g, '_')}_${dateFichier()}.xlsx`);
             } catch (e) {
                 console.error("Erreur lors de la génération du XLSX:", e);
                 alert("Une erreur s'est produite lors de la génération du fichier Excel: " + e.message);

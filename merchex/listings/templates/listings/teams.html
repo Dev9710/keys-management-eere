@@ -832,7 +832,7 @@ function generatePDF() {
     }
     doc.setFontSize(10);
     doc.text("© Église Évangélique Rencontre Espérance", 14, doc.internal.pageSize.height - 10);
-    doc.save("liste_equipes.pdf");
+    doc.save('liste_equipes_' + dateFichier() + '.pdf');
 }
 
 function generateXLSX() {
@@ -849,7 +849,7 @@ function generateXLSX() {
     if (tableData.length > 0) {
         const ws = XLSX.utils.json_to_sheet(tableData);
         XLSX.utils.book_append_sheet(wb, ws, "Équipes");
-        XLSX.writeFile(wb, "liste_equipes.xlsx");
+        XLSX.writeFile(wb, 'liste_equipes_' + dateFichier() + '.xlsx');
     } else { alert("Aucune équipe à exporter"); }
 }
 

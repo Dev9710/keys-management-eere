@@ -1180,7 +1180,7 @@
             <div class="modal-body">
                 <div class="delete-warning">
                     <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
-                    <span>Voulez-vous vraiment supprimer la clé numéro <strong id="keyNumberToDelete"></strong> et tous ses exemplaires ? Cette action ne peut pas être annulée. Cependant le numéro de clé sera de nouveau disponible pour une nouvelle clé.</span>
+                    <span>Voulez-vous vraiment supprimer la clé numéro <strong id="keyNumberToDelete"></strong> et tous ses exemplaires ? Cette action est irréversible. Cependant le numéro de clé sera de nouveau disponible pour une nouvelle clé.</span>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1505,7 +1505,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         doc.setFontSize(10);
         doc.text("© Église Évangélique Rencontre Espérance", 14, doc.internal.pageSize.height - 10);
-        doc.save("liste_cles.pdf");
+        doc.save('liste_cles_' + dateFichier() + '.pdf');
     }
 
     function generateXLSX() {
@@ -1619,7 +1619,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         XLSX.utils.book_append_sheet(wb, ws, "Clés");
-        XLSX.writeFile(wb, "liste_cles_eere.xlsx");
+        XLSX.writeFile(wb, 'liste_cles_eere_' + dateFichier() + '.xlsx');
     }
 });
 </script>

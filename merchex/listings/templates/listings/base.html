@@ -352,6 +352,19 @@
             majEtat();
             window.addEventListener('scroll', majEtat, { passive: true });
         })();
+
+        /* Date de generation utilisee dans le nom des exports PDF et XLSX de
+           toutes les pages : JJ_MM_AAAA, format europeen, la date seule et
+           jamais l'heure. Construite a partir des composantes locales et
+           jamais avec toISOString(), qui renvoie UTC : un export fait a 00h30
+           en France porterait la date de la veille. */
+        window.dateFichier = function () {
+            const d = new Date();
+            const deuxChiffres = (n) => String(n).padStart(2, '0');
+            return deuxChiffres(d.getDate())
+                 + '_' + deuxChiffres(d.getMonth() + 1)
+                 + '_' + d.getFullYear();
+        };
     </script>
     
     <!-- Scripts supplémentaires par page -->

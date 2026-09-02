@@ -1228,7 +1228,7 @@
                 doc.setTextColor(0);
 
                 // Nom du fichier basé sur l'utilisateur et la date
-                const fileName = `Cles_${userName.replace(/\s+/g, '_')}_${today.replace(/\//g, '-')}.pdf`;
+                const fileName = `Cles_${userName.replace(/\s+/g, '_')}_${dateFichier()}.pdf`;
                 doc.save(fileName);
             }).catch(() => {
                 // Sécurité : ne jamais laisser le clone hors écran dans le DOM.
@@ -1319,7 +1319,7 @@
             XLSX.utils.book_append_sheet(wb, ws, "Clés attribuées");
             
             // Générer le nom du fichier
-            const fileName = `Cles_${userName.replace(/\s+/g, '_')}_${today.replace(/\//g, '-')}.xlsx`;
+            const fileName = `Cles_${userName.replace(/\s+/g, '_')}_${dateFichier()}.xlsx`;
             
             // Écrire le fichier
             XLSX.writeFile(wb, fileName);
