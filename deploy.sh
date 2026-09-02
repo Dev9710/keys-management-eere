@@ -47,8 +47,18 @@ CIBLE="$SAUVEGARDES/merchex-$HORODATAGE.sql.gz"
 # sans poser de verrou : l'application peut continuer d'écrire pendant le
 # dump. MYSQL_PWD plutôt que -p en argument, qui exposerait le mot de
 # passe dans la liste des processus du NAS.
+#
+# --no-tablespaces : depuis MySQL 5.7, mysqldump interroge les espaces de
+# tables, ce qui exige le privilège global PROCESS. L'utilisateur merchex
+# n'a de droits que sur sa propre base — et c'est très bien ainsi. Sans
+# cette option le dump echoue sur « Access denied ... PROCESS ». Ces
+# métadonnées ne concernent que les tables InnoDB à espace dédié, que
+# Django ne crée pas.
+#
+# Pas de --routines : dumper les procédures stockées réclame là aussi des
+# droits supplémentaires, et l'application n'en a aucune.
 docker exec -e MYSQL_PWD="$MYSQL_MOTDEPASSE" "$CONTENEUR_DB" \
-    mysqldump --single-transaction --routines --triggers \
+    mysqldump --single-transaction --no-tablespaces \
               --user="$MYSQL_UTILISATEUR" "$MYSQL_BASE" \
     | gzip > "$CIBLE"
 
