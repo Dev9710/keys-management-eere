@@ -4,7 +4,12 @@ services:
   db:
     image: mysql:8.4.8
     container_name: merchex-db
-    restart: unless-stopped
+    # always, et surtout pas unless-stopped : ce dernier memorise un arret
+    # manuel de facon permanente (bouton Arreter de Container Manager,
+    # docker stop) et ne redemarre plus le conteneur, pas meme au reboot du
+    # NAS. Un arret ponctuel devenait ainsi une panne definitive et
+    # silencieuse de la base, l'application repartant seule de son cote.
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: merchex
@@ -25,7 +30,7 @@ services:
   adminer:
     image: adminer:4
     container_name: merchex-adminer
-    restart: unless-stopped
+    restart: always
     depends_on:
       - db
     ports:
