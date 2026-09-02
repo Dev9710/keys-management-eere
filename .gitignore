@@ -25,3 +25,21 @@ Thumbs.db
 
 # Impeccable — reglages locaux (consentement du hook), propres a la machine
 .impeccable/config.local.json
+
+# Dépôt de fichiers de l'application — contenu, pas code (14 Mo et grossit)
+merchex/files/
+
+# Captures de sites et scripts d'analyse ponctuels
+www.egliseevangeliqueparis12.org-*.html
+analyze_lh.js
+
+# Impeccable — sorties de critique, regenerees a chaque passage.
+# design.json et live/config.json restent suivis, eux.
+.impeccable/critique/
+
+# Configuration des agents — propre a chaque poste.
+# A retirer d'ici si l'equipe decide un jour de la partager ; seul
+# .claude/settings.local.json est local par nature.
+.claude/
+.codex/
+.cursor/
