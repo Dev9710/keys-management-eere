@@ -50,8 +50,12 @@ SESSION_COOKIE_SECURE = False
 # -----------------------------
 # Static
 # -----------------------------
-# Assure-toi que collectstatic écrit bien ici, et que Web Station sert ce dossier
-STATIC_ROOT = os.environ.get("STATIC_ROOT", "/home/python/src/staticfiles")
+# Dans le conteneur, l'application vit dans /app : collectstatic ecrit donc
+# dans /app/staticfiles, et uWSGI sert ce meme dossier (voir static-map dans
+# uwsgi.ini). L'ancien /home/python/src/staticfiles datait de l'installation
+# Web Station et n'existe pas dans le conteneur -- collectstatic echouait, en
+# silence, l'entrypoint masquant l'erreur par un « || true ».
+STATIC_ROOT = os.environ.get("STATIC_ROOT", "/app/staticfiles")
 
 # -----------------------------
 # LOGGING (stdout)

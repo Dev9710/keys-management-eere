@@ -43,3 +43,6 @@ analyze_lh.js
 .claude/
 .codex/
 .cursor/
+
+# Genere par collectstatic a chaque demarrage du conteneur
+merchex/staticfiles/
