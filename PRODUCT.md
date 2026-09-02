@@ -22,8 +22,8 @@ donc un cas réel, pas théorique : deux personnes peuvent toucher la même clé
 
 | Rôle | Peut | Ne peut pas |
 |---|---|---|
-| **Administrateur** (`admin`) | Tout : parc, attributions, équipes, membres, **création de comptes**, **historique des actions** (création, modification, lecture, suppression), **synthèse globale + statistiques**, exports | — |
-| **Éditeur** (`editor`) | Créer, modifier, supprimer sur le parc, les attributions, les équipes et les membres ; **exporter les données** | Administrer les comptes, voir l'historique des actions, voir la synthèse globale et les statistiques — **ces menus lui sont masqués, pas grisés** |
+| **Administrateur** (`admin`) | Tout : clés, attributions, équipes, membres, **création de comptes**, **historique des actions** (création, modification, lecture, suppression), **synthèse globale + statistiques**, exports | — |
+| **Éditeur** (`editor`) | Créer, modifier, supprimer sur les clés, les attributions, les équipes et les membres ; **exporter les données** | Administrer les comptes, voir l'historique des actions, voir la synthèse globale et les statistiques — **ces menus lui sont masqués, pas grisés** |
 | **Visiteur** (`visitor`) | **Lire** et **exporter les données** | Rien ajouter, rien modifier, rien supprimer, rien administrer — **menus masqués** |
 
 Rôle par défaut à l'inscription : `visitor`.
@@ -44,7 +44,7 @@ que la ligne équivalente dans un tableur est un échec fonctionnel, quelle que 
 
 ## Positioning
 
-Registre de clés adossé à la structure réelle de l'église : le parc est modélisé en trois niveaux
+Registre de clés adossé à la structure réelle de l'église : les clés sont modélisées en trois niveaux
 (**type de clé** → **exemplaire physique** → **attribution**), et les détenteurs sont organisés en
 équipes de service. Un tableur ou un outil d'inventaire générique ne restitue ni la distinction
 type/exemplaire, ni la traçabilité nominative par équipe, ni le journal d'actions horodaté.
@@ -184,6 +184,12 @@ usage mobile élargi.
 - **Ton chaleureux et communautaire** : accueillant et humain, propre à une église, tout en restant
   clair et professionnel. Vouvoiement, vocabulaire métier assumé (gestionnaire, équipe, clé, armoire,
   coffre). Ni administratif froid, ni familier.
+- **Le mot de la maison est « registre », jamais « parc ».** « Parc » vient de la gestion
+  d'actifs — parc automobile, parc informatique : du matériel garé qu'on inventorie une fois
+  l'an. Ici les clés sont dans les mains de personnes et changent de main à chaque
+  arrivée, départ ou changement d'équipe. « Registre » porte le mouvement et les porteurs ;
+  « parc » les efface. Vocabulaire retenu : registre, clé, modèle, exemplaire, détenteur,
+  équipe, armoire, coffre.
 
 ## Evidence on Hand
 
@@ -199,7 +205,7 @@ usage mobile élargi.
 
 1. **Plus rapide que le tableur, sinon rien.** Les gestionnaires viennent d'Excel et peuvent y
    retourner ; chaque flux se juge au nombre de gestes par rapport à une ligne de tableur.
-2. **La vérité du parc prime sur la mise en avant.** L'écran répond « où est cette clé, qui l'a »
+2. **La vérité du registre prime sur la mise en avant.** L'écran répond « où est cette clé, qui l'a »
    avant toute autre ambition ; c'est un outil de travail, pas une vitrine.
 3. **Type, exemplaire, attribution restent distincts.** Aucune vue ne doit aplatir ces trois niveaux :
    c'est ce qui rend l'inventaire exact — et ce qu'aucun tableur ne sait faire.

@@ -130,7 +130,7 @@ def about(request):
 
 def home(request):
     """
-    Accueil : etat du parc en un coup d'oeil, puis les quatre espaces.
+    Accueil : etat du registre en un coup d'oeil, puis les quatre espaces.
 
     Les chiffres ne sont pas decoratifs. Un registre qui n'affiche jamais son
     etat laisse l'ecart entre la base et l'armoire s'installer sans temoin.
@@ -157,6 +157,7 @@ def home(request):
     nb_attributions = sum(attribues_par_type.values())
 
     return render(request, 'listings/home.html', {
+        # Chiffres du bandeau
         'nb_attributions': nb_attributions,
         # Ce qui n'est pas sorti est en armoire ou au coffre.
         'nb_en_stock': nb_exemplaires - nb_attributions,
@@ -170,6 +171,28 @@ def home(request):
         'nb_detenteurs': User.objects.filter(
             key_assignments__is_active=True).distinct().count(),
         'nb_ecarts': ecarts,
+
+        # Chiffres portes par les cartes de navigation : chacune annonce
+        # ce qu'elle contient plutot que de le promettre.
+        'nb_types': KeyType.objects.count(),
+        'nb_exemplaires': nb_exemplaires,
+        'nb_equipes': Team.objects.count(),
+        'nb_membres': User.objects.count(),
+
+        # Le verbe des cartes suit le role. « Gerer les cles » promet a un
+        # visiteur une action qu'il ne peut pas accomplir : il decouvrirait
+        # la restriction en arrivant sur une page amputee de ses boutons.
+        # Un seul endroit le decide, les quatre cartes le suivent.
+        # is_visitor est une methode, pas une propriete : sans les
+        # parentheses, Python renvoie la methode liee, toujours vraie.
+        # Les gabarits appellent les callables tout seuls, pas le code.
+        # La FAQ de l'accueil. Vide tant qu'aucune question n'a ete
+        # ecrite : le gabarit affiche son etat vide, et il suffira
+        # d'ajouter des {'question': ..., 'reponse': ...} ici pour que la
+        # section se remplisse, sans y toucher.
+        'faq': [],
+
+        'verbe_cartes': 'Consulter' if request.user.is_visitor() else 'Gérer',
     })
 
 
@@ -1155,8 +1178,9 @@ def login_view(request):
                     # La session expire à la fermeture du navigateur
                     request.session.set_expiry(0)
 
-                messages.success(
-                    request, f'Bienvenue, {user.first_name} {user.last_name}!')
+                # Pas de message de bienvenue : le hero de l'accueil salue
+                # déjà par le prénom. Un bandeau qui répète la même chose,
+                # au-dessus des chiffres, ne fait que décaler le contenu.
 
                 # Redirection vers la page demandée ou la page d'accueil
                 next_url = request.POST.get('next', 'home')

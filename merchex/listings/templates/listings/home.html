@@ -232,14 +232,14 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
     background: transparent;
     border: 1px solid rgba(255,255,255,.18);
     border-radius: 50px;
-    font-size: .66rem;
+    font-size: .68rem;
     letter-spacing: .08em;
     text-transform: uppercase;
     color: rgba(255,255,255,.85);
-    margin-bottom: 1.5rem;
     white-space: nowrap;
     font-family: 'DM Sans', sans-serif;
     font-weight: 500;
+    margin-bottom: 1.5rem;
     opacity: 0;
     animation: descriptionAppear .4s ease-out .15s forwards;
 }
@@ -247,7 +247,7 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
 .hero-title {
     font-family: 'DM Serif Display', Georgia, serif;
     font-weight: 400;
-    font-size: 1.4rem;
+    font-size: 2.6rem;
     margin-bottom: 10px;
     text-shadow:
         0 0 20px rgba(255,255,255,0.5),
@@ -260,47 +260,19 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
 
 .hero-description {
     font-family: 'DM Sans', sans-serif;
-    font-size: .88rem;
+    font-size: 1.2rem;
     font-weight: 400;
     margin-bottom: 20px;
     opacity: 0;
     transform: translateY(20px);
     animation: descriptionAppear .4s ease-out .25s forwards;
-    max-width: 580px;
+    /* 99 caractères à 1.2rem demandent ~950px. En dessous de cette largeur
+       d'écran la phrase se replie d'elle-même, ce qui est le comportement
+       souhaitable : on ne force jamais une ligne à déborder. */
+    max-width: 1010px;
     margin-left: auto;
     margin-right: auto;
     line-height: 1.7;
-}
-
-.cta-button {
-    display: inline-block;
-    text-decoration: none;
-    font-family: 'DM Sans', sans-serif;
-    padding: .7rem 1.6rem;
-    font-size: .88rem;
-    font-weight: 500;
-    background: rgba(255,255,255,0.1);
-    color: white;
-    border: 2px solid rgba(255,255,255,0.8);
-    border-radius: 50px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    opacity: 0;
-    transform: translateY(20px) scale(0.8);
-    animation: buttonAppear .4s ease-out .3s forwards;
-}
-.cta-button:hover {
-    transform: translateY(-1px);
-    background: rgba(255,255,255,0.2);
-    border-color: white;
-}
-.cta-button:active { transform: scale(.98); }
-.cta-button:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(255,255,255,.5);
 }
 
 .wave {
@@ -315,27 +287,35 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
 /* ═══════════════════════════════════════════
    FEATURES SECTION — white / paper
 ═══════════════════════════════════════════ */
+/* ── Section 3 · Que voulez-vous faire ? ────────────────────────────────────
+   Pleine largeur, comme le hero. Le fond reprend le vert le plus profond :
+   la page alterne registre sombre / chiffres clairs / destinations sombres,
+   et les cartes se détachent sur leur propre fond plutôt que sur du blanc. */
 .features-section {
-    background: #ffffff;
-    padding: 1.5rem 2rem 2.5rem;
-    position: relative;
+    background: #0d3028;
+    /* Même hauteur que la section des chiffres, et même centrage vertical :
+       les deux blocs se répondent au lieu de se succéder en escalier. */
+    padding: 4rem 2rem;
+    min-height: 75dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .features-section-head {
-    max-width: 1200px;
-    margin: 0 auto 1rem;
+    max-width: 1400px;
+    margin: 0 auto 1.75rem;
+    text-align: center;
 }
 
 .features-section-head h2 {
-    font-family: 'DM Sans', sans-serif;
-    font-size: .68rem;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: #64748b;
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 400;
+    color: #ffffff;
 }
 
-/* ── Section 2 · Le parc en chiffres ──────────────────────────────────
+/* ── Section 2 · Le registre en quelques chiffres ──────────────────────────────────
    Fond blanc. La jointure avec le hero est un fondu : le bas du hero se
    dissout vers le blanc (voir .hero-section::after), donc aucune arête
    entre le vert et la section. Contraste vérifié : #2a7562 sur blanc
@@ -359,13 +339,13 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
 .kpi-titre {
     font-family: 'DM Serif Display', Georgia, serif;
     font-weight: 400;
-    font-size: 1.4rem;
+    font-size: 2rem;
     color: #0d3028;
     margin-bottom: 8px;
 }
 .kpi-sous-titre {
     font-family: 'DM Sans', sans-serif;
-    font-size: .88rem;
+    font-size: 1rem;
     line-height: 1.6;
     color: #64748b;
     max-width: 62ch;
@@ -386,7 +366,7 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
 .kpi-nombre {
     display: block;
     font-family: 'DM Sans', sans-serif;
-    font-size: 2.2rem;
+    font-size: 3.4rem;
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.02em;
@@ -398,10 +378,14 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
 .kpi-libelle {
     display: block;
     font-family: 'DM Sans', sans-serif;
-    font-size: .88rem;
+    /* Un libelle de corps courant sous un chiffre de 3.4rem passe pour
+       une note de bas de page. Il porte le sens du chiffre : il monte avec
+       lui. A 1rem, « Incoherences de stock » tient toujours sur une ligne
+       (~168 px pour 192 px de colonne). */
+    font-size: 1rem;
     font-weight: 500;
     color: #0f172a;
-    margin-top: .7rem;
+    margin-top: .9rem;
 }
 
 /* La colonne avant son tour : absente, pas vide. Cet état n'est jamais posé
@@ -443,63 +427,245 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
    couleur seule. */
 .kpi-item-ecart .kpi-nombre { color: #cc8400; }
 
-/* ── Section 4 · Incitation à tenir le registre ───────────────────────
-   Même reliure que le hero : la page s'ouvre et se referme sur le vert
-   profond. Le bouton reprend le contour blanc du hero — l'orange reste
-   réservé à l'ajout. */
-.cta-section {
-    background: linear-gradient(135deg, #0d3028 0%, #1a5040 100%);
-    padding: 2.5rem 2rem;
+/* ── Carte de destination ─────────────────────────────────────────────
+   Composition reprise de la référence : surface colorée, voile qui
+   assombrit le bas, titre et chiffres posés dessus, barre d'action en
+   pied. À la place de la photo, les verts du système — on n'a pas
+   d'images des locaux, et il n'est pas question d'en inventer. */
+.feature-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 340px;
+    border-radius: 14px;   /* le plus grand rayon du système */
+    overflow: hidden;
+    text-decoration: none;
     color: #ffffff;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
+    transform-style: preserve-3d;
+    transition: box-shadow .3s cubic-bezier(.16,1,.3,1),
+                transform .3s cubic-bezier(.16,1,.3,1);
 }
-.cta-inner {
-    max-width: 1200px;
-    margin: 0 auto;
+.feature-card:hover {
+    box-shadow: 0 20px 48px rgba(0,0,0,.2);
+}
+.feature-card:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255,255,255,.6);
+}
+
+/* Chaque destination sa nuance, toutes tirées de la rampe du système. */
+.fc-cles       { background: linear-gradient(155deg, #0d3028 0%, #1a5040 100%); }
+.fc-equipes    { background: linear-gradient(155deg, #134037 0%, #2a7562 100%); }
+.fc-detenteurs { background: linear-gradient(155deg, #1a5040 0%, #3a9f87 100%); }
+.fc-attribuees { background: linear-gradient(155deg, #0d3028 0%, #2a7562 100%); }
+
+/* L'image est un élément à part entière, pas un fond : si elle manque, le
+   navigateur déclenche onerror, la classe a-photo tombe, et la carte
+   retrouve son dégradé ET son pictogramme au lieu de rester vide. */
+.fc-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1);
+    transition: transform .5s cubic-bezier(.16,1,.3,1);
+}
+.feature-card:hover .fc-image { transform: scale(1.06); }
+
+/* ── Carte avec photo ─────────────────────────────────────────────────
+   Quand une image est fournie, elle devient le sujet : le filigrane
+   s'efface et le voile se concentre sur le texte.
+
+   Le voile n'est pas cosmétique — sur une zone claire de photo, le titre
+   blanc tombe à 3,92:1 sans lui. Mais il n'a de raison d'être que là où
+   il y a du texte à lire. Mesure sur une carte de 340 px : la barre
+   d'action fait 55 px, le corps 92 px — le texte occupe donc les 147 px
+   du bas, à partir de 57 %, et le titre commence à 64 %.
+
+   Le dégradé est donc nul jusqu'à 56 % — pas atténué, absent : toute la
+   partie haute de la photo est rendue telle quelle. Il grimpe ensuite en
+   8 % de hauteur (27 px) pour atteindre .76 à 64 %, où commence le titre,
+   soit au-dessus de la valeur qu'avait l'ancien dégradé au même endroit.
+   Contraste du titre blanc sur le pire cas (pixel photo blanc) : 6,4:1,
+   au-dessus des 4,5:1 exigés pour un texte de 22,4 px.
+   Rampe volontairement courte : la contrepartie est qu'une transition
+   peut se deviner sur une photo très uniforme à cet endroit.
+   Le dégradé reste sous l'image : si le fichier manque, la carte garde son
+   allure au lieu de devenir noire. */
+.feature-card.a-photo .fc-filigrane { display: none; }
+.feature-card.a-photo .fc-voile {
+    background: linear-gradient(180deg,
+        rgba(13,48,40,0)   0%,
+        rgba(13,48,40,0)   56%,
+        rgba(13,48,40,.45) 60%,
+        rgba(13,48,40,.76) 64%,
+        rgba(13,48,40,.96) 100%);
+}
+
+/* Le pictogramme en filigrane tient lieu de sujet, comme la photo dans la
+   référence : assez grand pour donner de la matière, assez discret pour
+   ne jamais concurrencer le texte. */
+.fc-filigrane {
+    position: absolute;
+    right: -14px;
+    top: 18px;
+    /* décor, pas du texte : dimensionné en multiple du corps
+       de référence plutôt qu'en pixels hors échelle. */
+    font-size: 8rem;
+    line-height: 1;
+    color: rgba(255,255,255,.09);
+    pointer-events: none;
+    transition: transform .45s cubic-bezier(.16,1,.3,1), color .3s;
+}
+.feature-card:hover .fc-filigrane {
+    transform: scale(1.08) rotate(-6deg);
+    color: rgba(255,255,255,.14);
+}
+
+/* Voile de lisibilité : c'est lui qui garantit le contraste du texte quelle
+   que soit la nuance de fond, exactement le rôle du calque sombre posé sur
+   la photo dans la référence. */
+.fc-voile {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+        rgba(13,48,40,0) 35%,
+        rgba(13,48,40,.55) 62%,
+        rgba(13,48,40,.92) 100%);
+    pointer-events: none;
+}
+
+.fc-corps {
+    position: relative;
+    padding: 1.5rem 1.5rem 1rem;
+}
+.fc-titre {
+    display: block;
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: .4rem;
+}
+.fc-chiffres {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    color: rgba(255,255,255,.82);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Barre d'action en pied, comme « Explore Now → ». */
+.fc-action {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 2rem;
-    flex-wrap: wrap;
+    gap: 1rem;
+    padding: .9rem 1.5rem 1.2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 600;
+    color: #ffffff;
+    border-top: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: background .25s, gap .25s;
 }
-.cta-texte { max-width: 62ch; }
-.cta-titre {
+.feature-card:hover .fc-action { background: rgba(255,255,255,.12); }
+.fc-action i { transition: transform .25s cubic-bezier(.16,1,.3,1); }
+.feature-card:hover .fc-action i { transform: translateX(4px); }
+
+/* ── Section 4 · Questions fréquentes ─────────────────────────────────
+   Section claire : le pied de page est déjà en #0d3028 et la navigation
+   qui précède aussi — trois blocs sombres d'affilée écrasaient la fin de
+   page. Même jointure de 56px que la section des chiffres, qui répond au
+   même cas : une section claire posée sous une section sombre.
+   Aucune question n'est encore écrite — la section existe avec son état
+   vide plutôt qu'avec de fausses questions, et les vraies arriveront par
+   la liste « faq » du contexte, sans toucher au gabarit. */
+.faq-section {
+    background: linear-gradient(180deg, #e8f0ed 0%, #ffffff 56px);
+    padding: 3.5rem 2rem;
+    color: #0f172a;
+}
+.faq-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+.faq-titre {
     font-family: 'DM Serif Display', Georgia, serif;
     font-weight: 400;
-    font-size: 1.4rem;
+    font-size: 2rem;
+    color: #0d3028;
     margin-bottom: 8px;
 }
-.cta-sous-titre {
+.faq-sous-titre {
     font-family: 'DM Sans', sans-serif;
-    font-size: .88rem;
-    color: rgba(255,255,255,.75);
+    font-size: 1rem;
+    color: #64748b;
     line-height: 1.6;
+    margin-bottom: 2rem;
 }
-.cta-bouton {
-    display: inline-flex;
+
+.faq-liste { text-align: left; }
+
+/* <details> natif : ouverture au clavier et au lecteur d'écran sans une
+   ligne de JavaScript, et l'état ouvert survit à l'impression. */
+.faq-item {
+    border-top: 1px solid #e8f0ed;
+}
+.faq-item:last-child { border-bottom: 1px solid #e8f0ed; }
+
+.faq-question {
+    display: flex;
     align-items: center;
-    gap: .6rem;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 0;
+    cursor: pointer;
+    list-style: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+.faq-question::-webkit-details-marker { display: none; }
+.faq-question::after {
+    content: '+';
+    font-size: 1.4rem;
+    font-weight: 400;
+    line-height: 1;
     flex-shrink: 0;
-    padding: .7rem 1.6rem;
-    background: rgba(255,255,255,0.1);
-    color: #ffffff;
-    border: 2px solid rgba(255,255,255,0.8);
-    border-radius: 50px;
+    transition: transform .25s ease;
+}
+.faq-item[open] .faq-question::after { transform: rotate(45deg); }
+.faq-question:focus-visible {
+    outline: 2px solid #2a7562;
+    outline-offset: 3px;
+}
+.faq-reponse {
+    padding: 0 0 1.2rem;
     font-family: 'DM Sans', sans-serif;
     font-size: .88rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: background .2s, border-color .2s, transform .1s;
+    line-height: 1.7;
+    color: #64748b;
 }
-.cta-bouton:hover {
-    background: rgba(255,255,255,0.2);
-    border-color: #ffffff;
-    color: #ffffff;
-    transform: translateY(-1px);
-}
-.cta-bouton:active { transform: scale(.98); }
-.cta-bouton:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(255,255,255,.5);
+
+/* L'etat vide se dit, il ne se cache pas : une section muette laisserait
+   croire a un chargement rate. #64748b sur blanc : 4,76:1. */
+.faq-vide {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    line-height: 1.7;
+    color: #64748b;
+    text-align: center;
+    padding: 1.5rem 0 .5rem;
 }
 
 .features-grid {
@@ -519,95 +685,6 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
     max-width: 895px;
 }
 
-/* ── Carte de destination — grammaire de carte du systeme ──
-   Blanche sur le fond papier, bordure verdie, legerement soulevee,
-   liseré gauche teal au survol : exactement les lignes de tableau
-   et les cartes de Gestion des cles. On traverse le portail sans
-   changer de produit. */
-.feature-card {
-    position: relative;
-    background: #ffffff;
-    border: 1px solid #e8f0ed;
-    border-left: 3px solid transparent;
-    border-radius: 12px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    text-decoration: none;
-    color: inherit;
-    box-shadow: 0 1px 3px rgba(0,0,0,.04);
-    transition: background .15s, border-left-color .15s, box-shadow .2s, transform .2s;
-}
-
-.feature-card:hover {
-    background: #f8fffe;
-    border-left-color: #3a9f87;
-    box-shadow: 0 4px 16px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
-    transform: translateY(-2px);
-}
-
-.feature-card:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(58,159,135,.25);
-    border-left-color: #3a9f87;
-}
-
-/* Pastille d'icone : le teal clair du systeme, pas un verre depoli */
-.cv-icon {
-    width: 44px; height: 44px;
-    background: #edf7f5;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    transition: background .2s;
-}
-.cv-icon i {
-    font-size: 18px;
-    color: #3a9f87;
-    transition: color .2s;
-}
-.feature-card:hover .cv-icon { background: #3a9f87; }
-.feature-card:hover .cv-icon i { color: #ffffff; }
-
-.feature-card-body {
-    padding: 1rem 1.25rem 1.1rem;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: .35rem;
-}
-
-.feature-card h3 {
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 600;
-    font-size: .9rem;
-    color: #0f172a;
-    line-height: 1.3;
-}
-
-.feature-card p {
-    font-family: 'DM Sans', sans-serif;
-    font-size: .88rem;
-    color: #64748b;
-    line-height: 1.5;
-    flex: 1;
-}
-
-.feature-arrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: .68rem;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: #64748b;
-    margin-top: .75rem;
-    transition: color .2s, gap .2s;
-}
-.feature-card:hover .feature-arrow { color: #2a7562; gap: 10px; }
-
 /* ═══════════════════════════════════════════
    KEYFRAMES — hero (inchangés)
 ═══════════════════════════════════════════ */
@@ -626,10 +703,6 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
 @keyframes descriptionAppear {
     0%   { opacity: 0; transform: translateY(20px); }
     100% { opacity: 1; transform: translateY(0); }
-}
-@keyframes buttonAppear {
-    0%   { opacity: 0; transform: translateY(20px) scale(0.8); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes starsMove {
     0%   { transform: translate(0, 0); }
@@ -672,20 +745,22 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
 ═══════════════════════════════════════════ */
 @media (max-width: 1024px) {
     .features-grid,
-    .features-grid.is-3 { grid-template-columns: repeat(2, 1fr); max-width: 1200px; }
+    .features-grid.is-3 { grid-template-columns: repeat(2, 1fr); max-width: 1400px; }
 }
 
 @media (max-width: 768px) {
     .hero-section { padding: 40px 15px; min-height: 60dvh; }
-    .hero-title   { font-size: 1.15rem; }
-    .features-section { padding: 1.25rem 1rem 2rem; }
+    .hero-title   { font-size: 2rem; }
+    .features-section { padding: 2.5rem 1rem; }
+    .feature-card { min-height: 260px; }
+    .fc-filigrane { font-size: 6rem; }
     .kpi-section { padding: 2rem 1rem; }
     .kpi-section { min-height: 0; padding: 2.5rem 1rem; }
+    .features-section { min-height: 0; }
     .kpi-rangee { grid-template-columns: repeat(2, 1fr); row-gap: 1.75rem; }
     .kpi-item:nth-child(odd) { border-left: none; }
-    .kpi-nombre { font-size: 1.4rem; }
-    .cta-section { padding: 2rem 1rem; }
-    .cta-inner { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
+    .kpi-nombre { font-size: 2rem; }
+    .faq-section { padding: 2.5rem 1rem; }
 }
 
 @media (max-width: 480px) {
@@ -693,7 +768,8 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
     .features-grid.is-3 { grid-template-columns: 1fr; }
     .kpi-rangee { grid-template-columns: 1fr; }
     .kpi-item { border-left: none; }
-    .kpi-titre, .cta-titre { font-size: 1.15rem; }
+    .kpi-titre, .faq-titre,
+    .features-section-head h2 { font-size: 1.4rem; }
 }
 
 /* Mouvement réduit : plus d'étoiles injectées du tout (le script sort avant),
@@ -702,13 +778,13 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
    cartes à opacity: 0. */
 @media (prefers-reduced-motion: reduce) {
     .hero-section, .hero-content, .hero-title, .hero-description,
-    .cta-button, .hero-badge,
+    .hero-badge,
     .stars-layer-1, .stars-layer-2, .stars-layer-3,
     body.accueil .top-header,
     body.accueil .top-header .logo,
     body.accueil .top-header .nav-menu a,
     body.accueil .top-header .user-menu,
-    .feature-card, .kpi-item, .cta-bouton {
+    .feature-card, .fc-filigrane, .fc-action, .kpi-item {
         animation: none !important;
         transition: none !important;
         opacity: 1 !important;
@@ -735,16 +811,15 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
     <div class="hero-content">
         <!-- Pas d'aria-hidden : c'est le seul texte qui nomme le portail
              et l'église, et le seul contexte d'un h1 par ailleurs court. -->
-        <div class="hero-badge">Portail de gestion des clés · Église Évangélique Rencontre Espérance</div>
-        <h1 class="hero-title">Bonjour {{ request.user.first_name|default:"" }}</h1>
+        <span class="hero-badge">Portail de gestion des clés · Église Évangélique Rencontre Espérance</span>
+        <h1 class="hero-title">Bienvenue {{ request.user.first_name|default:"" }}</h1>
         <p class="hero-description">
             {% if request.user.is_visitor %}
             Vous consultez le registre des clés en lecture seule.
             {% else %}
-            Le registre des clés de l'église : qui détient quoi, et où se trouve le reste.
+            Ce portail facilite la gestion des clés et du stock de clés au conseil d'administration de l'église.
             {% endif %}
         </p>
-        <a class="cta-button" href="{% url 'key_list' %}">Ouvrir le parc de clés</a>
     </div>
 </section>
 
@@ -768,31 +843,31 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
         </div>
         {% endif %}
 
-        <h2 class="kpi-titre">Le parc en chiffres</h2>
+        <h2 class="kpi-titre">Le registre en quelques chiffres</h2>
         <p class="kpi-sous-titre">
-            Relevé sur le registre au moment où vous ouvrez cette page.
+            Relevé à l’ouverture de cette page.
         </p>
 
         <div class="kpi-rangee">
             <div class="kpi-item">
                 <span class="kpi-nombre" data-compteur="{{ nb_attributions }}">{{ nb_attributions }}</span>
-                <span class="kpi-libelle">Clés attribuées</span>
+                <span class="kpi-libelle">Clés en circulation</span>
             </div>
             <div class="kpi-item">
                 <span class="kpi-nombre" data-compteur="{{ nb_en_stock }}">{{ nb_en_stock }}</span>
-                <span class="kpi-libelle">Clés en stock</span>
+                <span class="kpi-libelle">Clés disponibles</span>
             </div>
             <div class="kpi-item">
                 <span class="kpi-nombre" data-compteur="{{ nb_sans_dispo }}">{{ nb_sans_dispo }}</span>
-                <span class="kpi-libelle">Sans exemplaire disponible</span>
+                <span class="kpi-libelle">Clé{% if nb_sans_dispo > 1 %}s{% endif %} sans stock</span>
             </div>
             <div class="kpi-item">
                 <span class="kpi-nombre" data-compteur="{{ nb_detenteurs }}">{{ nb_detenteurs }}</span>
-                <span class="kpi-libelle">Détenteurs</span>
+                <span class="kpi-libelle">Personnes équipées</span>
             </div>
             <div class="kpi-item kpi-item-ecart">
                 <span class="kpi-nombre" data-compteur="{{ nb_ecarts }}">{{ nb_ecarts }}</span>
-                <span class="kpi-libelle">Clé{{ nb_ecarts|pluralize }} à vérifier</span>
+                <span class="kpi-libelle">Incohérence{% if nb_ecarts > 1 %}s{% endif %} de stock</span>
             </div>
         </div>
 
@@ -805,55 +880,58 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
 <section class="features-section" id="features">
 
     <div class="features-section-head">
-        <h2>Navigation rapide</h2>
+        <h2>Que voulez-vous {% if request.user.is_visitor %}consulter{% else %}faire{% endif %} ?</h2>
     </div>
 
     <div class="features-grid{% if request.user.is_visitor %} is-3{% endif %}">
 
-        <!-- Card 1 — Gestion des clés -->
-        <a class="feature-card" href="{% url 'key_list' %}"
-           aria-label="Gestion des clés">
-            <div class="feature-card-body">
-                <div class="cv-icon"><i class="fas fa-key" aria-hidden="true"></i></div>
-                <h3>Gestion des clés</h3>
-                <p>Ajouter, modifier et consulter la liste complète des clés disponibles.</p>
-                <span class="feature-arrow">Accéder <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
-            </div>
+        <a class="feature-card fc-cles a-photo" href="{% url 'key_list' %}">
+            <img class="fc-image" src="{% static 'listings/pictures/cles.jpg' %}" alt="" loading="lazy"
+                 onerror="this.closest('.feature-card').classList.remove('a-photo'); this.remove();">
+            <i class="fas fa-key fc-filigrane" aria-hidden="true"></i>
+            <span class="fc-voile" aria-hidden="true"></span>
+            <span class="fc-corps">
+                <span class="fc-titre">{{ verbe_cartes }} les clés</span>
+                <span class="fc-chiffres">{{ nb_types }} clés · {{ nb_exemplaires }} exemplaires</span>
+            </span>
+            <span class="fc-action">Ouvrir la liste des clés <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
         </a>
 
-        <!-- Card 2 — Gestion des équipes -->
-        <a class="feature-card" href="{% url 'team_list' %}"
-           aria-label="Gestion des équipes">
-            <div class="feature-card-body">
-                <div class="cv-icon"><i class="fas fa-users" aria-hidden="true"></i></div>
-                <h3>Gestion des équipes</h3>
-                <p>Ajouter, supprimer ou modifier le nom d'une équipe.</p>
-                <span class="feature-arrow">Accéder <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
-            </div>
+        <a class="feature-card fc-equipes a-photo" href="{% url 'team_list' %}">
+            <img class="fc-image" src="{% static 'listings/pictures/equipes.jpg' %}" alt="" loading="lazy"
+                 onerror="this.closest('.feature-card').classList.remove('a-photo'); this.remove();">
+            <i class="fas fa-users fc-filigrane" aria-hidden="true"></i>
+            <span class="fc-voile" aria-hidden="true"></span>
+            <span class="fc-corps">
+                <span class="fc-titre">{{ verbe_cartes }} les équipes</span>
+                <span class="fc-chiffres">{{ nb_equipes }} équipes de service</span>
+            </span>
+            <span class="fc-action">Ouvrir la liste des équipes <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
         </a>
 
-        <!-- Card 3 — Gestion des détenteurs -->
-        <a class="feature-card" href="{% url 'user_list' %}"
-           aria-label="Gestion des détenteurs de clés">
-            <div class="feature-card-body">
-                <div class="cv-icon"><i class="fas fa-user" aria-hidden="true"></i></div>
-                <h3>Gestion des détenteurs</h3>
-                <p>Administrer les détenteurs de clés par équipe.</p>
-                <span class="feature-arrow">Accéder <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
-            </div>
+        <a class="feature-card fc-detenteurs a-photo" href="{% url 'user_list' %}">
+            <img class="fc-image" src="{% static 'listings/pictures/detenteurs.jpg' %}" alt="" loading="lazy"
+                 onerror="this.closest('.feature-card').classList.remove('a-photo'); this.remove();">
+            <i class="fas fa-user fc-filigrane" aria-hidden="true"></i>
+            <span class="fc-voile" aria-hidden="true"></span>
+            <span class="fc-corps">
+                <span class="fc-titre">{{ verbe_cartes }} les détenteurs</span>
+                <span class="fc-chiffres">{{ nb_membres }} membres suivis</span>
+            </span>
+            <span class="fc-action">Ouvrir la liste des détenteurs <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
         </a>
 
-
-        <!-- Card 4 — Clés attribuées -->
         {% if not request.user.is_visitor %}
-        <a class="feature-card" href="{% url 'user_keys' %}"
-           aria-label="Gestion des clés attribuées">
-            <div class="feature-card-body">
-                <div class="cv-icon"><i class="fas fa-id-badge" aria-hidden="true"></i></div>
-                <h3>Clés attribuées</h3>
-                <p>Attribuer une ou plusieurs clés aux détenteurs de clés.</p>
-                <span class="feature-arrow">Accéder <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
-            </div>
+        <a class="feature-card fc-attribuees a-photo" href="{% url 'user_keys' %}">
+            <img class="fc-image" src="{% static 'listings/pictures/attribuees.jpg' %}" alt="" loading="lazy"
+                 onerror="this.closest('.feature-card').classList.remove('a-photo'); this.remove();">
+            <i class="fas fa-id-badge fc-filigrane" aria-hidden="true"></i>
+            <span class="fc-voile" aria-hidden="true"></span>
+            <span class="fc-corps">
+                <span class="fc-titre">Gérer les attributions de clés</span>
+                <span class="fc-chiffres">{{ nb_attributions }} clés entre les mains</span>
+            </span>
+            <span class="fc-action">Ouvrir la page d'attribution <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
         </a>
         {% endif %}
 
@@ -861,35 +939,31 @@ body.accueil .top-header .user-menu       { animation-delay: .35s; }
 </section>
 
 <!-- ══════════════════════════════════
-     4 · TENIR LE REGISTRE À JOUR
+     4 · QUESTIONS FRÉQUENTES
 ══════════════════════════════════ -->
-<section class="cta-section" id="suivi">
-    <div class="cta-inner">
-        <div class="cta-texte">
-            {% if request.user.is_visitor %}
-            <h2 class="cta-titre">Besoin de retrouver une clé ?</h2>
-            <p class="cta-sous-titre">
-                Le parc complet, ses détenteurs et leurs équipes sont consultables,
-                et exportables au format de votre choix.
-            </p>
-            {% else %}
-            <h2 class="cta-titre">Une clé remise ou rendue ?</h2>
-            <p class="cta-sous-titre">
-                Enregistrez le mouvement pendant qu'il est frais. C'est ce qui garde
-                l'écart entre le registre et l'armoire à zéro.
-            </p>
-            {% endif %}
-        </div>
+<section class="faq-section" id="faq">
+    <div class="faq-inner">
+        <h2 class="faq-titre">Questions fréquentes</h2>
+        <p class="faq-sous-titre">
+            Ce qui revient le plus souvent sur la tenue du registre.
+        </p>
 
-        {% if request.user.is_visitor %}
-        <a class="cta-bouton" href="{% url 'key_list' %}">
-            <i class="fas fa-key" aria-hidden="true"></i> Consulter le parc de clés
-        </a>
-        {% else %}
-        <a class="cta-bouton" href="{% url 'user_keys' %}">
-            <i class="fas fa-id-badge" aria-hidden="true"></i> Attribuer ou retirer une clé
-        </a>
-        {% endif %}
+        <div class="faq-liste">
+            {% for question in faq %}
+            <details class="faq-item">
+                <summary class="faq-question">{{ question.question }}</summary>
+                <div class="faq-reponse">{{ question.reponse }}</div>
+            </details>
+            {% empty %}
+            {# Aucune question n'est encore ecrite. L'etat vide est un vrai #}
+            {# chemin de code, pas un texte a supprimer plus tard : le jour #}
+            {# ou « faq » se remplit, il disparait tout seul. #}
+            <p class="faq-vide">
+                Aucune question n'est encore répertoriée.<br>
+                Elles seront ajoutées au fil de celles qui reviennent.
+            </p>
+            {% endfor %}
+        </div>
     </div>
 </section>
 
@@ -948,7 +1022,35 @@ document.addEventListener('DOMContentLoaded', function () {
     setInterval(createShootingStar, 8000);
 });
 
-/* Comptage des chiffres du parc.
+/* Inclinaison des cartes de navigation, comme la référence.
+   La carte suit le pointeur sur deux axes, dans une amplitude volontairement
+   faible — au-delà de ~6°, le texte se déforme et devient pénible à lire.
+   Aucune animation CSS ne touche à transform sur ces cartes : la tentative
+   précédente ne produisait rien parce qu'une animation l'écrasait dans la
+   cascade. Rien ne bouge sous prefers-reduced-motion, et le survol reste
+   purement décoratif : tout marche au clavier sans lui. */
+document.addEventListener('DOMContentLoaded', function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!window.matchMedia('(hover: hover)').matches) return;   // pas au doigt
+
+    const AMPLITUDE = 6;   // degrés
+
+    document.querySelectorAll('.feature-card').forEach(carte => {
+        carte.addEventListener('mousemove', e => {
+            const r = carte.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width - 0.5;
+            const y = (e.clientY - r.top) / r.height - 0.5;
+            carte.style.transform =
+                `rotateX(${-y * AMPLITUDE}deg) rotateY(${x * AMPLITUDE}deg) translateY(-4px)`;
+        });
+        carte.addEventListener('mouseleave', () => { carte.style.transform = ''; });
+        // Le clavier n'a pas de pointeur : on garde le seul soulèvement.
+        carte.addEventListener('focus', () => { carte.style.transform = 'translateY(-4px)'; });
+        carte.addEventListener('blur', () => { carte.style.transform = ''; });
+    });
+});
+
+/* Comptage des chiffres du registre.
 
    Ni « 0 » ni case vide : la colonne n'existe pas encore, puis elle arrive
    et compte en arrivant. Zéro serait une valeur mensongère — c'en est une

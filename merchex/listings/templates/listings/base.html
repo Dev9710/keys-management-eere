@@ -135,6 +135,16 @@
             display: none;
         }
         
+        .role-utilisateur {
+            margin-top: .35rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: #64748b;
+        }
+
         .user-menu .dropdown-menu {
             min-width: 220px;
             border: none;
@@ -231,6 +241,11 @@
                 <li class="dropdown-header">
                     <div class="fw-bold">{{ request.user.first_name }} {{ request.user.last_name }}</div>
                     <div class="small text-muted">{{ request.user.email }}</div>
+                    <div class="role-utilisateur">
+                        {% if request.user.role == 'admin' %}Administrateur
+                        {% elif request.user.role == 'editor' %}Éditeur
+                        {% else %}Lecture seule{% endif %}
+                    </div>
                 </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>

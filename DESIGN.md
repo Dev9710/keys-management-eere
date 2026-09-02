@@ -57,10 +57,35 @@ typography:
     lineHeight: 1.4
   metric:
     fontFamily: "DM Sans, sans-serif"
-    fontSize: "2.2rem"
+    fontSize: "3.4rem"
     fontWeight: 700
     lineHeight: 1
     letterSpacing: "-0.02em"
+  metricLabel:
+    fontFamily: "DM Sans, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 500
+    lineHeight: 1.3
+  heroTitle:
+    fontFamily: "DM Serif Display, Georgia, serif"
+    fontSize: "2.6rem"
+    fontWeight: 400
+    lineHeight: 1.15
+  heroLead:
+    fontFamily: "DM Sans, sans-serif"
+    fontSize: "1.2rem"
+    fontWeight: 400
+    lineHeight: 1.5
+  sectionTitle:
+    fontFamily: "DM Serif Display, Georgia, serif"
+    fontSize: "2rem"
+    fontWeight: 400
+    lineHeight: 1.2
+  sectionLead:
+    fontFamily: "DM Sans, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 400
+    lineHeight: 1.6
 rounded:
   xs: "2px"
   sm: "8px"
@@ -227,7 +252,7 @@ signaler une erreur bloquante. Il ne sert jamais à attirer l'attention sur autr
 
 **Character:** Une sérif de titre chaleureuse posée sur une grotesque neutre et très lisible. La
 sérif ne sert qu'aux titres — c'est la main qui a écrit sur la couverture ; DM Sans porte tout le
-reste, y compris les chiffres du parc, où sa lisibilité en petit corps compte plus que son style.
+reste, y compris les chiffres du registre, où sa lisibilité en petit corps compte plus que son style.
 
 ### Hierarchy
 
@@ -240,9 +265,28 @@ reste, y compris les chiffres du parc, où sa lisibilité en petit corps compte 
 - **Label** (DM Sans, 700, 0.68rem, `letter-spacing: .08em`, capitales) : labels de filtre.
 - **Caption** (DM Sans, 400, 0.75rem) : précisions tertiaires sous un chiffre ou un intitulé —
   ce qui explique sans jamais porter la donnée elle-même.
-- **Metric** (DM Sans, 700, 2.2rem, `letter-spacing: -0.02em`, `line-height: 1`) : les chiffres
-  d'état du parc, et eux seuls. C'est la seule échappée hors de l'échelle courante ; elle se paie
-  par sa rareté — une occurrence par page, sur le bandeau de chiffres.
+- **Metric** (DM Sans, 700, 3.4rem, `letter-spacing: -0.02em`, `line-height: 1`) : les chiffres
+  d'état du registre, et eux seuls. C'est la seule échappée hors de l'échelle courante ; elle se paie
+  par sa rareté — une occurrence par page, sur le bandeau de chiffres. Descend à 2rem sous 768 px,
+  où la grille passe à deux colonnes.
+- **Metric label** (DM Sans, 500, 1rem) : l'intitulé sous un chiffre metric, et lui seul. Il sort du
+  corps courant parce qu'un libellé à 0.88rem sous un chiffre de 3.4rem se lit comme une note de bas
+  de page, alors qu'il porte le sens du chiffre. Plafonné par la colonne : cinq colonnes dans
+  1200 px laissent 192 px utiles, soit environ 24 signes sur une ligne.
+- **Hero title** (DM Serif Display, 400, 2.6rem) : le `<h1>` du bandeau d'accueil, une occurrence
+  par page. Il doit rester au-dessus de *section title* aux deux paliers — 2.6 contre 2rem sur
+  bureau, 2 contre 1.4rem sous 768 px, en reprenant le token de *section title* plutôt qu’en
+  ajoutant une valeur — sinon la page n'a plus de titre principal.
+- **Hero lead** (DM Sans, 400, 1.2rem) : la phrase sous le *hero title*. Plus grande que
+  *section lead* pour la même raison de rang.
+- **Section title** (DM Serif Display, 400, 2rem) : les titres des sections de l'accueil, qui
+  s'enchaînent sur une même page et sont de rang égal — une seule taille pour les trois, sinon
+  la page annonce une hiérarchie qui n'existe pas. Distinct de *Display*, réservé au bandeau de
+  page en blanc sur le gradient. Descend sous 768 px à 1.4rem, la taille du rôle *display* — pas une valeur de plus
+  dans l’échelle.
+- **Section lead** (DM Sans, 400, 1rem) : la phrase sous un *section title*. Elle monte avec lui
+  pour la même raison que *metric label* : sous un titre de 2rem, le corps courant à 0.88rem se
+  lit comme une note.
 - **En-tête de tableau** (DM Sans, 700, 0.75rem, `letter-spacing: .06em`, capitales) : la variante
   du label sur fond teal plein, en capitales.
 

@@ -307,15 +307,19 @@ class AccueilTests(TestCase):
     def setUp(self):
         self.client.login(username='accueil', password='motdepasse-test')
 
-    def test_laccueil_affiche_les_chiffres_du_parc(self):
+    def test_laccueil_affiche_les_chiffres_du_registre(self):
         reponse = self.client.get(reverse('home'))
         self.assertEqual(reponse.status_code, 200)
         # Les cinq indicateurs du bandeau, et eux seuls.
         for cle in ('nb_attributions', 'nb_en_stock', 'nb_sans_dispo',
                     'nb_detenteurs', 'nb_ecarts'):
             self.assertIn(cle, reponse.context)
-        # Le total n'est plus affiche : il valait la somme de ses voisines.
-        self.assertNotIn('nb_exemplaires', reponse.context)
+        # Le total n'a plus de colonne dans le bandeau — il valait la somme
+        # de ses voisines. Il reste en contexte pour les cartes de
+        # navigation, qui annoncent ce qu'elles contiennent.
+        page = reponse.content.decode()
+        self.assertNotIn('Clés au total', page)
+        self.assertIn('nb_exemplaires', reponse.context)
 
     def test_les_cles_sans_exemplaire_disponible_sont_comptees(self):
         """Ni en armoire ni au coffre : rien a donner a un nouveau membre."""
@@ -341,20 +345,43 @@ class AccueilTests(TestCase):
 
     def test_laccueil_salue_par_le_prenom(self):
         contenu = self.client.get(reverse('home')).content.decode()
-        self.assertIn('Bonjour Marie', contenu)
+        self.assertIn('Bienvenue Marie', contenu)      # le hero
 
-    def test_laccueil_affiche_les_messages(self):
-        """Un message posé avant une redirection vers l'accueil doit survivre."""
+    def test_la_connexion_ne_pose_pas_de_bandeau_de_bienvenue(self):
+        """Le hero salue déjà par le prénom : un bandeau ferait doublon."""
         self.client.logout()
         reponse = self.client.post(reverse('login'), {
             'username': 'accueil', 'password': 'motdepasse-test',
         }, follow=True)
-        self.assertContains(reponse, 'Bienvenue, Marie Dupont')
+        # Le hero salue, sans virgule. Le bandeau supprimé disait
+        # « Bienvenue, Prénom Nom ! » — c'est le bloc qu'on vérifie absent,
+        # pas le mot, qui appartient légitimement au hero.
+        self.assertContains(reponse, 'Bienvenue Marie')
+        self.assertNotContains(reponse, 'home-messages')
+
+    def test_le_bloc_messages_reste_disponible(self):
+        """Il ne s'affiche que s'il y a un message — mais il est toujours là :
+        c'est ce qui évite qu'un message posé avant une redirection vers
+        l'accueil disparaisse en silence, comme c'était le cas avant."""
+        from django.contrib.messages import get_messages
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from django.test import RequestFactory
+        from listings.views import home
+
+        requete = RequestFactory().get(reverse('home'))
+        requete.user = self.compte
+        requete.session = self.client.session
+        requete._messages = FallbackStorage(requete)
+        from django.contrib import messages as m
+        m.info(requete, 'Message de contrôle')
+        reponse = home(requete)
+        self.assertIn('Message de contrôle', reponse.content.decode())
+        self.assertIn('home-messages', reponse.content.decode())
 
 
 class SectionsAccueilTests(TestCase):
     """
-    L'accueil enchaine quatre sections : hero, etat du parc, navigation,
+    L'accueil enchaine quatre sections : hero, etat du registre, navigation,
     incitation. La derniere s'adapte au role — proposer d'attribuer une cle
     a quelqu'un qui ne peut rien ecrire serait une impasse.
     """
@@ -371,23 +398,42 @@ class SectionsAccueilTests(TestCase):
 
     def test_les_quatre_sections_sont_presentes(self):
         page = self.contenu('adm')
-        for section in ('hero-section', 'kpi-section', 'features-section', 'cta-section'):
+        for section in ('hero-section', 'kpi-section', 'features-section', 'faq-section'):
             self.assertIn(section, page)
 
-    def test_lincitation_propose_dattribuer_a_qui_peut_ecrire(self):
-        for qui in ('adm', 'edi'):
-            page = self.contenu(qui)
-            self.assertIn('Attribuer ou retirer une clé', page)
-            self.assertIn('href="%s"' % reverse('user_keys'), page)
+    def test_la_faq_dit_qu_elle_est_vide(self):
+        """
+        Aucune question n'est encore ecrite. Une section muette laisserait
+        croire a un chargement rate : l'etat vide se dit.
+        """
+        page = self.contenu('adm')
+        self.assertEqual(self.client.get(reverse('home')).context['faq'], [])
+        self.assertIn('Questions fréquentes', page)
+        self.assertIn("Aucune question n'est encore répertoriée", page)
+        # « <details> » apparait aussi dans un commentaire de la feuille
+        # de style, inline dans la page : on vise l'attribut de classe.
+        self.assertNotIn('class="faq-item"', page)
 
-    def test_lincitation_propose_de_consulter_au_visiteur(self):
-        page = self.contenu('vis')
-        self.assertIn('Consulter le parc de clés', page)
-        self.assertNotIn('Attribuer ou retirer une clé', page)
-        # Le visiteur n'a pas acces a la page d'attribution : l'y envoyer
-        # serait une impasse. On teste le lien, pas la chaine « /attr/ »,
-        # qui apparait aussi dans le JS de detection du menu actif.
-        self.assertNotIn('href="%s"' % reverse('user_keys'), page)
+    def test_la_faq_se_remplit_par_le_contexte(self):
+        """
+        L'etat vide est un vrai chemin de code : des qu'une question
+        arrive dans « faq », il cede la place sans toucher au gabarit.
+        """
+        from django.template.loader import render_to_string
+        rendu = render_to_string('listings/home.html', {
+            'faq': [{'question': 'Où est la clé du local ?',
+                     'reponse': 'Dans la liste des clés.'}],
+            'request': self.client.get(reverse('home')).wsgi_request,
+        })
+        self.assertIn('class="faq-item"', rendu)
+        self.assertIn('Où est la clé du local ?', rendu)
+        self.assertNotIn("Aucune question n'est encore répertoriée", rendu)
+
+    def test_lancienne_incitation_a_disparu(self):
+        page = self.contenu('adm')
+        for reste in ('cta-section', 'Attribuer ou retirer une clé',
+                      'Consulter le registre des clés'):
+            self.assertNotIn(reste, page)
 
 
 class TuileEcartTests(TestCase):
@@ -476,3 +522,202 @@ class EnTeteSansCoutureTests(TestCase):
         page = self.client.get(reverse('key_list')).content.decode()
         self.assertIn('<body class="">', page)
         self.assertNotIn('body.accueil .top-header', page)
+
+
+class CartesNavigationTests(TestCase):
+    """
+    Les quatre cartes de navigation annoncent leur contenu avec les vrais
+    chiffres, et la quatrieme reste fermee au visiteur.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        for nom, role in (('adm2', 'admin'), ('vis2', 'visitor')):
+            Owner.objects.create_user(username=nom, password='motdepasse-test',
+                                      role=role, first_name=nom)
+        equipe = Team.objects.create(name='Accueil')
+        User.objects.create(name='Dupont', firstname='Marie', team=equipe)
+        KeyType.objects.create(number=1, name='Porte', place='Entrée',
+                               total_quantity=2, in_cabinet=2, in_safe=0)
+
+    def contenu(self, qui):
+        self.client.login(username=qui, password='motdepasse-test')
+        return self.client.get(reverse('home')).content.decode()
+
+    def test_les_cartes_annoncent_les_vrais_chiffres(self):
+        page = self.contenu('adm2')
+        # Les cartes n'accordent pas leur pluriel a 1 — « 1 clés »,
+        # « 1 équipes ». Sans effet sur les donnees reelles (148 cles,
+        # 25 equipes), mais visible sur un registre qui demarre.
+        self.assertIn('1 clés', page)             # nb_types
+        self.assertIn('1 équipes de service', page)
+        self.assertIn('1 membres suivis', page)
+
+    def test_ladmin_voit_les_quatre_cartes(self):
+        page = self.contenu('adm2')
+        self.assertEqual(page.count('class="feature-card'), 4)
+        self.assertIn("Ouvrir la page d'attribution", page)
+
+    def test_le_visiteur_nen_voit_que_trois(self):
+        page = self.contenu('vis2')
+        self.assertEqual(page.count('class="feature-card'), 3)
+        self.assertNotIn("Ouvrir la page d'attribution", page)
+        # La grille se resserre pour garder la meme largeur de carte.
+        self.assertIn('features-grid is-3', page)
+
+
+class RoleDansLeMenuTests(TestCase):
+    """
+    Le role est annonce dans le menu utilisateur, sous l'adresse mail :
+    meme nature d'information que le nom et le mail, donc meme endroit, et
+    visible depuis toutes les pages plutot que du seul accueil. Sans lui,
+    un visiteur ne peut pas distinguer « je n'ai pas le droit » de
+    « c'est casse ».
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        for nom, role in (('pa', 'admin'), ('pe', 'editor'), ('pv', 'visitor')):
+            Owner.objects.create_user(username=nom, password='motdepasse-test',
+                                      role=role, first_name=nom,
+                                      email='%s@exemple.fr' % nom)
+
+    def entete(self, qui):
+        self.client.login(username=qui, password='motdepasse-test')
+        page = self.client.get(reverse('home')).content.decode()
+        debut = page.index('class="dropdown-header"')
+        return page[debut:page.index('</li>', debut)]
+
+    def test_chaque_role_est_annonce(self):
+        self.assertIn('Administrateur', self.entete('pa'))
+        self.assertIn('Éditeur', self.entete('pe'))
+        self.assertIn('Lecture seule', self.entete('pv'))
+
+    def test_le_role_suit_ladresse_mail(self):
+        """Nom, puis adresse, puis role : du plus identifiant au plus abstrait."""
+        entete = self.entete('pa')
+        self.assertLess(entete.index('pa@exemple.fr'),
+                        entete.index('class="role-utilisateur"'))
+
+    def test_le_role_est_visible_hors_accueil(self):
+        """Il tient dans base.html : toutes les pages en heritent."""
+        self.client.login(username='pv', password='motdepasse-test')
+        page = self.client.get(reverse('key_list')).content.decode()
+        self.assertIn('Lecture seule', page)
+
+    def test_le_hero_ne_porte_plus_de_pastille(self):
+        self.client.login(username='pv', password='motdepasse-test')
+        page = self.client.get(reverse('home')).content.decode()
+        self.assertNotIn('class="hero-role"', page)
+        self.assertNotIn('hero-repères', page)
+class LibellesDesColonnesTests(TestCase):
+    """
+    Les cinq colonnes comptent trois choses differentes — des exemplaires,
+    des modeles, des personnes. Alignees sur une ligne, elles se lisent
+    comme une seule unite si le libelle ne la declare pas. « 15 cles a
+    verifier » envoyait chercher quinze cles dans l'armoire ; il s'agit de
+    quinze modeles dont l'addition ne retombe pas juste.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        Owner.objects.create_user(username='lib', password='motdepasse-test',
+                                  role='admin', first_name='Marie')
+
+    def setUp(self):
+        self.client.login(username='lib', password='motdepasse-test')
+
+    def page(self):
+        return self.client.get(reverse('home')).content.decode()
+
+    def bandeau(self):
+        """
+        Les seules cinq colonnes. « Cles attribuees » reste par ailleurs le
+        titre de la carte de navigation, qui reprend le nom du menu : on ne
+        peut pas juger un libelle sur la page entiere.
+        """
+        page = self.page()
+        debut = page.index('class="kpi-rangee"')
+        return page[debut:page.index('</section>', debut)]
+
+    def test_les_libelles_declarent_leur_unite(self):
+        bandeau = self.bandeau()
+        for libelle in ('Clés en circulation', 'Clés disponibles',
+                        'Personnes équipées'):
+            self.assertIn(libelle, bandeau)
+
+    def test_les_anciens_libelles_ont_disparu(self):
+        """Aucun libelle ne compte des cles quand il compte des modeles."""
+        bandeau = self.bandeau()
+        for ancien in ('Clés attribuées', 'Clés en stock',
+                       'Sans exemplaire disponible', '>Détenteurs<'):
+            self.assertNotIn(ancien, bandeau)
+
+    def test_zero_reste_au_singulier(self):
+        """
+        Zero est l'etat vise, donc celui qu'on verra le plus. En francais il
+        est singulier ; le filtre pluralize suit la regle anglaise et aurait
+        ecrit « 0 comptes ».
+        """
+        page = self.page()
+        self.assertEqual(self.client.get(reverse('home')).context['nb_ecarts'], 0)
+        self.assertIn('Incohérence de stock', page)
+        self.assertIn('Clé sans stock', page)
+
+    def test_un_reste_au_singulier(self):
+        KeyType.objects.create(number=1, name='Local', place='Sous-sol',
+                               total_quantity=3, in_cabinet=0, in_safe=0)
+        page = self.page()
+        self.assertIn('Incohérence de stock', page)
+        self.assertIn('Clé sans stock', page)
+
+    def test_au_dela_de_un_le_pluriel_apparait(self):
+        for n in (1, 2):
+            KeyType.objects.create(number=n, name='Local %d' % n, place='Bas',
+                                   total_quantity=3, in_cabinet=0, in_safe=0)
+        page = self.page()
+        self.assertIn('Incohérences de stock', page)
+        self.assertIn('Clés sans stock', page)
+
+
+class VerbeSelonLeRoleTests(TestCase):
+    """
+    « Gerer les cles » promet a un visiteur une action qu'il ne peut pas
+    accomplir : il decouvrirait la restriction en arrivant sur une page
+    amputee de ses boutons. Le verbe suit donc le role, decide en un seul
+    endroit — views.home — et repris par les trois cartes visibles.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        for nom, role in (('va', 'admin'), ('ve', 'editor'), ('vv', 'visitor')):
+            Owner.objects.create_user(username=nom, password='motdepasse-test',
+                                      role=role, first_name=nom)
+
+    def page(self, qui):
+        self.client.login(username=qui, password='motdepasse-test')
+        return self.client.get(reverse('home')).content.decode()
+
+    def test_le_visiteur_est_invite_a_consulter(self):
+        page = self.page('vv')
+        self.assertIn('Que voulez-vous consulter ?', page)
+        for libelle in ('Consulter les clés', 'Consulter les équipes',
+                        'Consulter les détenteurs'):
+            self.assertIn(libelle, page)
+        self.assertNotIn('Gérer les', page)
+
+    def test_les_autres_roles_sont_invites_a_faire(self):
+        for qui in ('va', 've'):
+            page = self.page(qui)
+            self.assertIn('Que voulez-vous faire ?', page)
+            self.assertIn('Gérer les clés', page)
+            self.assertNotIn('Consulter les', page)
+
+    def test_les_actions_restent_neutres(self):
+        """
+        Ouvrir une liste n'est pas modifier : la ligne d'action ne change
+        pas selon le role, et la carte des attributions reste masquee au
+        visiteur par ailleurs.
+        """
+        for qui in ('va', 'vv'):
+            self.assertIn('Ouvrir la liste des clés', self.page(qui))
