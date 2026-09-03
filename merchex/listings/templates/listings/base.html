@@ -224,6 +224,7 @@
             {% if not request.user.is_visitor %}
                 <a href="{% url 'user_keys' %}" id="menu-user_keys">Gestion des clés attribuées</a>
             {% endif %}
+            <a href="{% url 'aide' %}" id="menu-aide">Aide</a>
         </nav>
         
         <!-- Menu utilisateur (si connecté) -->
@@ -251,6 +252,11 @@
                 <li>
                     <a class="dropdown-item" href="{% url 'profile' %}">
                         <i class="fas fa-user-circle me-2"></i> Gérer mon profil
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'aide' %}">
+                        <i class="fas fa-circle-question me-2"></i> Aide &amp; guide d'utilisation
                     </a>
                 </li>
               <!--   <li>
@@ -344,6 +350,9 @@
             }
             else if (currentPath.includes('/users') || currentPath === '/users/') {
                 document.getElementById('menu-user_list')?.classList.add('active');
+            }
+            else if (currentPath.includes('/aide')) {
+                document.getElementById('menu-aide')?.classList.add('active');
             }
             // Fallback pour les sous-pages qui pourraient ne pas être capturées par les conditions ci-dessus
             else if (currentPath.includes('/owner/') || currentPath.includes('/owner/management/')) {

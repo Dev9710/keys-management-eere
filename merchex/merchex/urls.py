@@ -35,6 +35,7 @@ urlpatterns = [
     path('hello/', views.hello),
     path('about-us/', views.about),  # ajoutez cette ligne
     path('home/', views.home, name='home'),
+    path('aide/', views.aide, name='aide'),
     path('contact/', views.contact),
     path('users/', views.user_list, name='user_list'),
     path('teams/', views.team_list, name='team_list'),

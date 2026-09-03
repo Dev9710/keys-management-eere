@@ -196,6 +196,13 @@ def home(request):
     })
 
 
+@login_required
+def aide(request):
+    """Guide d'utilisation du portail : chaque action, qui peut la faire, et
+    un lien direct vers l'écran concerné. Accessible à tout utilisateur connecté."""
+    return render(request, 'listings/aide.html')
+
+
 def contact(request):
     return HttpResponse('<h1> contact us </h1> <p> </>')
 

@@ -1,0 +1,454 @@
+{% extends 'listings/base.html' %}
+{% load static %}
+
+{% block title %}Aide &amp; guide d'utilisation | EERE{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  .aide-wrap { background:#f8fafc; min-height:100vh; }
+  .aide-hero {
+    background:linear-gradient(135deg,#0d3028 0%,#1a5040 100%);
+    color:#fff; padding:2.6rem 2rem 3.4rem; text-align:center;
+  }
+  .aide-hero .eyebrow {
+    font-family:'DM Sans',sans-serif; font-size:.72rem; letter-spacing:.16em;
+    text-transform:uppercase; color:rgba(255,255,255,.7); font-weight:600;
+  }
+  .aide-hero h1 { font-family:'Fraunces',serif; font-weight:600; font-size:2.4rem; margin:.4rem 0 .6rem; }
+  .aide-hero p { max-width:60ch; margin:0 auto; color:rgba(255,255,255,.88); line-height:1.6; }
+
+  .aide-layout {
+    max-width:1180px; margin:-2rem auto 0; padding:0 1.5rem 4rem;
+    display:grid; grid-template-columns:246px 1fr; gap:2rem; align-items:start;
+  }
+  /* Sommaire */
+  .aide-toc {
+    position:sticky; top:1.5rem; background:#ffffff; border:1px solid #e2e8f0;
+    border-radius:14px; padding:1.1rem 1rem; box-shadow:0 1px 3px rgba(0,0,0,.06);
+  }
+  .aide-toc .toc-title {
+    font-family:'DM Sans',sans-serif; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase;
+    color:#64748b; font-weight:700; margin:0 0 .6rem .3rem;
+  }
+  .aide-toc a {
+    display:block; padding:.4rem .6rem; border-radius:8px; color:#0f172a; text-decoration:none;
+    font-size:.9rem; font-weight:500; border-left:3px solid transparent;
+  }
+  .aide-toc a:hover { background:#edf7f5; color:#2a7562; border-left-color:#3a9f87; }
+
+  .aide-content { display:flex; flex-direction:column; gap:2.2rem; min-width:0; }
+
+  .aide-section {
+    background:#ffffff; border:1px solid #e2e8f0; border-radius:16px;
+    padding:1.6rem 1.7rem; box-shadow:0 1px 3px rgba(0,0,0,.05); scroll-margin-top:1.5rem;
+  }
+  .aide-section > h2 {
+    font-family:'Fraunces',serif; font-weight:600; font-size:1.5rem; color:#0d3028;
+    margin:0 0 .3rem; display:flex; align-items:center; gap:.6rem;
+  }
+  .aide-section > h2 .fas { color:#3a9f87; font-size:1.15rem; }
+  .aide-section > .intro { color:#64748b; margin:0 0 1.2rem; line-height:1.6; }
+
+  /* Bloc action */
+  .action { padding:1.1rem 0; border-top:1px solid #e2e8f0; }
+  .action:first-of-type { border-top:none; padding-top:.2rem; }
+  .action h3 {
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:1.05rem; color:#0f172a;
+    margin:0 0 .35rem; display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;
+  }
+  .action p { color:#64748b; line-height:1.6; margin:0 0 .7rem; }
+  .action ol { color:#64748b; line-height:1.6; margin:.2rem 0 .8rem 1.1rem; padding:0; }
+  .action ol li { margin-bottom:.25rem; }
+
+  /* Badges de rôle */
+  .roles { display:inline-flex; gap:.3rem; flex-wrap:wrap; }
+  .role {
+    font-family:'DM Sans',sans-serif; font-size:.66rem; font-weight:700; letter-spacing:.03em;
+    text-transform:uppercase; padding:2px 8px; border-radius:20px; white-space:nowrap;
+  }
+  .role.admin  { background:#ede9fe; color:#6d28d9; }
+  .role.editor { background:#edf7f5; color:#2a7562; }
+  .role.visitor{ background:#f1f5f9; color:#64748b; }
+
+  /* Bouton Ouvrir */
+  .ouvrir {
+    display:inline-flex; align-items:center; gap:.45rem; background:#3a9f87; color:#fff;
+    text-decoration:none; font-family:'DM Sans',sans-serif; font-weight:600; font-size:.86rem;
+    padding:.5rem .95rem; border-radius:9px; transition:background .15s;
+  }
+  .ouvrir:hover { background:#2a7562; color:#fff; }
+  .ouvrir .fas { font-size:.78rem; }
+
+  /* Capture annotée */
+  figure.shot { margin:.9rem 0 .2rem; }
+  figure.shot img {
+    width:100%; border:1px solid #e2e8f0; border-radius:10px; display:block;
+    box-shadow:0 4px 14px rgba(13,48,40,.08);
+  }
+  figure.shot figcaption {
+    font-size:.8rem; color:#64748b; margin-top:.45rem; font-style:italic; text-align:center;
+  }
+
+  /* Garde-fous : liste à picto */
+  .gardefous { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.9rem; }
+  .gardefous li { display:grid; grid-template-columns:26px 1fr; gap:.7rem; align-items:start; }
+  .gardefous .fas { color:#3a9f87; margin-top:.2rem; }
+  .gardefous b { color:#0f172a; }
+  .gardefous span { color:#64748b; line-height:1.55; }
+
+  .note {
+    background:#edf7f5; border-left:3px solid #3a9f87; border-radius:8px;
+    padding:.7rem .9rem; color:#0d3028; font-size:.9rem; line-height:1.55; margin:.6rem 0 0;
+  }
+  .note a { color:#2a7562; font-weight:600; }
+  /* Garde-fou en ligne : rappelé au moment d'expliquer la feature concernée */
+  .gf-inline {
+    display:grid; grid-template-columns:auto 1fr; gap:.65rem; align-items:start;
+    background:#fff7ed; border:1px solid #fde4c4; border-left:3px solid #e8920a;
+    border-radius:10px; padding:.7rem .9rem; margin:.4rem 0 .2rem;
+    color:#0f172a; font-size:.9rem; line-height:1.55;
+  }
+  .gf-inline > .fas { color:#e8920a; margin-top:.15rem; font-size:1rem; }
+  .gf-inline .gf-lbl {
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:.68rem;
+    letter-spacing:.05em; text-transform:uppercase; color:#e8920a;
+    display:block; margin-bottom:.12rem;
+  }
+  .gf-inline a { color:#c2740a; font-weight:600; }
+  /* Encart séquence : étapes numérotées */
+  .gf-seq { margin-top:1.1rem; }
+  .gf-seq > b { display:block; margin-bottom:.5rem; }
+  .gf-seq ol {
+    margin:0; padding:0; list-style:none; counter-reset:etape;
+    display:flex; flex-direction:column; gap:.45rem;
+  }
+  .gf-seq ol li {
+    counter-increment:etape; display:grid; grid-template-columns:24px 1fr;
+    gap:.6rem; align-items:start;
+  }
+  .gf-seq ol li::before {
+    content:counter(etape); grid-column:1;
+    width:24px; height:24px; border-radius:50%; background:#3a9f87; color:#fff;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:.8rem;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  @media (max-width:860px) {
+    .aide-layout { grid-template-columns:1fr; }
+    .aide-toc { position:static; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="aide-wrap">
+
+  <div class="aide-hero">
+    <div class="eyebrow">Aide &amp; guide d'utilisation</div>
+    <h1>Bien utiliser le portail</h1>
+    <p>Tout ce que vous pouvez faire ici, expliqué simplement. Chaque action indique qui peut la
+      réaliser et vous emmène directement sur le bon écran.</p>
+  </div>
+
+  <div class="aide-layout">
+
+    <!-- ── Sommaire ─────────────────────────────────────── -->
+    <nav class="aide-toc">
+      <div class="toc-title">Sommaire</div>
+      <a href="#roles">Rôles &amp; permissions</a>
+      <a href="#cles">Gestion des clés</a>
+      <a href="#equipes">Gestion des équipes</a>
+      <a href="#detenteurs">Gestion des détenteurs</a>
+      <a href="#attribution">Attribution des clés</a>
+      <a href="#exports">Exports PDF &amp; Excel</a>
+      <a href="#synthese">Synthèse &amp; statistiques</a>
+      <a href="#historique">Historique des actions</a>
+      <a href="#comptes">Gestion des comptes</a>
+      <a href="#compte">Mon compte</a>
+      <a href="#gardefous">Les garde-fous</a>
+    </nav>
+
+    <div class="aide-content">
+
+      <!-- ── Rôles ──────────────────────────────────────── -->
+      <section id="roles" class="aide-section">
+        <h2><i class="fas fa-user-shield"></i> Rôles &amp; permissions</h2>
+        <p class="intro">Chaque compte a un rôle qui détermine ce qu'il peut faire. Les menus non
+          autorisés sont simplement masqués — vous ne voyez que ce qui vous concerne.</p>
+
+        <div class="action">
+          <h3><span class="role admin">Administrateur</span></h3>
+          <p>Accès complet : gestion des clés, équipes, détenteurs et attributions, <b>création des
+            comptes</b>, <b>historique des actions</b>, <b>synthèse et statistiques</b>, et tous les exports.</p>
+        </div>
+        <div class="action">
+          <h3><span class="role editor">Éditeur</span></h3>
+          <p>Peut <b>créer, modifier et supprimer</b> les clés, les équipes, les détenteurs et les
+            attributions, et exporter les données. Ne voit pas l'administration des comptes,
+            l'historique ni la synthèse.</p>
+        </div>
+        <div class="action">
+          <h3><span class="role visitor">Visiteur</span></h3>
+          <p>Accès en <b>lecture seule</b> : consulter et exporter les données. Aucune création,
+            modification ni suppression. C'est le rôle par défaut d'un nouveau compte.</p>
+        </div>
+      </section>
+
+      <!-- ── Clés ───────────────────────────────────────── -->
+      <section id="cles" class="aide-section">
+        <h2><i class="fas fa-key"></i> Gestion des clés</h2>
+        <p class="intro">Le cœur du registre : chaque type de clé, le nombre d'exemplaires, où ils
+          se trouvent (armoire ou coffre) et lesquels sont sortis.</p>
+
+        <div class="action">
+          <h3>Consulter la liste des clés <span class="roles"><span class="role admin">Admin</span><span class="role editor">Éditeur</span><span class="role visitor">Visiteur</span></span></h3>
+          <p>La liste affiche chaque clé avec son numéro, son nom, son emplacement et le nombre
+            d'exemplaires. La barre de recherche filtre en direct.</p>
+          <figure class="shot"><img src="{% static 'listings/aide/cles-liste.png' %}" alt="Liste des clés"><figcaption>La page de gestion des clés et ses repères.</figcaption></figure>
+          <a class="ouvrir" href="{% url 'key_list' %}"><i class="fas fa-arrow-up-right-from-square"></i> Ouvrir la gestion des clés</a>
+        </div>
+
+        <div class="action">
+          <h3>Ajouter une clé <span class="roles"><span class="role admin">Admin</span><span class="role editor">Éditeur</span></span></h3>
+          <ol>
+            <li>Cliquez sur <b>« + Ajouter »</b> en haut de la page.</li>
+            <li>Renseignez le numéro, le nom, l'emplacement et le nombre d'exemplaires.</li>
+            <li>Validez : la clé apparaît aussitôt dans la liste.</li>
+          </ol>
+          <figure class="shot"><img src="{% static 'listings/aide/cles-ajouter.png' %}" alt="Ajouter une clé"><figcaption>Le formulaire d'ajout d'une clé.</figcaption></figure>
+        </div>
+
+        <div class="action">
+          <h3>Modifier une clé <span class="roles"><span class="role admin">Admin</span><span class="role editor">Éditeur</span></span></h3>
+          <p>Cliquez sur le bouton <b>Modifier</b> (vert) sur la ligne de la clé, ajustez les champs,
+            puis enregistrez.</p>
+        </div>
+
+        <div class="action">
+          <h3>Supprimer une clé <span class="roles"><span class="role admin">Admin</span><span class="role editor">Éditeur</span></span></h3>
+          <p>Bouton <b>Supprimer</b> (rouge) sur la ligne. Une confirmation vous est demandée avant
+            toute suppression.</p>
+          <div class="gf-inline"><i class="fas fa-shield-halved"></i>
+            <div><span class="gf-lbl">Garde-fou</span>Une clé dont un exemplaire est
+              <b>actuellement attribué</b> ne peut pas être supprimée : le portail refuse et vous
+              l'explique, pour ne jamais perdre la trace d'une clé en circulation.</div>
+          </div>
+        </div>
+
+        <div class="action">
+          <h3>Supprimer plusieurs clés à la fois <span class="roles"><span class="role admin">Admin</span><span class="role editor">Éditeur</span></span></h3>
+          <p>Cochez les clés à retirer, puis utilisez la <b>suppression groupée</b>. La même
+            protection s'applique : les clés attribuées sont refusées.</p>
+        </div>
+      </section>
+
+      <!-- ── Équipes ────────────────────────────────────── -->
+      <section id="equipes" class="aide-section">
+        <h2><i class="fas fa-users"></i> Gestion des équipes</h2>
+        <p class="intro">Les équipes regroupent les détenteurs (ex. Conseil d'administration,
+          Accueil). Elles servent à filtrer et organiser qui détient quoi.</p>
+
+        <div class="action">
+          <h3>Consulter, créer, modifier, supprimer une équipe <span class="roles"><span class="role admin">Admin</span><span class="role editor">Éditeur</span><span class="role visitor">Visiteur (lecture)</span></span></h3>
+          <ol>
+            <li><b>Créer</b> : bouton « + Ajouter », saisissez le nom de l'équipe.</li>
+            <li><b>Modifier</b> : bouton vert sur la ligne pour renommer.</li>
+            <li><b>Supprimer</b> : bouton rouge, avec confirmation.</li>
+          </ol>
+          <div class="gf-inline"><i class="fas fa-shield-halved"></i>
+            <div><span class="gf-lbl">Garde-fou</span>Une équipe où des détenteurs sont
+              <b>encore affectés</b> ne peut pas être supprimée : videz-la d'abord de ses membres
+              (voir <a href="#gardefous">la bonne séquence</a>).</div>
+          </div>
+          <figure class="shot"><img src="{% static 'listings/aide/equipes.png' %}" alt="Gestion des équipes"><figcaption>La page de gestion des équipes.</figcaption></figure>
+          <a class="ouvrir" href="{% url 'team_list' %}"><i class="fas fa-arrow-up-right-from-square"></i> Ouvrir la gestion des équipes</a>
+        </div>
+      </section>
+
+      <!-- ── Détenteurs ─────────────────────────────────── -->
+      <section id="detenteurs" class="aide-section">
+        <h2><i class="fas fa-id-card"></i> Gestion des détenteurs de clés</h2>
+        <p class="intro">Les détenteurs sont les personnes à qui l'on confie des clés. Ce sont des
+          <b>fiches</b> gérées dans l'application — ce ne sont pas des comptes de connexion.</p>
+
+        <div class="action">
+          <h3>Consulter, créer, modifier, supprimer un détenteur <span class="roles"><span class="role admin">Admin</span><span class="role editor">Éditeur</span><span class="role visitor">Visiteur (lecture)</span></span></h3>
+          <ol>
+            <li><b>Créer</b> : « + Ajouter », renseignez prénom, nom et l'équipe de rattachement.</li>
+            <li><b>Modifier</b> : bouton vert sur la ligne.</li>
+            <li><b>Supprimer</b> : bouton rouge, avec confirmation.</li>
+          </ol>
+          <div class="gf-inline"><i class="fas fa-shield-halved"></i>
+            <div><span class="gf-lbl">Garde-fou</span>Un détenteur à qui <b>des clés sont
+              attribuées</b> ne peut pas être supprimé : retirez-lui d'abord ses clés
+              (voir <a href="#gardefous">la bonne séquence</a>).</div>
+          </div>
+          <figure class="shot"><img src="{% static 'listings/aide/detenteurs.png' %}" alt="Gestion des détenteurs"><figcaption>La page de gestion des détenteurs de clés.</figcaption></figure>
+          <a class="ouvrir" href="{% url 'user_list' %}"><i class="fas fa-arrow-up-right-from-square"></i> Ouvrir la gestion des détenteurs</a>
+        </div>
+      </section>
+
+      <!-- ── Attribution ────────────────────────────────── -->
+      <section id="attribution" class="aide-section">
+        <h2><i class="fas fa-arrows-turn-to-dots"></i> Attribution des clés</h2>
+        <p class="intro">Le geste central : confier une ou plusieurs clés à un détenteur, ou les lui
+          reprendre. Tout mouvement est enregistré.</p>
+
+        <div class="action">
+          <h3>Attribuer des clés à un détenteur <span class="roles"><span class="role admin">Admin</span><span class="role editor">Éditeur</span></span></h3>
+          <ol>
+            <li>Choisissez l'<b>équipe</b> puis le <b>détenteur</b> dans les menus déroulants.</li>
+            <li>Le tableau montre les clés déjà détenues. Cliquez sur <b>« Attribuer une clé »</b>.</li>
+            <li>Cochez les clés à confier, fixez la date, puis <b>Enregistrer</b>.</li>
+          </ol>
+          <figure class="shot"><img src="{% static 'listings/aide/attribution.png' %}" alt="Attribution des clés"><figcaption>L'écran d'attribution : sélection du détenteur et de ses clés.</figcaption></figure>
+          <a class="ouvrir" href="{% url 'user_keys' %}"><i class="fas fa-arrow-up-right-from-square"></i> Ouvrir l'attribution des clés</a>
+        </div>
+
+        <div class="action">
+          <h3>Retirer une clé, ou toutes les clés <span class="roles"><span class="role admin">Admin</span><span class="role editor">Éditeur</span></span></h3>
+          <p>Décochez une clé pour la reprendre, ou utilisez <b>« Retirer toutes les clés »</b> pour
+            tout rendre d'un coup. La clé retourne à son emplacement d'origine (armoire ou coffre).</p>
+          <div class="note"><i class="fas fa-shield-halved"></i> Si vous réattribuez une clé
+            précédemment rendue, le portail <b>réactive l'attribution existante</b> au lieu d'en créer
+            une seconde — pas de doublon, pas d'erreur.</div>
+        </div>
+      </section>
+
+      <!-- ── Exports ────────────────────────────────────── -->
+      <section id="exports" class="aide-section">
+        <h2><i class="fas fa-file-export"></i> Exports PDF &amp; Excel</h2>
+        <p class="intro">À tout moment, vous pouvez sortir un document pour l'imprimer, l'archiver
+          ou le partager. Tous les rôles peuvent exporter.</p>
+
+        <div class="action">
+          <h3>Récapitulatif d'un détenteur (PDF / Excel) <span class="roles"><span class="role admin">Admin</span><span class="role editor">Éditeur</span><span class="role visitor">Visiteur</span></span></h3>
+          <p>Sur l'écran d'attribution, une fois un détenteur sélectionné, les boutons <b>« Générer
+            PDF »</b> et <b>« Générer XLSX »</b> produisent la fiche de ses clés — avec en-tête,
+            tableau, encadré commentaires et espace pour signer.</p>
+          <figure class="shot"><img src="{% static 'listings/aide/attribution-exports.png' %}" alt="Boutons d'export PDF et Excel"><figcaption>Les boutons d'export, sur l'écran d'attribution.</figcaption></figure>
+        </div>
+
+        <div class="action">
+          <h3>Export de la synthèse <span class="roles"><span class="role admin">Admin</span></span></h3>
+          <p>Depuis le tableau de synthèse, un export reprend l'état global du registre.</p>
+        </div>
+
+        <div class="action">
+          <h3>Export de l'historique <span class="roles"><span class="role admin">Admin</span></span></h3>
+          <p>Le journal des actions peut être exporté pour archivage ou contrôle.</p>
+        </div>
+      </section>
+
+      <!-- ── Synthèse ───────────────────────────────────── -->
+      <section id="synthese" class="aide-section">
+        <h2><i class="fas fa-table-list"></i> Synthèse &amp; statistiques</h2>
+        <p class="intro">La vue d'ensemble : combien d'exemplaires de chaque clé, combien sont
+          sortis, combien restent — et les chiffres clés du registre.</p>
+
+        <div class="action">
+          <h3>Tableau de synthèse <span class="roles"><span class="role admin">Admin</span></span></h3>
+          <p>Chaque clé y figure avec son total, ses exemplaires attribués et disponibles. Les
+            <b>incohérences</b> (un total qui ne correspond pas à la somme des exemplaires) sont
+            <b>signalées en orange</b> pour être corrigées.</p>
+          <figure class="shot"><img src="{% static 'listings/aide/synthese.png' %}" alt="Tableau de synthèse"><figcaption>Le tableau de synthèse, incohérences en orange.</figcaption></figure>
+          <a class="ouvrir" href="{% url 'synthesis_table' %}"><i class="fas fa-arrow-up-right-from-square"></i> Ouvrir la synthèse</a>
+        </div>
+
+        <div class="action">
+          <h3>Statistiques <span class="roles"><span class="role admin">Admin</span></span></h3>
+          <p>Des indicateurs sur l'usage et l'état du registre.</p>
+          <a class="ouvrir" href="{% url 'history_stats' %}"><i class="fas fa-arrow-up-right-from-square"></i> Ouvrir les statistiques</a>
+        </div>
+      </section>
+
+      <!-- ── Historique ─────────────────────────────────── -->
+      <section id="historique" class="aide-section">
+        <h2><i class="fas fa-clock-rotate-left"></i> Historique des actions</h2>
+        <p class="intro">Chaque création, modification, consultation et suppression est tracée : qui,
+          quoi, quand. C'est la mémoire du registre et sa preuve.</p>
+
+        <div class="action">
+          <h3>Consulter le journal <span class="roles"><span class="role admin">Admin</span></span></h3>
+          <p>La liste des actions, filtrable. Cliquez sur une ligne pour en voir le détail (valeurs
+            avant / après).</p>
+          <figure class="shot"><img src="{% static 'listings/aide/historique.png' %}" alt="Historique des actions"><figcaption>Le journal des actions.</figcaption></figure>
+          <a class="ouvrir" href="{% url 'history_view' %}"><i class="fas fa-arrow-up-right-from-square"></i> Ouvrir l'historique</a>
+        </div>
+      </section>
+
+      <!-- ── Comptes ────────────────────────────────────── -->
+      <section id="comptes" class="aide-section">
+        <h2><i class="fas fa-user-gear"></i> Gestion des comptes</h2>
+        <p class="intro">Réservée aux administrateurs : créer les comptes des personnes qui utilisent
+          le portail et leur attribuer un rôle.</p>
+
+        <div class="action">
+          <h3>Créer, modifier, supprimer un compte <span class="roles"><span class="role admin">Admin</span></span></h3>
+          <ol>
+            <li><b>Créer</b> : « Ajouter un compte », renseignez les informations et le <b>rôle</b>.</li>
+            <li><b>Modifier</b> : changer le rôle ou les informations d'un compte existant.</li>
+            <li><b>Supprimer</b> : retirer un accès, avec confirmation.</li>
+          </ol>
+          <div class="note"><i class="fas fa-lock"></i> L'accès au portail est <b>sur invitation</b> :
+            il n'y a pas d'inscription libre, les comptes sont créés ici par un administrateur.</div>
+          <figure class="shot"><img src="{% static 'listings/aide/comptes.png' %}" alt="Gestion des comptes"><figcaption>La gestion des comptes (administrateur).</figcaption></figure>
+          {% if request.user.role == 'admin' %}
+          <a class="ouvrir" href="{% url 'owner_management' %}"><i class="fas fa-arrow-up-right-from-square"></i> Ouvrir la gestion des comptes</a>
+          {% endif %}
+        </div>
+      </section>
+
+      <!-- ── Mon compte ─────────────────────────────────── -->
+      <section id="compte" class="aide-section">
+        <h2><i class="fas fa-user-circle"></i> Mon compte</h2>
+        <p class="intro">Gérer vos propres informations et votre accès.</p>
+
+        <div class="action">
+          <h3>Profil &amp; mot de passe <span class="roles"><span class="role admin">Admin</span><span class="role editor">Éditeur</span><span class="role visitor">Visiteur</span></span></h3>
+          <p>Depuis le menu en haut à droite (votre nom) → <b>« Gérer mon profil »</b>, vous mettez à
+            jour vos informations. En cas d'oubli, la page de connexion propose <b>« Mot de passe
+            oublié »</b> : un lien de réinitialisation vous est envoyé par e-mail.</p>
+          <a class="ouvrir" href="{% url 'profile' %}"><i class="fas fa-arrow-up-right-from-square"></i> Ouvrir mon profil</a>
+        </div>
+      </section>
+
+      <!-- ── Garde-fous ─────────────────────────────────── -->
+      <section id="gardefous" class="aide-section">
+        <h2><i class="fas fa-shield-halved"></i> Les garde-fous</h2>
+        <p class="intro">Le portail est conçu pour vous éviter les erreurs qui coûtent cher. Voici
+          les protections en place.</p>
+        <ul class="gardefous">
+          <li><i class="fas fa-check"></i><span><b>Pas de suppression d'une clé en circulation.</b> Une clé dont un exemplaire est attribué ne peut pas être supprimée — le portail refuse et l'explique.</span></li>
+          <li><i class="fas fa-check"></i><span><b>Pas de suppression d'un détenteur qui a des clés.</b> Tant que des clés lui sont attribuées, l'utilisateur ne peut pas être supprimé : le portail refuse et vous invite d'abord à lui retirer ses clés.</span></li>
+          <li><i class="fas fa-check"></i><span><b>Pas de suppression d'une équipe qui a des membres.</b> Une équipe où des détenteurs sont encore affectés ne peut pas être supprimée : videz-la d'abord de ses membres.</span></li>
+          <li><i class="fas fa-check"></i><span><b>Confirmation avant chaque suppression.</b> Rien n'est effacé sans que vous ayez confirmé.</span></li>
+          <li><i class="fas fa-check"></i><span><b>Réattribution sans doublon.</b> Reconfier une clé rendue réactive l'attribution existante au lieu d'en créer une nouvelle.</span></li>
+          <li><i class="fas fa-check"></i><span><b>Incohérences signalées.</b> Dans la synthèse, un total qui ne colle pas à la somme des exemplaires s'affiche en orange.</span></li>
+          <li><i class="fas fa-check"></i><span><b>Menus selon le rôle.</b> Vous ne voyez que ce que vous avez le droit de faire ; le reste est masqué.</span></li>
+          <li><i class="fas fa-check"></i><span><b>Accès sur invitation.</b> Pas d'inscription libre : les comptes sont créés par un administrateur.</span></li>
+          <li><i class="fas fa-check"></i><span><b>Sauvegarde avant mise à jour.</b> À chaque déploiement, la base est sauvegardée et vérifiée avant tout changement — et une sauvegarde automatique tourne régulièrement.</span></li>
+        </ul>
+
+        <div class="note gf-seq">
+          <b>Supprimer un détenteur ou une équipe : la bonne séquence</b>
+          <ol>
+            <li><span><b>Désattribuer les clés</b> du ou des détenteurs concernés, depuis
+              <a href="{% url 'user_keys' %}">Gestion des clés attribuées</a>.</span></li>
+            <li><span><b>Supprimer le ou les détenteurs</b> une fois qu'ils n'ont plus de clé, dans
+              <a href="{% url 'user_list' %}">Gestion des détenteurs</a>.</span></li>
+            <li><span><b>Supprimer l'équipe</b> une fois qu'elle ne compte plus aucun membre, dans
+              <a href="{% url 'team_list' %}">Gestion des équipes</a>.</span></li>
+          </ol>
+        </div>
+      </section>
+
+      <p style="text-align:center;color:#64748b;font-size:.85rem;margin:.5rem 0 0;">
+        Une question qui n'a pas de réponse ici ? Contactez votre administrateur.
+      </p>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
