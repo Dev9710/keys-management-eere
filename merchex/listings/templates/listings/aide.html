@@ -138,6 +138,43 @@
     .aide-layout { grid-template-columns:1fr; }
     .aide-toc { position:static; }
   }
+
+  /* Bouton imprimer / exporter en PDF (en fin de page) */
+  .aide-print-wrap { text-align:center; margin:1.4rem 0 .2rem; }
+  .aide-print {
+    display:inline-flex; align-items:center; gap:.5rem;
+    background:#3a9f87; color:#fff; border:none;
+    border-radius:9px; padding:.6rem 1.25rem; font-family:'DM Sans',sans-serif;
+    font-weight:600; font-size:.9rem; cursor:pointer; transition:background .15s;
+  }
+  .aide-print:hover { background:#2a7562; }
+  .aide-print .fas { font-size:.84rem; }
+
+  /* ── Impression / PDF : document propre, sans le décor de l'appli ── */
+  @media print {
+    .top-header, .footer, #page-loader, .aide-toc, .ouvrir, .aide-print-wrap { display:none !important; }
+    .aide-wrap { background:#fff !important; }
+    .aide-layout { display:block; max-width:none; margin:0; padding:0; }
+    .aide-content { gap:1.1rem; }
+    .aide-hero {
+      background:#fff !important; color:#0d3028; text-align:left;
+      padding:0 0 .5rem; margin-bottom:1rem; border-bottom:2px solid #3a9f87;
+    }
+    .aide-hero .eyebrow { color:#3a9f87; }
+    .aide-hero h1 { color:#0d3028; font-size:1.9rem; margin:.2rem 0 .4rem; }
+    .aide-hero p { color:#334155; margin:0; max-width:none; }
+    .aide-section {
+      box-shadow:none; border:1px solid #e2e8f0; padding:1rem 1.1rem;
+    }
+    .aide-section > h2 { break-after:avoid; page-break-after:avoid; }
+    .action, figure.shot, .gf-inline, .gf-seq, .note {
+      break-inside:avoid; page-break-inside:avoid;
+    }
+    figure.shot img { border:1px solid #cbd5e1; box-shadow:none; }
+    a { color:#0d3028; text-decoration:none; }
+    * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+    @page { margin:1.4cm; }
+  }
 </style>
 {% endblock %}
 
@@ -443,6 +480,12 @@
           </ol>
         </div>
       </section>
+
+      <div class="aide-print-wrap">
+        <button type="button" class="aide-print" onclick="window.print()">
+          <i class="fas fa-print"></i> Imprimer / Exporter ce guide en PDF
+        </button>
+      </div>
 
       <p style="text-align:center;color:#64748b;font-size:.85rem;margin:.5rem 0 0;">
         Une question qui n'a pas de réponse ici ? Contactez votre administrateur.
