@@ -35,7 +35,9 @@
     display:block; padding:.4rem .6rem; border-radius:8px; color:#0f172a; text-decoration:none;
     font-size:.9rem; font-weight:500; border-left:3px solid transparent;
   }
-  .aide-toc a:hover { background:#edf7f5; color:#2a7562; border-left-color:#3a9f87; }
+  .aide-toc a:hover,
+  .aide-toc a.active { background:#edf7f5; color:#2a7562; border-left-color:#3a9f87; }
+  .aide-toc a.active { font-weight:600; }
 
   .aide-content { display:flex; flex-direction:column; gap:2.2rem; min-width:0; }
 
@@ -494,4 +496,49 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Sommaire dynamique (scroll-spy) : surligne la rubrique en cours de lecture.
+// Desktop uniquement — sur mobile le sommaire est empilé en haut, sans intérêt.
+(function () {
+    var toc = document.querySelector('.aide-toc');
+    if (!toc) return;
+    var links = Array.prototype.slice.call(toc.querySelectorAll('a[href^="#"]'));
+    var sections = links.map(function (a) {
+        return document.getElementById(a.getAttribute('href').slice(1));
+    });
+    var mq = window.matchMedia('(min-width: 861px)');
+    var LINE = 160;   // ligne de lecture, sous l'en-tête fixe
+    var ticking = false;
+
+    function setActive(idx) {
+        links.forEach(function (a, i) { a.classList.toggle('active', i === idx); });
+    }
+    function update() {
+        ticking = false;
+        var active = 0;
+        for (var i = 0; i < sections.length; i++) {
+            if (sections[i] && sections[i].getBoundingClientRect().top <= LINE) active = i;
+        }
+        setActive(active);
+    }
+    function onScroll() {
+        if (!ticking) { ticking = true; window.requestAnimationFrame(update); }
+    }
+    function apply(e) {
+        if (e.matches) {
+            window.addEventListener('scroll', onScroll, { passive: true });
+            update();
+        } else {
+            window.removeEventListener('scroll', onScroll);
+            links.forEach(function (a) { a.classList.remove('active'); });
+        }
+    }
+    apply(mq);
+    if (mq.addEventListener) { mq.addEventListener('change', apply); }
+    else if (mq.addListener) { mq.addListener(apply); }
+})();
+</script>
 {% endblock %}
