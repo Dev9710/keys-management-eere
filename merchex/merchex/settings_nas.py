@@ -50,12 +50,29 @@ SESSION_COOKIE_SECURE = False
 # -----------------------------
 # Static
 # -----------------------------
-# Dans le conteneur, l'application vit dans /app : collectstatic ecrit donc
-# dans /app/staticfiles, et uWSGI sert ce meme dossier (voir static-map dans
-# uwsgi.ini). L'ancien /home/python/src/staticfiles datait de l'installation
-# Web Station et n'existe pas dans le conteneur -- collectstatic echouait, en
-# silence, l'entrypoint masquant l'erreur par un « || true ».
-STATIC_ROOT = os.environ.get("STATIC_ROOT", "/app/staticfiles")
+# Le site tourne sous Web Station (projet Python uWSGI), pas via notre
+# Dockerfile : le code est monte sur /home/python/src et le front Web Station
+# ne definit aucun alias /static. Avec DEBUG = False, Django refuse alors de
+# servir /static -> les images des cartes de l'accueil repondaient 404.
+#
+# WhiteNoise fait servir /static par Django lui-meme, independamment de la
+# configuration Web Station (donc reproductible depuis le depot). Le
+# middleware est insere juste apres SecurityMiddleware, avant l'auth, pour
+# court-circuiter les requetes statiques sans passer par la base.
+MIDDLEWARE = list(MIDDLEWARE)
+MIDDLEWARE.insert(
+    MIDDLEWARE.index("django.middleware.security.SecurityMiddleware") + 1,
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+)
+
+# BASE_DIR = /home/python/src en prod : STATIC_ROOT vit donc a cote du code
+# (sur le montage hote), et non dans le /app fige de l'image jamais servi.
+STATIC_ROOT = os.environ.get("STATIC_ROOT", str(BASE_DIR / "staticfiles"))
+
+# Sert directement depuis les dossiers static/ des apps : les images
+# s'affichent meme si collectstatic n'a pas ete rejoue (Web Station ne le
+# declenche pas de lui-meme).
+WHITENOISE_USE_FINDERS = True
 
 # -----------------------------
 # LOGGING (stdout)
